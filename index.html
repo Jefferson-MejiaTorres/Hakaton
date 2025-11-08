@@ -500,49 +500,104 @@
 
             <div class="bg-white rounded-2xl shadow-2xl p-8 md:p-12 max-w-4xl mx-auto">
                 <form id="prediction-form" class="space-y-6">
-                    <div class="grid md:grid-cols-2 gap-6">
-                        <div>
-                            <label class="block text-gray-700 font-semibold mb-2">Edad (meses)</label>
-                            <input type="number" id="edad" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent" placeholder="Ej: 24" required>
+                    <!-- Paso 1: Tipo de Persona -->
+                    <div id="paso-tipo" class="space-y-4">
+                        <div class="text-center mb-6">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">
+                                <i class="fas fa-user-circle text-blue-600 mr-2"></i>
+                                Paso 1: Selecciona el tipo de persona
+                            </h3>
+                            <p class="text-gray-600">El análisis se adaptará según la edad y características</p>
                         </div>
-                        <div>
-                            <label class="block text-gray-700 font-semibold mb-2">Peso (kg)</label>
-                            <input type="number" step="0.1" id="peso" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent" placeholder="Ej: 10.5" required>
-                        </div>
-                        <div>
-                            <label class="block text-gray-700 font-semibold mb-2">Talla (cm)</label>
-                            <input type="number" step="0.1" id="talla" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent" placeholder="Ej: 82" required>
-                        </div>
-                        <div>
-                            <label for="zona" class="block text-gray-700 font-semibold mb-2">Zona</label>
-                            <select id="zona" name="zona" title="Seleccione la zona de residencia" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent" required>
-                                <option value="">Seleccionar</option>
-                                <option value="urbana">Urbana</option>
-                                <option value="rural">Rural</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="acceso" class="block text-gray-700 font-semibold mb-2">Acceso a servicios de salud</label>
-                            <select id="acceso" name="acceso" title="Seleccione si tiene acceso a servicios de salud" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent" required>
-                                <option value="">Seleccionar</option>
-                                <option value="si">Sí</option>
-                                <option value="no">No</option>
-                            </select>
-                        </div>
-                        <div>
-                            <label for="nivel" class="block text-gray-700 font-semibold mb-2">Nivel socioeconómico</label>
-                            <select id="nivel" name="nivel" title="Seleccione el nivel socioeconómico" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent" required>
-                                <option value="">Seleccionar</option>
-                                <option value="bajo">Bajo</option>
-                                <option value="medio">Medio</option>
-                                <option value="alto">Alto</option>
-                            </select>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <button type="button" class="tipo-persona-btn p-6 border-2 border-gray-300 rounded-xl hover:border-blue-600 hover:bg-blue-50 transition-all transform hover:scale-105" data-tipo="bebe">
+                                <i class="fas fa-baby text-4xl text-pink-500 mb-3"></i>
+                                <div class="font-bold text-gray-900">Bebé</div>
+                                <div class="text-sm text-gray-600">0-12 meses</div>
+                            </button>
+                            
+                            <button type="button" class="tipo-persona-btn p-6 border-2 border-gray-300 rounded-xl hover:border-blue-600 hover:bg-blue-50 transition-all transform hover:scale-105" data-tipo="nino">
+                                <i class="fas fa-child text-4xl text-blue-500 mb-3"></i>
+                                <div class="font-bold text-gray-900">Niño</div>
+                                <div class="text-sm text-gray-600">1-12 años</div>
+                            </button>
+                            
+                            <button type="button" class="tipo-persona-btn p-6 border-2 border-gray-300 rounded-xl hover:border-blue-600 hover:bg-blue-50 transition-all transform hover:scale-105" data-tipo="adolescente">
+                                <i class="fas fa-user-graduate text-4xl text-purple-500 mb-3"></i>
+                                <div class="font-bold text-gray-900">Adolescente</div>
+                                <div class="text-sm text-gray-600">13-17 años</div>
+                            </button>
+                            
+                            <button type="button" class="tipo-persona-btn p-6 border-2 border-gray-300 rounded-xl hover:border-blue-600 hover:bg-blue-50 transition-all transform hover:scale-105" data-tipo="adulto">
+                                <i class="fas fa-user text-4xl text-green-500 mb-3"></i>
+                                <div class="font-bold text-gray-900">Adulto</div>
+                                <div class="text-sm text-gray-600">18+ años</div>
+                            </button>
                         </div>
                     </div>
 
-                    <button type="submit" class="w-full bg-blue-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition transform hover:scale-105">
-                        <i class="fas fa-calculator mr-2"></i>Calcular Riesgo
-                    </button>
+                    <!-- Paso 2: Datos Específicos (oculto inicialmente) -->
+                    <div id="paso-datos" class="hidden space-y-6">
+                        <div class="text-center mb-6">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">
+                                <i class="fas fa-clipboard-list text-blue-600 mr-2"></i>
+                                Paso 2: Ingresa los datos
+                            </h3>
+                            <div id="tipo-seleccionado-badge" class="inline-block bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-semibold mt-2"></div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="edad" class="block text-gray-700 font-semibold mb-2">
+                                    <span id="label-edad">Edad</span>
+                                </label>
+                                <input type="number" id="edad" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent" placeholder="Ej: 24" required>
+                            </div>
+                            <div>
+                                <label for="peso" class="block text-gray-700 font-semibold mb-2">Peso (kg)</label>
+                                <input type="number" step="0.1" id="peso" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent" placeholder="Ej: 10.5" required>
+                            </div>
+                            <div>
+                                <label for="talla" class="block text-gray-700 font-semibold mb-2">Talla (cm)</label>
+                                <input type="number" step="0.1" id="talla" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent" placeholder="Ej: 82" required>
+                            </div>
+                            <div>
+                                <label for="zona" class="block text-gray-700 font-semibold mb-2">Zona</label>
+                                <select id="zona" name="zona" title="Seleccione la zona de residencia" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent" required>
+                                    <option value="">Seleccionar</option>
+                                    <option value="urbana">Urbana</option>
+                                    <option value="rural">Rural</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="acceso" class="block text-gray-700 font-semibold mb-2">Acceso a servicios de salud</label>
+                                <select id="acceso" name="acceso" title="Seleccione si tiene acceso a servicios de salud" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent" required>
+                                    <option value="">Seleccionar</option>
+                                    <option value="si">Sí</option>
+                                    <option value="no">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="nivel" class="block text-gray-700 font-semibold mb-2">Nivel socioeconómico</label>
+                                <select id="nivel" name="nivel" title="Seleccione el nivel socioeconómico" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent" required>
+                                    <option value="">Seleccionar</option>
+                                    <option value="bajo">Bajo</option>
+                                    <option value="medio">Medio</option>
+                                    <option value="alto">Alto</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <button type="button" id="btn-volver" class="flex-1 bg-gray-300 text-gray-700 py-4 rounded-lg font-bold text-lg hover:bg-gray-400 transition">
+                                <i class="fas fa-arrow-left mr-2"></i>Volver
+                            </button>
+                            <button type="submit" class="flex-1 bg-blue-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition transform hover:scale-105">
+                                <i class="fas fa-calculator mr-2"></i>Calcular Riesgo
+                            </button>
+                        </div>
+                    </div>
                 </form>
 
                 <div id="resultado" class="mt-8 hidden">

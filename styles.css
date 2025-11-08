@@ -89,6 +89,26 @@ input:focus, select:focus {
     outline: none;
 }
 
+/* Estilos para botones de tipo de persona */
+.tipo-persona-btn {
+    cursor: pointer;
+    transition: all 0.3s ease;
+}
+
+.tipo-persona-btn:hover {
+    transform: translateY(-5px);
+    box-shadow: 0 10px 25px rgba(0, 0, 0, 0.15);
+}
+
+.tipo-persona-btn:active {
+    transform: translateY(-2px);
+}
+
+.tipo-persona-btn.selected {
+    border-color: #2563eb;
+    background-color: #dbeafe;
+}
+
 /* Animación para el resultado */
 #resultado {
     animation: fadeIn 0.5s ease-out;

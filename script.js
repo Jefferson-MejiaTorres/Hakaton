@@ -11,30 +11,45 @@ document.addEventListener('DOMContentLoaded', function() {
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const mobileMenu = document.getElementById('mobile-menu');
     
-    if (mobileMenuButton) {
-        mobileMenuButton.addEventListener('click', function() {
+    if (mobileMenuButton && mobileMenu) {
+        mobileMenuButton.addEventListener('click', function(e) {
+            e.preventDefault();
+            e.stopPropagation();
+            
             mobileMenu.classList.toggle('hidden');
             mobileMenu.classList.toggle('active');
             
             // Animar icono del botón
             const icon = this.querySelector('i');
-            if (mobileMenu.classList.contains('active')) {
-                icon.classList.remove('fa-bars');
-                icon.classList.add('fa-times');
-            } else {
-                icon.classList.remove('fa-times');
-                icon.classList.add('fa-bars');
+            if (icon) {
+                if (mobileMenu.classList.contains('active')) {
+                    icon.classList.remove('fa-bars');
+                    icon.classList.add('fa-times');
+                } else {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
             }
+            
+            console.log('Menú móvil toggled:', mobileMenu.classList.contains('active'));
         });
     }
 
     // Cerrar menú móvil al hacer click en un enlace
-    const mobileMenuLinks = mobileMenu.querySelectorAll('a');
-    mobileMenuLinks.forEach(link => {
-        link.addEventListener('click', () => {
-            mobileMenu.classList.add('hidden');
+    if (mobileMenu) {
+        const mobileMenuLinks = mobileMenu.querySelectorAll('a');
+        mobileMenuLinks.forEach(link => {
+            link.addEventListener('click', () => {
+                mobileMenu.classList.add('hidden');
+                mobileMenu.classList.remove('active');
+                const icon = mobileMenuButton.querySelector('i');
+                if (icon) {
+                    icon.classList.remove('fa-times');
+                    icon.classList.add('fa-bars');
+                }
+            });
         });
-    });
+    }
 
     // Smooth scroll para todos los enlaces de navegación
     document.querySelectorAll('a[href^="#"]').forEach(anchor => {
@@ -1217,8 +1232,13 @@ function compartirProyecto() {
 }
 
 // Funcionalidad del botón Scroll to Top
-document.addEventListener('DOMContentLoaded', function() {
+window.addEventListener('DOMContentLoaded', function() {
     const scrollToTopBtn = document.getElementById('scrollToTop');
+    
+    if (!scrollToTopBtn) {
+        console.error('Botón scrollToTop no encontrado');
+        return;
+    }
     
     // Mostrar/ocultar botón basado en scroll
     window.addEventListener('scroll', function() {
@@ -1230,10 +1250,13 @@ document.addEventListener('DOMContentLoaded', function() {
     });
     
     // Scroll suave al hacer click
-    scrollToTopBtn.addEventListener('click', function() {
+    scrollToTopBtn.addEventListener('click', function(e) {
+        e.preventDefault();
         window.scrollTo({
             top: 0,
             behavior: 'smooth'
         });
     });
+    
+    console.log('✅ Botón Scroll to Top inicializado');
 });

@@ -262,13 +262,19 @@ section {
 
 /* Animación para el menú móvil */
 #mobile-menu {
-    transition: all var(--transition-base);
+    transition: max-height 0.3s ease-in-out, opacity 0.3s ease;
     max-height: 0;
     overflow: hidden;
+    opacity: 0;
 }
 
 #mobile-menu.active {
     max-height: 500px;
+    opacity: 1;
+}
+
+#mobile-menu:not(.hidden) {
+    display: block;
 }
 
 /* Gradientes personalizados profesionales */
@@ -1135,7 +1141,7 @@ img:hover {
     opacity: 0;
     visibility: hidden;
     transform: translateY(100px);
-    z-index: 999;
+    z-index: 9999;
 }
 
 .scroll-to-top.show {

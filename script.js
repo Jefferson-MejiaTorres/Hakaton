@@ -1215,3 +1215,25 @@ function compartirProyecto() {
         alert('¡Enlace copiado al portapapeles!');
     }
 }
+
+// Funcionalidad del botón Scroll to Top
+document.addEventListener('DOMContentLoaded', function() {
+    const scrollToTopBtn = document.getElementById('scrollToTop');
+    
+    // Mostrar/ocultar botón basado en scroll
+    window.addEventListener('scroll', function() {
+        if (window.pageYOffset > 300) {
+            scrollToTopBtn.classList.add('show');
+        } else {
+            scrollToTopBtn.classList.remove('show');
+        }
+    });
+    
+    // Scroll suave al hacer click
+    scrollToTopBtn.addEventListener('click', function() {
+        window.scrollTo({
+            top: 0,
+            behavior: 'smooth'
+        });
+    });
+});

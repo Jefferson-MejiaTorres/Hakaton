@@ -3,42 +3,63 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SIDI - Sistema Inteligente de Detección de Desnutrición Infantil en Norte de Santander">
+    <meta name="theme-color" content="#0066CC">
     <title>SIDI - Sistema Inteligente de Detección de Desnutrición Infantil</title>
+    
+    <!-- Preconnect para mejor performance -->
+    <link rel="preconnect" href="https://cdn.tailwindcss.com">
+    <link rel="preconnect" href="https://cdnjs.cloudflare.com">
+    
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link rel="stylesheet" href="./styles.css">
+    
+    <!-- Google Fonts para mejor tipografía -->
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
 </head>
 <body class="bg-gradient-to-br from-blue-50 to-green-50">
+    <!-- Indicador de scroll -->
+    <div class="scroll-indicator" id="scroll-indicator"></div>
     <!-- Navbar -->
-    <nav class="bg-white shadow-lg fixed w-full top-0 z-50">
+    <nav class="bg-white/95 shadow-lg fixed w-full top-0 z-50 transition-all duration-300 backdrop-blur-lg" id="navbar">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16">
-                <div class="flex items-center">
-                    <i class="fas fa-heartbeat text-3xl text-blue-600 mr-3"></i>
-                    <span class="text-2xl font-bold text-gray-800">SIDI</span>
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center space-x-3 animate-fade-in-left">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-green-600 rounded-xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-heartbeat text-white text-2xl"></i>
+                    </div>
+                    <span class="text-2xl font-bold gradient-text">SIDI</span>
                 </div>
-                <div class="hidden md:flex items-center space-x-8">
-                    <a href="#inicio" class="text-gray-700 hover:text-blue-600 transition">Inicio</a>
-                    <a href="#problema" class="text-gray-700 hover:text-blue-600 transition">Problema</a>
-                    <a href="#solucion" class="text-gray-700 hover:text-blue-600 transition">Solución</a>
-                    <a href="#pilar" class="text-gray-700 hover:text-blue-600 transition">Pilar TIC</a>
-                    <a href="#tecnologia" class="text-gray-700 hover:text-blue-600 transition">Tecnología</a>
-                    <a href="#impacto" class="text-gray-700 hover:text-blue-600 transition">Impacto</a>
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="#inicio" class="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-all duration-300">Inicio</a>
+                    <a href="#problema" class="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-all duration-300">Problema</a>
+                    <a href="#solucion" class="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-all duration-300">Solución</a>
+                    <a href="#pilar" class="px-4 py-2 text-gray-700 hover:text-green-600 font-medium rounded-lg hover:bg-green-50 transition-all duration-300">Pilar TIC</a>
+                    <a href="#tecnologia" class="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-all duration-300">Tecnología</a>
+                    <a href="#impacto" class="px-4 py-2 text-gray-700 hover:text-purple-600 font-medium rounded-lg hover:bg-purple-50 transition-all duration-300">Impacto</a>
+                    <a href="#demo" class="ml-3 px-6 py-2 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300">Demo</a>
                 </div>
                 <div class="md:hidden flex items-center">
-                    <button type="button" id="mobile-menu-button" class="text-gray-700" aria-label="Abrir menú de navegación" title="Menú">
+                    <button type="button" id="mobile-menu-button" class="text-gray-700 hover:text-blue-600 focus:outline-none p-2 rounded-lg hover:bg-blue-50 transition-all duration-300" aria-label="Abrir menú de navegación" title="Menú">
                         <i class="fas fa-bars text-2xl"></i>
                     </button>
                 </div>
             </div>
         </div>
         <!-- Mobile Menu -->
-        <div id="mobile-menu" class="hidden md:hidden bg-white border-t">
-            <a href="#inicio" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Inicio</a>
-            <a href="#problema" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Problema</a>
-            <a href="#solucion" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Solución</a>
-            <a href="#pilar" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Pilar TIC</a>
-            <a href="#tecnologia" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Tecnología</a>
+        <div id="mobile-menu" class="md:hidden bg-white border-t shadow-lg">
+            <a href="#inicio" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-all duration-300 border-l-4 border-transparent hover:border-blue-600">Inicio</a>
+            <a href="#problema" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-all duration-300 border-l-4 border-transparent hover:border-blue-600">Problema</a>
+            <a href="#solucion" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-all duration-300 border-l-4 border-transparent hover:border-blue-600">Solución</a>
+            <a href="#pilar" class="block px-6 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 font-medium transition-all duration-300 border-l-4 border-transparent hover:border-green-600">Pilar TIC</a>
+            <a href="#tecnologia" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-all duration-300 border-l-4 border-transparent hover:border-blue-600">Tecnología</a>
+            <a href="#impacto" class="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 font-medium transition-all duration-300 border-l-4 border-transparent hover:border-purple-600">Impacto</a>
+            <a href="#demo" class="block px-6 py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold text-center mx-4 my-3 rounded-lg shadow-lg">Demo</a>
+        </div>
+    </nav>
             <a href="#impacto" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Impacto</a>
         </div>
     </nav>

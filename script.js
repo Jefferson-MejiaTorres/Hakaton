@@ -1,13 +1,30 @@
-// Script principal para SIDI
+// Script principal para SIDI - Versión Mejorada con Animaciones Profesionales
 
 document.addEventListener('DOMContentLoaded', function() {
-    // Mobile menu toggle
+    // Inicializar efectos y animaciones
+    initScrollIndicator();
+    initNavbarEffects();
+    initAnimationsOnScroll();
+    initParallaxEffects();
+    
+    // Mobile menu toggle con animación mejorada
     const mobileMenuButton = document.getElementById('mobile-menu-button');
     const mobileMenu = document.getElementById('mobile-menu');
     
     if (mobileMenuButton) {
         mobileMenuButton.addEventListener('click', function() {
             mobileMenu.classList.toggle('hidden');
+            mobileMenu.classList.toggle('active');
+            
+            // Animar icono del botón
+            const icon = this.querySelector('i');
+            if (mobileMenu.classList.contains('active')) {
+                icon.classList.remove('fa-bars');
+                icon.classList.add('fa-times');
+            } else {
+                icon.classList.remove('fa-times');
+                icon.classList.add('fa-bars');
+            }
         });
     }
 
@@ -1101,6 +1118,85 @@ document.addEventListener('DOMContentLoaded', function() {
     console.log('💚 Pilar: Herramientas TIC para el Trabajo Incluyente y Seguro');
     console.log('🚀 Sistema cargado correctamente');
 });
+
+// Función para inicializar el indicador de scroll
+function initScrollIndicator() {
+    const scrollIndicator = document.getElementById('scroll-indicator');
+    if (!scrollIndicator) return;
+    
+    window.addEventListener('scroll', () => {
+        const windowHeight = document.documentElement.scrollHeight - document.documentElement.clientHeight;
+        const scrolled = (window.scrollY / windowHeight) * 100;
+        scrollIndicator.style.width = scrolled + '%';
+    });
+}
+
+// Función para efectos del navbar al hacer scroll
+function initNavbarEffects() {
+    const navbar = document.getElementById('navbar');
+    if (!navbar) return;
+    
+    let lastScroll = 0;
+    window.addEventListener('scroll', () => {
+        const currentScroll = window.pageYOffset;
+        
+        if (currentScroll > 100) {
+            navbar.classList.add('scrolled', 'shadow-xl');
+        } else {
+            navbar.classList.remove('scrolled', 'shadow-xl');
+        }
+        
+        // Ocultar navbar al bajar, mostrar al subir
+        if (currentScroll > lastScroll && currentScroll > 100) {
+            navbar.style.transform = 'translateY(-100%)';
+        } else {
+            navbar.style.transform = 'translateY(0)';
+        }
+        
+        lastScroll = currentScroll;
+    });
+}
+
+// Función para animar elementos al hacer scroll
+function initAnimationsOnScroll() {
+    const observerOptions = {
+        threshold: 0.1,
+        rootMargin: '0px 0px -50px 0px'
+    };
+    
+    const observer = new IntersectionObserver((entries) => {
+        entries.forEach((entry, index) => {
+            if (entry.isIntersecting) {
+                setTimeout(() => {
+                    entry.target.classList.add('visible', 'animate-fade-in-up');
+                    entry.target.style.opacity = '1';
+                    entry.target.style.transform = 'translateY(0)';
+                }, index * 100);
+            }
+        });
+    }, observerOptions);
+    
+    // Observar todos los elementos con animación
+    document.querySelectorAll('section > div, .stat-card, .tech-card, .card-hover').forEach(el => {
+        el.style.opacity = '0';
+        el.style.transform = 'translateY(30px)';
+        el.style.transition = 'all 0.6s ease-out';
+        observer.observe(el);
+    });
+}
+
+// Función para efectos parallax sutiles
+function initParallaxEffects() {
+    window.addEventListener('scroll', () => {
+        const scrolled = window.pageYOffset;
+        const parallaxElements = document.querySelectorAll('[data-parallax]');
+        
+        parallaxElements.forEach(el => {
+            const speed = el.dataset.parallax || 0.5;
+            el.style.transform = `translateY(${scrolled * speed}px)`;
+        });
+    });
+}
 
 // Función para compartir en redes sociales (opcional)
 function compartirProyecto() {

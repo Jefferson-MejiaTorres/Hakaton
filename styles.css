@@ -379,6 +379,30 @@ input:focus, select:focus, textarea:focus {
 
 input, select, textarea {
     transition: all var(--transition-fast);
+    color: #1f2937; /* Gris oscuro para buen contraste */
+    background-color: white;
+}
+
+/* Estilos específicos para select y options */
+select {
+    color: #1f2937;
+    background-color: white;
+}
+
+select option {
+    color: #1f2937;
+    background-color: white;
+    padding: 10px;
+}
+
+select option:checked,
+select option:hover {
+    background-color: #3b82f6;
+    color: white;
+}
+
+select option[value=""] {
+    color: #6b7280; /* Gris para el placeholder */
 }
 
 /* Estilos para botones de tipo de persona mejorados */

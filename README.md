@@ -4,7 +4,13 @@
 ![Pilar](https://img.shields.io/badge/Pilar-TIC%20Incluyente%20y%20Seguro-green?style=for-the-badge)
 ![Status](https://img.shields.io/badge/Status-Hackathon-orange?style=for-the-badge)
 
-## 🎯 Descripción del Proyecto
+## � Demo en Vivo
+
+**🚀 Accede al sistema aquí:** [https://hakaton-peach-sigma.vercel.app/](https://hakaton-peach-sigma.vercel.app/)
+
+---
+
+## �🎯 Descripción del Proyecto
 
 **SIDI** es un sistema inteligente de detección temprana de desnutrición infantil en Norte de Santander, que aplica minería de datos y aprendizaje supervisado para apoyar políticas públicas y generar acciones preventivas de salud en la región.
 

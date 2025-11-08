@@ -361,7 +361,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     '<strong>Estudios diagnósticos completos:</strong> Hemograma con VSG, proteínas totales y fraccionadas, perfil tiroideo, coprocultivo y coproparasitológico seriado, vitaminas (A, D, B12, ácido fólico), zinc y hierro sérico.',
                     '<strong>Plan nutricional terapéutico:</strong> Dieta hipercalórica e hiperproteica adaptada a la edad. Fórmulas de alto valor nutricional. Suplementación con micronutrientes específicos según déficits detectados.',
                     '<strong>Evaluación y tratamiento odontológico:</strong> La salud bucal afecta directamente la alimentación. Tratamiento de caries y problemas de masticación.',
-                    '<strong>Programa de seguimiento estructurado:</strong> Controles semanales el primer mes, quincenales el segundo mes, mensuales posteriormente. Registro de peso, talla, perímetro cefálico y braquial.',
+                    '<strong>Programa de seguimiento estructurado:</strong> Controles semanales el primer mes, quincenales el segundo mes, mensuales posteriormente. Registro de peso, estatura, perímetro cefálico y braquial.',
                     '<strong>Apoyo psicosocial integral:</strong> Evaluación del entorno familiar y socioeconómico. Vinculación con programas de apoyo alimentario (PAE, ICBF). Trabajo social para gestión de ayudas gubernamentales.',
                     '<strong>Educación nutricional familiar:</strong> Talleres prácticos de preparación de alimentos nutritivos de bajo costo. Guías de alimentación saludable adaptadas al contexto socioeconómico.'
                 ];
@@ -532,7 +532,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     '<strong>Optimización de la lactancia materna:</strong> Si lactancia materna exclusiva: evaluar técnica de agarre, posición, frecuencia de tomas, producción de leche. Si lactancia mixta: revisar cantidad y preparación de fórmula. Consulta con especialista en lactancia si es necesario.',
                     '<strong>Revisión de alimentación complementaria:</strong> Si tiene más de 6 meses, evaluar introducción adecuada de alimentos sólidos. Consistencia, variedad, cantidad y frecuencia según edad. Educación sobre alimentación perceptiva.',
                     '<strong>Análisis básico de laboratorio:</strong> Hemograma para descartar anemia. Evaluar necesidad de suplementación con hierro, vitamina D. Perfil básico si hay factores de riesgo adicionales.',
-                    '<strong>Seguimiento quincenal primer mes:</strong> Monitoreo de peso, talla y perímetro cefálico cada 15 días. Ajuste del plan nutricional según respuesta. Registro en carné de crecimiento y desarrollo.',
+                    '<strong>Seguimiento quincenal primer mes:</strong> Monitoreo de peso, estatura y perímetro cefálico cada 15 días. Ajuste del plan nutricional según respuesta. Registro en carné de crecimiento y desarrollo.',
                     '<strong>Educación a cuidadores:</strong> Taller práctico sobre preparación de papillas y alimentos complementarios. Higiene en la alimentación. Señales de alerta nutricional. Estimulación del desarrollo infantil.',
                     '<strong>Evaluación del entorno familiar:</strong> Identificar factores que pueden estar afectando la alimentación del bebé. Apoyo emocional a la madre/cuidador. Vinculación con grupos de apoyo a la lactancia.'
                 ];
@@ -570,7 +570,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     '<strong>Plan nutricional preventivo:</strong> Diseño de menús balanceados adaptados a la edad y preferencias del niño. Incremento calórico moderado (10-20% sobre requerimiento basal). Inclusión de alimentos densamente nutritivos.',
                     '<strong>Educación nutricional familiar:</strong> Taller práctico con padres/cuidadores sobre alimentación infantil saludable. Estrategias para manejo de selectividad alimentaria. Recetas económicas y nutritivas.',
                     '<strong>Evaluación psicosocial:</strong> Identificar factores familiares, económicos o emocionales que afecten la alimentación. Ambiente durante las comidas. Dinámicas familiares. Acceso a alimentos.',
-                    '<strong>Seguimiento estructurado:</strong> Control quincenal el primer mes con medición de peso y talla. Luego mensual por 3 meses. Registro fotográfico del progreso. Ajustes según evolución.',
+                    '<strong>Seguimiento estructurado:</strong> Control quincenal el primer mes con medición de peso y estatura. Luego mensual por 3 meses. Registro fotográfico del progreso. Ajustes según evolución.',
                     '<strong>Vinculación con programas de apoyo:</strong> Programa de Alimentación Escolar (PAE) si aplica. ICBF - Modalidad de nutrición. Banco de alimentos local. Programas municipales de seguridad alimentaria.'
                 ];
                 
@@ -616,7 +616,7 @@ document.addEventListener('DOMContentLoaded', function() {
                     '<strong>Plan nutricional para adolescentes:</strong> Diseño participativo con el adolescente (empoderamiento). Dieta balanceada considerando necesidades de crecimiento y desarrollo. Evitar restricciones extremas.',
                     '<strong>Educación en nutrición y salud:</strong> Talleres interactivos sobre nutrición basada en evidencia. Desmitificación de dietas de moda. Alimentación saludable vs. dietas restrictivas. Manejo saludable del peso.',
                     '<strong>Apoyo psicosocial preventivo:</strong> Espacios de escucha activa. Trabajo en autoestima y autopercepción. Manejo de presión social. Grupos de apoyo para adolescentes si está disponible.',
-                    '<strong>Seguimiento mensual:</strong> Controles mensuales durante 3 meses. Monitoreo de peso, talla, evolución puberal. Evaluación continua de aspectos emocionales y conducta alimentaria.'
+                    '<strong>Seguimiento mensual:</strong> Controles mensuales durante 3 meses. Monitoreo de peso, estatura, evolución puberal. Evaluación continua de aspectos emocionales y conducta alimentaria.'
                 ];
                 
                 planAccion = `
@@ -770,7 +770,7 @@ document.addEventListener('DOMContentLoaded', function() {
             
             if (tipo === 'bebe') {
                 recomendaciones = [
-                    '<strong>Controles pediátricos regulares:</strong> Mantener seguimiento según cronograma establecido (mensual en menores de 6 meses, bimensual de 6-12 meses). Registro de peso, talla y perímetro cefálico en cada consulta.',
+                    '<strong>Controles pediátricos regulares:</strong> Mantener seguimiento según cronograma establecido (mensual en menores de 6 meses, bimensual de 6-12 meses). Registro de peso, estatura y perímetro cefálico en cada consulta.',
                     '<strong>Lactancia materna exclusiva hasta los 6 meses:</strong> Si es posible, continuar con lactancia materna exclusiva. Beneficios para el sistema inmune, vínculo afectivo y desarrollo óptimo. Apoyo a la madre lactante.',
                     '<strong>Introducción adecuada de alimentación complementaria:</strong> A partir de los 6 meses, introducir gradualmente alimentos sólidos. Variedad de texturas y sabores. Respetar señales de hambre y saciedad del bebé.',
                     '<strong>Calendario de vacunación completo:</strong> Cumplir con el esquema de vacunación nacional. Las vacunas protegen contra enfermedades que pueden afectar el estado nutricional.',

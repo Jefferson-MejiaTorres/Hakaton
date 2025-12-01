@@ -1,3 +1,5 @@
 # Vercel ignore
 .git/
+backend/
+docs/
 README.md

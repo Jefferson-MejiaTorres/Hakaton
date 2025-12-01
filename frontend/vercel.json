@@ -9,12 +9,12 @@
   ],
   "routes": [
     {
-      "src": "/styles.css",
-      "dest": "/styles.css"
+      "src": "/css/(.*)",
+      "dest": "/css/$1"
     },
     {
-      "src": "/script.js",
-      "dest": "/script.js"
+      "src": "/js/(.*)",
+      "dest": "/js/$1"
     },
     {
       "src": "/(.*)",

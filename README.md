@@ -7,23 +7,16 @@
 
 ---
 
-## 📋 Descripción del Proyecto
+## 📋 Descripción
 
-SIDI es un sistema inteligente de detección temprana de desnutrición infantil en Norte de Santander, que aplica **minería de datos** y **aprendizaje supervisado** para apoyar políticas públicas y generar acciones preventivas de salud.
-
-### 🎯 Objetivos
-
-1. ✅ **Objetivo 1:** Estudiar datos sociodemográficos mediante minería de datos
-2. ✅ **Objetivo 2:** Seleccionar técnicas de aprendizaje supervisado (SVM seleccionado)
-3. ⚠️ **Objetivo 3:** Crear modelo predictivo (EN DESARROLLO)
-4. ⚠️ **Objetivo 4:** Validar el sistema (PENDIENTE)
+Sistema de detección temprana de desnutrición infantil en Norte de Santander mediante técnicas de Machine Learning.
 
 ### 🚀 Estado Actual
 
-- ✅ **Frontend:** Completo y desplegado en Vercel
-- 🔄 **Backend:** En desarrollo (Fase 1 iniciada)
-- 📊 **Base de Datos:** PostgreSQL configurado
-- 🤖 **ML Models:** SVM, Random Forest, MLP (en entrenamiento)
+- ✅ **Frontend:** Desplegado en Vercel
+- ✅ **Base de Datos:** Supabase (PostgreSQL)
+- ✅ **Predicción SQL:** Función implementada en Supabase
+- 🔄 **Backend Python:** En desarrollo (FastAPI)
 
 ---
 
@@ -31,44 +24,46 @@ SIDI es un sistema inteligente de detección temprana de desnutrición infantil 
 
 ```
 Hakaton/
-├── frontend/               # Aplicación web (HTML, CSS, JS)
-│   ├── index.html         # Página principal
-│   ├── css/               # Estilos
-│   │   └── styles.css
-│   ├── js/                # Scripts
-│   │   └── script.js
-│   ├── vercel.json        # Configuración de Vercel
-│   └── README.md          # Documentación del frontend
+├── frontend/               # Aplicación web
+│   ├── index.html
+│   ├── css/styles.css
+│   ├── js/
+│   │   ├── script.js
+│   │   └── supabase-integration.js
+│   └── vercel.json
 │
-├── backend/               # API y modelos ML (Python/FastAPI)
-│   ├── app/              # Aplicación FastAPI
-│   ├── data/             # Datasets y modelos entrenados
-│   ├── notebooks/        # Jupyter notebooks para análisis
-│   ├── tests/            # Tests unitarios
-│   └── requirements.txt  # Dependencias Python
+├── backend/               # Backend y ML
+│   ├── app/              # FastAPI app
+│   │   ├── models/       # SQLAlchemy models
+│   │   ├── config.py
+│   │   └── database.py
+│   ├── supabase_schema.sql      # ⚡ Esquema de BD
+│   ├── datos_ejemplo.sql        # ⚡ Datos de prueba
+│   ├── funcion_prediccion.sql   # ⚡ Función de predicción
+│   ├── requirements.txt
+│   └── README.md
 │
-├── docs/                 # Documentación del proyecto
-│   ├── ANALISIS_PROYECTO_ACADEMICO.md
-│   ├── HOJA_DE_RUTA_COMPLETA.md
-│   ├── PROYECTO_COMPLETO.md
-│   ├── MEJORAS.md
-│   ├── MEJORAS_FRONTEND.md
-│   ├── FIX_MOBILE.md
-│   └── DEPLOY.md
-│
-├── .gitignore
-├── .vercelignore
-└── README.md             # Este archivo
+└── docs/                 # Documentación académica
 ```
 
 ---
 
-## 🛠️ Tecnologías Utilizadas
+## 🛠️ Tecnologías
 
 ### Frontend
-- HTML5, CSS3, JavaScript (Vanilla)
+- HTML5, CSS3, JavaScript
 - Tailwind CSS
-- Font Awesome
+- Supabase Client
+
+### Backend
+- Python 3.10+
+- FastAPI
+- Supabase (PostgreSQL)
+- SQLAlchemy
+
+### Machine Learning
+- Scikit-learn (SVM, Random Forest)
+- TensorFlow (MLP)
 - Vercel (deployment)
 
 ### Backend

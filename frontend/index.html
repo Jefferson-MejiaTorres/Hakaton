@@ -49,8 +49,87 @@
         }
         .animate-delay-2 { animation-delay: 2s; }
         .animate-delay-4 { animation-delay: 4s; }
+        .github-circle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #333333, #1a1a1a);
+            border-radius: 50%;
+            box-shadow: 0 10px 30px rgba(0, 0, 0, 0.4);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: float 3s ease-in-out infinite;
+        }
+        .github-circle i {
+            color: white;
+            font-size: 32px;
+            transition: transform 0.3s ease;
+        }
+        .github-circle:hover {
+            transform: translateY(-8px) scale(1.1);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.5);
+            background: linear-gradient(135deg, #4a4a4a, #2a2a2a);
+        }
+        .github-circle:hover i {
+            transform: rotate(360deg);
+        }
+        .facebook-circle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #1877f2, #0c5fc9);
+            border-radius: 50%;
+            box-shadow: 0 10px 30px rgba(24, 119, 242, 0.4);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: float 3s ease-in-out infinite;
+            animation-delay: 1s;
+        }
+        .facebook-circle i {
+            color: white;
+            font-size: 32px;
+            transition: transform 0.3s ease;
+        }
+        .facebook-circle:hover {
+            transform: translateY(-8px) scale(1.1);
+            box-shadow: 0 20px 40px rgba(24, 119, 242, 0.6);
+            background: linear-gradient(135deg, #2e8af6, #1565d4);
+        }
+        .facebook-circle:hover i {
+            transform: rotate(360deg);
+        }
+        .whatsapp-circle {
+            display: inline-flex;
+            align-items: center;
+            justify-content: center;
+            width: 64px;
+            height: 64px;
+            background: linear-gradient(135deg, #25d366, #1ea952);
+            border-radius: 50%;
+            box-shadow: 0 10px 30px rgba(37, 211, 102, 0.4);
+            transition: all 0.4s cubic-bezier(0.4, 0, 0.2, 1);
+            animation: float 3s ease-in-out infinite;
+            animation-delay: 2s;
+        }
+        .whatsapp-circle i {
+            color: white;
+            font-size: 32px;
+            transition: transform 0.3s ease;
+        }
+        .whatsapp-circle:hover {
+            transform: translateY(-8px) scale(1.1);
+            box-shadow: 0 20px 40px rgba(37, 211, 102, 0.6);
+            background: linear-gradient(135deg, #35e377, #22b85e);
+        }
+        .whatsapp-circle:hover i {
+            transform: rotate(360deg);
+        }
         @media (max-width: 640px) {
             .card-role { padding: 1.5rem !important; }
+            .github-circle, .facebook-circle, .whatsapp-circle { width: 56px; height: 56px; }
+            .github-circle i, .facebook-circle i, .whatsapp-circle i { font-size: 28px; }
         }
     </style>
 </head>
@@ -148,20 +227,28 @@
                     </div>
                 </a>
             </div>
-            <div class="text-center mb-8 flex flex-col sm:flex-row items-center justify-center gap-4">
+            <div class="text-center mb-8">
                 <a href="about.html" class="inline-flex items-center space-x-2 bg-white bg-opacity-20 backdrop-blur-md text-white px-5 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-opacity-30 transition-all shadow-lg hover:shadow-xl transform hover:scale-105">
                     <i class="fas fa-info-circle"></i><span>Más información del proyecto</span>
                 </a>
-                <a href="https://github.com/Jefferson-MejiaTorres/Hakaton" target="_blank" rel="noopener noreferrer" class="inline-flex items-center space-x-2 bg-gray-900 bg-opacity-80 backdrop-blur-md text-white px-5 sm:px-8 py-3 sm:py-4 rounded-full font-semibold hover:bg-opacity-100 transition-all shadow-lg hover:shadow-xl transform hover:scale-105" title="Ver repositorio en GitHub">
-                    <i class="fab fa-github text-xl"></i><span>Ver Código Fuente</span>
-                </a>
             </div>
-            <div class="text-center text-purple-200 text-xs sm:text-sm px-4">
+            <div class="text-center text-purple-200 text-xs sm:text-sm px-4 mb-8">
                 <div class="bg-white bg-opacity-10 backdrop-blur-md rounded-2xl p-4 sm:p-6 max-w-2xl mx-auto">
                     <p class="mb-2 font-semibold text-white">Universidad de Pamplona • 2025</p>
                     <p class="text-xs sm:text-sm"><i class="fas fa-code mr-2"></i>Desarrollado por: <span class="font-semibold text-white">Jefferson David Mejía Torres</span></p>
                     <p class="text-xs mt-2 text-purple-300">Proyecto Académico - Detección Temprana de Desnutrición Infantil</p>
                 </div>
+            </div>
+            <div class="flex justify-center items-center gap-4 sm:gap-6 mb-8">
+                <a href="https://www.facebook.com/jefferson.de.la.torres.2025" target="_blank" rel="noopener noreferrer" class="facebook-circle" title="Sígueme en Facebook">
+                    <i class="fab fa-facebook-f"></i>
+                </a>
+                <a href="https://github.com/Jefferson-MejiaTorres/Hakaton" target="_blank" rel="noopener noreferrer" class="github-circle" title="Ver repositorio en GitHub">
+                    <i class="fab fa-github"></i>
+                </a>
+                <a href="https://wa.me/573171085372" target="_blank" rel="noopener noreferrer" class="whatsapp-circle" title="Contáctame por WhatsApp">
+                    <i class="fab fa-whatsapp"></i>
+                </a>
             </div>
         </div>
     </div>

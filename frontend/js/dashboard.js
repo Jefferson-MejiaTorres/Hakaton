@@ -768,22 +768,119 @@ function setupNavigation() {
 }
 
 // ==========================================
-// Setup Logout
+// Setup Logout con Modal de Confirmación
 // ==========================================
 function setupLogout() {
     const logoutBtn = document.getElementById('logout-btn');
     if (logoutBtn) {
-        logoutBtn.addEventListener('click', async () => {
-            try {
-                await supabase.auth.signOut();
-                localStorage.removeItem('userRole');
-                window.location.href = 'index.html';
-            } catch (error) {
-                console.error('Error al cerrar sesión:', error);
-            }
+        logoutBtn.addEventListener('click', () => {
+            mostrarModalConfirmacionLogout();
         });
     }
 }
+
+// Modal de Confirmación de Cerrar Sesión
+function mostrarModalConfirmacionLogout() {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-4 animate-fade-in';
+    
+    modal.innerHTML = `
+        <div class="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-md w-full mx-auto animate-scale-in overflow-hidden">
+            <!-- Header con gradiente -->
+            <div class="bg-gradient-to-r from-red-500 to-pink-500 p-4 sm:p-6">
+                <div class="flex items-center gap-3">
+                    <div class="w-12 h-12 sm:w-14 sm:h-14 bg-white bg-opacity-20 rounded-full flex items-center justify-center backdrop-blur-sm">
+                        <i class="fas fa-sign-out-alt text-2xl sm:text-3xl text-white"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-lg sm:text-xl font-bold text-white">Cerrar Sesión</h3>
+                        <p class="text-xs sm:text-sm text-red-100">Confirma tu acción</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Body -->
+            <div class="p-4 sm:p-6">
+                <div class="mb-6">
+                    <div class="flex items-start gap-3 mb-4">
+                        <div class="flex-shrink-0 w-10 h-10 bg-yellow-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-exclamation-triangle text-yellow-600 text-lg"></i>
+                        </div>
+                        <div>
+                            <p class="text-sm sm:text-base text-gray-700 mb-2">
+                                ¿Estás seguro de que deseas cerrar tu sesión actual?
+                            </p>
+                            <p class="text-xs sm:text-sm text-gray-500">
+                                Tendrás que volver a iniciar sesión para acceder al sistema.
+                            </p>
+                        </div>
+                    </div>
+                    
+                    <!-- Info adicional -->
+                    <div class="bg-blue-50 border-l-4 border-blue-400 p-3 rounded">
+                        <p class="text-xs sm:text-sm text-blue-800">
+                            <i class="fas fa-info-circle mr-2"></i>
+                            <strong>Recuerda:</strong> Todos tus datos están guardados de forma segura.
+                        </p>
+                    </div>
+                </div>
+                
+                <!-- Botones -->
+                <div class="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3">
+                    <button 
+                        onclick="this.closest('.fixed').remove()" 
+                        class="w-full sm:flex-1 px-4 py-2.5 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-bold hover:bg-gray-50 transition-all text-sm sm:text-base"
+                    >
+                        <i class="fas fa-times mr-2"></i>Cancelar
+                    </button>
+                    <button 
+                        onclick="confirmarCerrarSesion(this)" 
+                        class="w-full sm:flex-1 px-4 py-2.5 sm:py-3 bg-gradient-to-r from-red-600 to-pink-600 text-white rounded-lg font-bold hover:shadow-xl transition-all text-sm sm:text-base"
+                    >
+                        <i class="fas fa-sign-out-alt mr-2"></i>Cerrar Sesión
+                    </button>
+                </div>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+}
+
+// Función para confirmar y cerrar sesión
+async function confirmarCerrarSesion(button) {
+    // Cambiar botón a loading
+    const originalHTML = button.innerHTML;
+    button.disabled = true;
+    button.innerHTML = '<i class="fas fa-spinner fa-spin mr-2"></i>Cerrando...';
+    
+    try {
+        await supabase.auth.signOut();
+        localStorage.removeItem('userRole');
+        
+        // Mostrar mensaje de éxito brevemente
+        button.innerHTML = '<i class="fas fa-check mr-2"></i>¡Hasta pronto!';
+        
+        // Redireccionar después de 500ms
+        setTimeout(() => {
+            window.location.href = 'index.html';
+        }, 500);
+        
+    } catch (error) {
+        console.error('Error al cerrar sesión:', error);
+        
+        // Restaurar botón y mostrar error
+        button.disabled = false;
+        button.innerHTML = originalHTML;
+        
+        // Mostrar notificación de error
+        mostrarNotificacion('error', 'Error al cerrar sesión. Intenta nuevamente.');
+    }
+}
+
+// Exportar funciones
+window.mostrarModalConfirmacionLogout = mostrarModalConfirmacionLogout;
+window.confirmarCerrarSesion = confirmarCerrarSesion;
 
 // ==========================================
 // REGISTRAR PACIENTE - Funcionalidad Completa

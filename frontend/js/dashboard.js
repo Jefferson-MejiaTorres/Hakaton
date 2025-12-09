@@ -1385,33 +1385,33 @@ async function editarPaciente(id) {
 // Confirmar eliminación con modal bonito
 function confirmarEliminar(id, nombre) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 overflow-y-auto';
     modal.style.animation = 'fadeIn 0.2s ease-out';
     
     modal.innerHTML = `
-        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full" style="animation: scaleIn 0.3s ease-out">
+        <div class="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-md w-full my-auto mx-auto" style="animation: scaleIn 0.3s ease-out">
             <!-- Header -->
-            <div class="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 rounded-t-2xl">
-                <div class="flex items-center justify-center">
-                    <div class="bg-white/20 rounded-full p-3 mr-3">
-                        <i class="fas fa-exclamation-triangle text-3xl"></i>
+            <div class="bg-gradient-to-r from-red-600 to-red-700 text-white p-4 sm:p-6 rounded-t-xl sm:rounded-t-2xl">
+                <div class="flex items-center justify-center gap-2 sm:gap-3">
+                    <div class="bg-white/20 rounded-full p-2 sm:p-3">
+                        <i class="fas fa-exclamation-triangle text-2xl sm:text-3xl"></i>
                     </div>
-                    <h3 class="text-2xl font-bold">Confirmar Eliminación</h3>
+                    <h3 class="text-lg sm:text-2xl font-bold">Confirmar Eliminación</h3>
                 </div>
             </div>
             
             <!-- Body -->
-            <div class="p-6">
-                <p class="text-gray-700 text-lg mb-2">
+            <div class="p-4 sm:p-6">
+                <p class="text-gray-700 text-sm sm:text-lg mb-2">
                     ¿Estás seguro de que deseas eliminar al paciente:
                 </p>
-                <p class="text-xl font-bold text-gray-900 mb-4">
+                <p class="text-lg sm:text-xl font-bold text-gray-900 mb-3 sm:mb-4 break-words">
                     ${nombre}
                 </p>
-                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
-                    <div class="flex items-start">
-                        <i class="fas fa-exclamation-circle text-yellow-600 mt-1 mr-3"></i>
-                        <p class="text-sm text-yellow-800">
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-3 sm:p-4 rounded">
+                    <div class="flex items-start gap-2 sm:gap-3">
+                        <i class="fas fa-exclamation-circle text-yellow-600 mt-0.5 sm:mt-1 flex-shrink-0"></i>
+                        <p class="text-xs sm:text-sm text-yellow-800">
                             <strong>Advertencia:</strong> Esta acción eliminará permanentemente todos los datos asociados (mediciones, historia clínica, predicciones). No se puede deshacer.
                         </p>
                     </div>
@@ -1419,16 +1419,16 @@ function confirmarEliminar(id, nombre) {
             </div>
             
             <!-- Footer -->
-            <div class="flex space-x-3 p-6 bg-gray-50 rounded-b-2xl">
+            <div class="flex flex-col-reverse sm:flex-row gap-2 sm:gap-3 p-4 sm:p-6 bg-gray-50 rounded-b-xl sm:rounded-b-2xl">
                 <button 
                     onclick="this.closest('.fixed').remove()" 
-                    class="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-all"
+                    class="w-full sm:flex-1 px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-all text-sm sm:text-base"
                 >
                     <i class="fas fa-times mr-2"></i>Cancelar
                 </button>
                 <button 
                     id="btn-confirmar-eliminar" 
-                    class="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all shadow-lg hover:shadow-xl"
+                    class="w-full sm:flex-1 px-4 sm:px-6 py-2.5 sm:py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all shadow-lg hover:shadow-xl text-sm sm:text-base"
                 >
                     <i class="fas fa-trash-alt mr-2"></i>Eliminar
                 </button>
@@ -1532,7 +1532,7 @@ function mostrarNotificacion(tipo, mensaje, duracion = 3000) {
 // Mostrar modal de detalle
 function mostrarModalDetalle(paciente) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-fade-in overflow-y-auto';
     
     // Ordenar mediciones y predicciones por fecha (más reciente primero)
     const mediciones = Array.isArray(paciente.mediciones_antropometricas) 
@@ -1568,29 +1568,29 @@ function mostrarModalDetalle(paciente) {
     };
     
     modal.innerHTML = `
-        <div class="bg-white rounded-2xl shadow-2xl max-w-4xl w-full max-h-[90vh] overflow-y-auto animate-scale-in">
-            <div class="bg-gradient-to-r from-blue-600 to-green-600 text-white p-6 rounded-t-2xl">
-                <div class="flex justify-between items-center">
-                    <div>
-                        <h3 class="text-2xl font-bold">${paciente.nombre} ${paciente.apellido}</h3>
-                        <p class="text-blue-100 mt-1">${edadMeses} meses • ${paciente.sexo === 'M' ? 'Masculino' : 'Femenino'}</p>
+        <div class="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-4xl w-full my-auto mx-auto animate-scale-in">
+            <div class="bg-gradient-to-r from-blue-600 to-green-600 text-white p-4 sm:p-6 rounded-t-xl sm:rounded-t-2xl">
+                <div class="flex justify-between items-start gap-3">
+                    <div class="flex-1 min-w-0">
+                        <h3 class="text-lg sm:text-2xl font-bold truncate">${paciente.nombre} ${paciente.apellido}</h3>
+                        <p class="text-blue-100 mt-1 text-xs sm:text-base">${edadMeses} meses • ${paciente.sexo === 'M' ? 'Masculino' : 'Femenino'}</p>
                     </div>
-                    <button onclick="this.closest('.fixed').remove()" class="text-white hover:text-gray-200 transition-colors">
-                        <i class="fas fa-times text-2xl"></i>
+                    <button onclick="this.closest('.fixed').remove()" class="text-white hover:text-gray-200 transition-colors flex-shrink-0">
+                        <i class="fas fa-times text-xl sm:text-2xl"></i>
                     </button>
                 </div>
             </div>
             
-            <div class="p-6 space-y-6">
+            <div class="p-4 sm:p-6 space-y-4 sm:space-y-6 max-h-[70vh] overflow-y-auto">
                 <!-- Información Básica -->
-                <div class="grid md:grid-cols-2 gap-4">
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <h4 class="text-sm font-semibold text-gray-500 mb-1">Fecha de Nacimiento</h4>
-                        <p class="text-lg text-gray-900">${new Date(paciente.fecha_nacimiento).toLocaleDateString('es-ES')}</p>
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
+                    <div class="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                        <h4 class="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Fecha de Nacimiento</h4>
+                        <p class="text-base sm:text-lg text-gray-900">${new Date(paciente.fecha_nacimiento).toLocaleDateString('es-ES')}</p>
                     </div>
-                    <div class="bg-gray-50 p-4 rounded-lg">
-                        <h4 class="text-sm font-semibold text-gray-500 mb-1">Documento</h4>
-                        <p class="text-lg text-gray-900">${paciente.documento_identidad || 'No registrado'}</p>
+                    <div class="bg-gray-50 p-3 sm:p-4 rounded-lg">
+                        <h4 class="text-xs sm:text-sm font-semibold text-gray-500 mb-1">Documento</h4>
+                        <p class="text-base sm:text-lg text-gray-900">${paciente.documento_identidad || 'No registrado'}</p>
                     </div>
                 </div>
                 
@@ -1602,20 +1602,20 @@ function mostrarModalDetalle(paciente) {
                     </div>
                     
                     ${ultimaMedicion ? `
-                        <div class="grid md:grid-cols-4 gap-4 mb-4">
-                            <div class="bg-blue-50 p-4 rounded-lg">
-                                <p class="text-sm text-gray-600">Peso</p>
-                                <p class="text-2xl font-bold text-blue-600">${ultimaMedicion.peso} kg</p>
-                                <p class="text-xs text-gray-500 mt-1">${new Date(ultimaMedicion.fecha_medicion).toLocaleDateString('es-ES')}</p>
+                        <div class="grid grid-cols-2 lg:grid-cols-4 gap-3 sm:gap-4 mb-4">
+                            <div class="bg-blue-50 p-3 sm:p-4 rounded-lg">
+                                <p class="text-xs sm:text-sm text-gray-600">Peso</p>
+                                <p class="text-xl sm:text-2xl font-bold text-blue-600">${ultimaMedicion.peso} kg</p>
+                                <p class="text-xs text-gray-500 mt-1 hidden sm:block">${new Date(ultimaMedicion.fecha_medicion).toLocaleDateString('es-ES')}</p>
                             </div>
-                            <div class="bg-green-50 p-4 rounded-lg">
-                                <p class="text-sm text-gray-600">Talla</p>
-                                <p class="text-2xl font-bold text-green-600">${ultimaMedicion.talla} cm</p>
-                                <p class="text-xs text-gray-500 mt-1">${new Date(ultimaMedicion.fecha_medicion).toLocaleDateString('es-ES')}</p>
+                            <div class="bg-green-50 p-3 sm:p-4 rounded-lg">
+                                <p class="text-xs sm:text-sm text-gray-600">Talla</p>
+                                <p class="text-xl sm:text-2xl font-bold text-green-600">${ultimaMedicion.talla} cm</p>
+                                <p class="text-xs text-gray-500 mt-1 hidden sm:block">${new Date(ultimaMedicion.fecha_medicion).toLocaleDateString('es-ES')}</p>
                             </div>
-                            <div class="bg-purple-50 p-4 rounded-lg">
-                                <p class="text-sm text-gray-600">IMC</p>
-                                <p class="text-2xl font-bold text-purple-600">${ultimaMedicion.imc || 'N/A'}</p>
+                            <div class="bg-purple-50 p-3 sm:p-4 rounded-lg">
+                                <p class="text-xs sm:text-sm text-gray-600">IMC</p>
+                                <p class="text-xl sm:text-2xl font-bold text-purple-600">${ultimaMedicion.imc || 'N/A'}</p>
                             </div>
                             <div class="bg-indigo-50 p-4 rounded-lg flex items-center justify-center">
                                 <button 
@@ -1700,18 +1700,18 @@ function mostrarModalDetalle(paciente) {
                     </div>
                 ` : ''}
                 
-                <div class="flex justify-between pt-4 border-t">
+                <div class="flex flex-col sm:flex-row justify-between gap-3 pt-4 border-t">
                     <button 
                         onclick="agregarNuevaMedicion(${paciente.id}, '${paciente.nombre}', '${paciente.apellido}'); this.closest('.fixed').remove();" 
-                        class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors"
+                        class="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base font-medium"
                     >
                         <i class="fas fa-plus-circle mr-2"></i>Nueva Medición
                     </button>
-                    <div class="space-x-3">
-                        <button onclick="this.closest('.fixed').remove()" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                    <div class="flex gap-2 sm:gap-3">
+                        <button onclick="this.closest('.fixed').remove()" class="flex-1 sm:flex-initial px-4 sm:px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base font-medium">
                             Cerrar
                         </button>
-                        <button onclick="editarPaciente(${paciente.id}); this.closest('.fixed').remove();" class="px-6 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors">
+                        <button onclick="editarPaciente(${paciente.id}); this.closest('.fixed').remove();" class="flex-1 sm:flex-initial px-4 sm:px-6 py-2.5 bg-blue-600 text-white rounded-lg hover:bg-blue-700 transition-colors text-sm sm:text-base font-medium">
                             <i class="fas fa-edit mr-2"></i>Editar
                         </button>
                     </div>
@@ -1726,41 +1726,41 @@ function mostrarModalDetalle(paciente) {
 // Mostrar modal de edición
 function mostrarModalEdicion(paciente) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-fade-in overflow-y-auto';
     modal.innerHTML = `
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full animate-scale-in">
-            <div class="bg-gradient-to-r from-green-600 to-blue-600 text-white p-6 rounded-t-2xl">
-                <h3 class="text-2xl font-bold">Editar Paciente</h3>
+        <div class="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-2xl w-full my-auto mx-auto animate-scale-in">
+            <div class="bg-gradient-to-r from-green-600 to-blue-600 text-white p-4 sm:p-6 rounded-t-xl sm:rounded-t-2xl">
+                <h3 class="text-xl sm:text-2xl font-bold">Editar Paciente</h3>
             </div>
             
-            <form id="form-editar-paciente" class="p-6 space-y-4">
-                <div class="grid md:grid-cols-2 gap-4">
+            <form id="form-editar-paciente" class="p-4 sm:p-6 space-y-3 sm:space-y-4 max-h-[70vh] overflow-y-auto">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Nombre</label>
-                        <input type="text" id="edit-nombre" value="${paciente.nombre}" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600">
+                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Nombre</label>
+                        <input type="text" id="edit-nombre" value="${paciente.nombre}" required class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 text-sm sm:text-base">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Apellido</label>
-                        <input type="text" id="edit-apellido" value="${paciente.apellido}" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600">
+                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Apellido</label>
+                        <input type="text" id="edit-apellido" value="${paciente.apellido}" required class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 text-sm sm:text-base">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Fecha de Nacimiento</label>
-                        <input type="date" id="edit-fecha" value="${paciente.fecha_nacimiento}" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600">
+                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Fecha de Nacimiento</label>
+                        <input type="date" id="edit-fecha" value="${paciente.fecha_nacimiento}" required class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 text-sm sm:text-base">
                     </div>
                     <div>
-                        <label class="block text-sm font-medium text-gray-700 mb-2">Sexo</label>
-                        <select id="edit-sexo" required class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600">
+                        <label class="block text-xs sm:text-sm font-medium text-gray-700 mb-1.5 sm:mb-2">Sexo</label>
+                        <select id="edit-sexo" required class="w-full px-3 sm:px-4 py-2 sm:py-2.5 border rounded-lg focus:ring-2 focus:ring-blue-600 text-sm sm:text-base">
                             <option value="M" ${paciente.sexo === 'M' ? 'selected' : ''}>Masculino</option>
                             <option value="F" ${paciente.sexo === 'F' ? 'selected' : ''}>Femenino</option>
                         </select>
                     </div>
                 </div>
                 
-                <div class="flex justify-end space-x-3 pt-4 border-t">
-                    <button type="button" onclick="this.closest('.fixed').remove()" class="px-6 py-2 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors">
+                <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t">
+                    <button type="button" onclick="this.closest('.fixed').remove()" class="w-full sm:w-auto px-4 sm:px-6 py-2.5 border border-gray-300 rounded-lg hover:bg-gray-50 transition-colors text-sm sm:text-base font-medium">
                         Cancelar
                     </button>
-                    <button type="submit" class="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors">
+                    <button type="submit" class="w-full sm:w-auto px-4 sm:px-6 py-2.5 bg-green-600 text-white rounded-lg hover:bg-green-700 transition-colors text-sm sm:text-base font-medium">
                         <i class="fas fa-save mr-2"></i>Guardar Cambios
                     </button>
                 </div>
@@ -2007,24 +2007,24 @@ function mostrarResultadoEvaluacion(paciente, imc, prediccionData) {
 // Agregar nueva medición a un paciente existente
 function agregarNuevaMedicion(ninoId, nombre, apellido) {
     const modal = document.createElement('div');
-    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4 animate-fade-in';
+    modal.className = 'fixed inset-0 bg-black bg-opacity-60 backdrop-blur-sm flex items-center justify-center z-50 p-2 sm:p-4 animate-fade-in overflow-y-auto';
     
     modal.innerHTML = `
-        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full animate-scale-in">
+        <div class="bg-white rounded-xl sm:rounded-2xl shadow-2xl max-w-2xl w-full my-auto mx-auto animate-scale-in">
             <!-- Header -->
-            <div class="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-6 rounded-t-2xl">
-                <h3 class="text-2xl font-bold flex items-center">
-                    <i class="fas fa-ruler-combined mr-3"></i>
-                    Nueva Medición Antropométrica
+            <div class="bg-gradient-to-r from-green-600 to-emerald-600 text-white p-4 sm:p-6 rounded-t-xl sm:rounded-t-2xl">
+                <h3 class="text-lg sm:text-2xl font-bold flex items-center gap-2">
+                    <i class="fas fa-ruler-combined"></i>
+                    <span class="truncate">Nueva Medición</span>
                 </h3>
-                <p class="text-green-100 mt-1">Paciente: ${nombre} ${apellido}</p>
+                <p class="text-green-100 mt-1 text-xs sm:text-base truncate">Paciente: ${nombre} ${apellido}</p>
             </div>
             
             <!-- Formulario -->
-            <form id="form-nueva-medicion" class="p-6 space-y-6">
+            <form id="form-nueva-medicion" class="p-4 sm:p-6 space-y-4 sm:space-y-6 max-h-[65vh] overflow-y-auto">
                 <!-- Fecha de medición -->
-                <div class="bg-blue-50 border-l-4 border-blue-400 p-4 rounded">
-                    <label class="block text-sm font-semibold text-blue-900 mb-2">
+                <div class="bg-blue-50 border-l-4 border-blue-400 p-3 sm:p-4 rounded">
+                    <label class="block text-xs sm:text-sm font-semibold text-blue-900 mb-2">
                         <i class="fas fa-calendar mr-2"></i>Fecha de Medición
                     </label>
                     <input 
@@ -2033,12 +2033,12 @@ function agregarNuevaMedicion(ninoId, nombre, apellido) {
                         value="${new Date().toISOString().split('T')[0]}"
                         max="${new Date().toISOString().split('T')[0]}"
                         required 
-                        class="w-full px-4 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                        class="w-full px-3 sm:px-4 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm sm:text-base"
                     >
                 </div>
                 
                 <!-- Mediciones principales -->
-                <div class="grid md:grid-cols-2 gap-4">
+                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
                     <div>
                         <label class="block text-sm font-semibold text-gray-700 mb-2">
                             <i class="fas fa-weight mr-2 text-blue-600"></i>Peso (kg) *
@@ -2126,19 +2126,19 @@ function agregarNuevaMedicion(ninoId, nombre, apellido) {
                 </div>
                 
                 <!-- Botones -->
-                <div class="flex justify-end space-x-3 pt-4 border-t">
+                <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t">
                     <button 
                         type="button" 
                         onclick="this.closest('.fixed').remove()" 
-                        class="px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all"
+                        class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all text-sm sm:text-base"
                     >
                         <i class="fas fa-times mr-2"></i>Cancelar
                     </button>
                     <button 
                         type="submit" 
-                        class="px-6 py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
+                        class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all text-sm sm:text-base"
                     >
-                        <i class="fas fa-save mr-2"></i>Guardar Medición
+                        <i class="fas fa-save mr-2"></i>Guardar
                     </button>
                 </div>
             </form>

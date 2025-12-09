@@ -83,20 +83,53 @@ function filterMenuByRole(role) {
 // ==========================================
 async function loadDashboardData() {
     try {
-        // Obtener estadísticas de Supabase
-        // Por ahora usamos datos simulados
-        const stats = {
-            total: 247,
-            alto: 23,
-            medio: 78,
-            bajo: 146
-        };
+        // Obtener TODOS los niños
+        const { data: ninos, error: errorNinos } = await supabase
+            .from('ninos')
+            .select('id, nombre, apellido, fecha_nacimiento');
         
-        // Actualizar stats cards
-        document.getElementById('stat-total').textContent = stats.total;
-        document.getElementById('stat-alto').textContent = stats.alto;
-        document.getElementById('stat-medio').textContent = stats.medio;
-        document.getElementById('stat-bajo').textContent = stats.bajo;
+        if (errorNinos) throw errorNinos;
+        
+        // Obtener predicciones para calcular riesgos
+        const { data: predicciones, error: errorPredicciones } = await supabase
+            .from('predicciones')
+            .select('nino_id, nivel_riesgo')
+            .order('fecha_prediccion', { ascending: false });
+        
+        if (errorPredicciones) throw errorPredicciones;
+        
+        // Crear un mapa de riesgos (último riesgo por niño)
+        const riesgosPorNino = {};
+        predicciones?.forEach(pred => {
+            if (!riesgosPorNino[pred.nino_id]) {
+                riesgosPorNino[pred.nino_id] = pred.nivel_riesgo;
+            }
+        });
+        
+        // Calcular estadísticas
+        const total = ninos?.length || 0;
+        let alto = 0, medio = 0, bajo = 0, sinEvaluar = 0;
+        
+        ninos?.forEach(nino => {
+            const riesgo = riesgosPorNino[nino.id];
+            if (!riesgo) {
+                sinEvaluar++;
+            } else if (riesgo === 'alto') {
+                alto++;
+            } else if (riesgo === 'medio') {
+                medio++;
+            } else if (riesgo === 'bajo') {
+                bajo++;
+            }
+        });
+        
+        const stats = { total, alto, medio, bajo, sinEvaluar };
+        
+        // Actualizar stats cards con animación
+        animateCounter('stat-total', stats.total);
+        animateCounter('stat-alto', stats.alto);
+        animateCounter('stat-medio', stats.medio);
+        animateCounter('stat-bajo', stats.bajo);
         
         // Cargar gráficas
         loadCharts(stats);
@@ -105,8 +138,36 @@ async function loadDashboardData() {
         await loadRecentCases();
         
     } catch (error) {
-        console.error('Error al cargar datos:', error);
+        console.error('Error al cargar datos del dashboard:', error);
+        // Mostrar datos en 0 si hay error
+        document.getElementById('stat-total').textContent = '0';
+        document.getElementById('stat-alto').textContent = '0';
+        document.getElementById('stat-medio').textContent = '0';
+        document.getElementById('stat-bajo').textContent = '0';
     }
+}
+
+// ==========================================
+// Animar contadores
+// ==========================================
+function animateCounter(elementId, finalValue) {
+    const element = document.getElementById(elementId);
+    if (!element) return;
+    
+    const duration = 1000; // 1 segundo
+    const start = 0;
+    const increment = finalValue / (duration / 16); // 60 FPS
+    let current = start;
+    
+    const timer = setInterval(() => {
+        current += increment;
+        if (current >= finalValue) {
+            element.textContent = finalValue;
+            clearInterval(timer);
+        } else {
+            element.textContent = Math.floor(current);
+        }
+    }, 16);
 }
 
 // ==========================================
@@ -203,37 +264,141 @@ async function loadRecentCases() {
     const tbody = document.getElementById('tabla-recientes');
     if (!tbody) return;
     
+    tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Cargando casos recientes...</td></tr>';
+    
     try {
-        // Por ahora datos simulados - conectar con Supabase después
-        const casos = [
-            { id: 1, fecha: '2025-12-05', edad: 24, peso: 10.5, riesgo: 'alto' },
-            { id: 2, fecha: '2025-12-04', edad: 36, peso: 14.2, riesgo: 'medio' },
-            { id: 3, fecha: '2025-12-04', edad: 18, peso: 11.8, riesgo: 'bajo' },
-            { id: 4, fecha: '2025-12-03', edad: 48, peso: 16.5, riesgo: 'bajo' },
-            { id: 5, fecha: '2025-12-03', edad: 12, peso: 8.2, riesgo: 'alto' }
-        ];
+        // Obtener últimos 10 niños con sus mediciones y predicciones
+        const { data: ninos, error: errorNinos } = await supabase
+            .from('ninos')
+            .select(`
+                id,
+                nombre,
+                apellido,
+                fecha_nacimiento,
+                fecha_registro
+            `)
+            .order('fecha_registro', { ascending: false })
+            .limit(10);
         
-        tbody.innerHTML = casos.map(caso => `
-            <tr class="hover:bg-gray-50">
-                <td class="px-4 py-3 text-gray-900">#${caso.id}</td>
-                <td class="px-4 py-3 text-gray-600">${caso.fecha}</td>
-                <td class="px-4 py-3 text-gray-600">${caso.edad} meses</td>
-                <td class="px-4 py-3 text-gray-600">${caso.peso} kg</td>
-                <td class="px-4 py-3">
-                    ${getRiesgoBadge(caso.riesgo)}
-                </td>
-                <td class="px-4 py-3">
-                    <button class="text-blue-600 hover:text-blue-800 font-semibold">
-                        <i class="fas fa-eye mr-1"></i>Ver
-                    </button>
-                </td>
-            </tr>
-        `).join('');
+        if (errorNinos) throw errorNinos;
+        
+        if (!ninos || ninos.length === 0) {
+            tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-500">No hay pacientes registrados aún</td></tr>';
+            return;
+        }
+        
+        // Obtener mediciones para cada niño
+        const { data: mediciones, error: errorMed } = await supabase
+            .from('mediciones_antropometricas')
+            .select('nino_id, peso, talla, fecha_medicion')
+            .in('nino_id', ninos.map(n => n.id))
+            .order('fecha_medicion', { ascending: false });
+        
+        // Obtener predicciones para cada niño
+        const { data: predicciones, error: errorPred } = await supabase
+            .from('predicciones')
+            .select('nino_id, nivel_riesgo, fecha_prediccion')
+            .in('nino_id', ninos.map(n => n.id))
+            .order('fecha_prediccion', { ascending: false });
+        
+        // Crear mapas de datos
+        const medicionesPorNino = {};
+        mediciones?.forEach(med => {
+            if (!medicionesPorNino[med.nino_id]) {
+                medicionesPorNino[med.nino_id] = med;
+            }
+        });
+        
+        const prediccionesPorNino = {};
+        predicciones?.forEach(pred => {
+            if (!prediccionesPorNino[pred.nino_id]) {
+                prediccionesPorNino[pred.nino_id] = pred.nivel_riesgo;
+            }
+        });
+        
+        // Generar filas de la tabla
+        tbody.innerHTML = ninos.map(nino => {
+            const medicion = medicionesPorNino[nino.id];
+            const riesgo = prediccionesPorNino[nino.id] || 'sin_evaluar';
+            
+            // Calcular edad en meses
+            const fechaNac = new Date(nino.fecha_nacimiento);
+            const hoy = new Date();
+            const meses = Math.floor((hoy - fechaNac) / (1000 * 60 * 60 * 24 * 30.44));
+            
+            // Formatear fecha de registro
+            const fechaReg = new Date(nino.fecha_registro);
+            const fechaFormateada = fechaReg.toLocaleDateString('es-CO', { 
+                year: 'numeric', 
+                month: 'short', 
+                day: 'numeric' 
+            });
+            
+            // Obtener inicial para avatar
+            const inicial = nino.nombre.charAt(0).toUpperCase();
+            
+            return `
+                <tr class="hover:bg-gray-50 transition-colors">
+                    <td class="px-4 py-3">
+                        <div class="flex items-center space-x-3">
+                            <div class="w-10 h-10 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold shadow-lg">
+                                ${inicial}
+                            </div>
+                            <div>
+                                <p class="text-gray-900 font-semibold">${nino.nombre} ${nino.apellido}</p>
+                                <p class="text-xs text-gray-500">ID: ${nino.id}</p>
+                            </div>
+                        </div>
+                    </td>
+                    <td class="px-4 py-3 text-gray-600">${fechaFormateada}</td>
+                    <td class="px-4 py-3 text-gray-600">${meses} meses</td>
+                    <td class="px-4 py-3 text-gray-600">${medicion?.peso ? medicion.peso + ' kg' : '-'}</td>
+                    <td class="px-4 py-3 text-gray-600">${medicion?.talla ? medicion.talla + ' cm' : '-'}</td>
+                    <td class="px-4 py-3">
+                        ${getRiesgoBadge(riesgo)}
+                    </td>
+                    <td class="px-4 py-3">
+                        <button 
+                            onclick="verDetallePaciente(${nino.id})"
+                            class="text-blue-600 hover:text-blue-800 font-semibold transition-colors"
+                            title="Ver detalles del paciente"
+                        >
+                            <i class="fas fa-eye mr-1"></i>Ver
+                        </button>
+                    </td>
+                </tr>
+            `;
+        }).join('');
         
     } catch (error) {
-        console.error('Error al cargar casos:', error);
-        tbody.innerHTML = '<tr><td colspan="6" class="px-4 py-8 text-center text-red-500">Error al cargar datos</td></tr>';
+        console.error('Error al cargar casos recientes:', error);
+        tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>Error al cargar datos</td></tr>';
     }
+}
+
+// ==========================================
+// Ver detalle desde dashboard
+// ==========================================
+function verDetallePaciente(ninoId) {
+    // Cambiar a vista de pacientes
+    document.querySelectorAll('main > section').forEach(section => section.classList.add('hidden'));
+    document.getElementById('view-pacientes').classList.remove('hidden');
+    
+    // Actualizar navegación activa
+    document.querySelectorAll('aside nav a').forEach(link => link.classList.remove('bg-blue-100', 'text-blue-700'));
+    const linkPacientes = document.querySelector('aside nav a[onclick*="showView(\'pacientes\')"]');
+    if (linkPacientes) {
+        linkPacientes.classList.add('bg-blue-100', 'text-blue-700');
+    }
+    
+    // Cargar pacientes y mostrar el detalle
+    cargarPacientes().then(() => {
+        // Buscar y abrir el modal del paciente
+        const btnVer = document.querySelector(`button[onclick="verDetallesPaciente(${ninoId})"]`);
+        if (btnVer) {
+            btnVer.click();
+        }
+    });
 }
 
 // ==========================================
@@ -241,11 +406,91 @@ async function loadRecentCases() {
 // ==========================================
 function getRiesgoBadge(riesgo) {
     const badges = {
-        'alto': '<span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold">Alto</span>',
-        'medio': '<span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-semibold">Medio</span>',
-        'bajo': '<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold">Bajo</span>'
+        'alto': '<span class="px-3 py-1 bg-red-100 text-red-800 rounded-full text-sm font-semibold inline-flex items-center"><i class="fas fa-exclamation-triangle mr-1"></i>Alto</span>',
+        'medio': '<span class="px-3 py-1 bg-yellow-100 text-yellow-800 rounded-full text-sm font-semibold inline-flex items-center"><i class="fas fa-exclamation-circle mr-1"></i>Medio</span>',
+        'bajo': '<span class="px-3 py-1 bg-green-100 text-green-800 rounded-full text-sm font-semibold inline-flex items-center"><i class="fas fa-check-circle mr-1"></i>Bajo</span>',
+        'sin_evaluar': '<span class="px-3 py-1 bg-gray-100 text-gray-800 rounded-full text-sm font-semibold inline-flex items-center"><i class="fas fa-question-circle mr-1"></i>Sin evaluar</span>'
     };
-    return badges[riesgo] || badges['medio'];
+    return badges[riesgo] || badges['sin_evaluar'];
+}
+
+// ==========================================
+// Mostrar vista específica (FUNCIÓN GLOBAL)
+// ==========================================
+window.showView = function(viewName) {
+    // Ocultar todas las vistas
+    document.querySelectorAll('main > section').forEach(section => {
+        section.classList.add('hidden');
+    });
+    
+    // Mostrar la vista seleccionada
+    const targetView = document.getElementById(`view-${viewName}`);
+    if (targetView) {
+        targetView.classList.remove('hidden');
+        
+        // Mapa de colores por vista
+        const colorMap = {
+            'dashboard': { bg: 'bg-blue-100', text: 'text-blue-700', hover: 'hover:bg-blue-50' },
+            'pacientes': { bg: 'bg-purple-100', text: 'text-purple-700', hover: 'hover:bg-purple-50' },
+            'registrar': { bg: 'bg-green-100', text: 'text-green-700', hover: 'hover:bg-green-50' },
+            'analytics': { bg: 'bg-indigo-100', text: 'text-indigo-700', hover: 'hover:bg-indigo-50' },
+            'exportar': { bg: 'bg-teal-100', text: 'text-teal-700', hover: 'hover:bg-teal-50' },
+            'reportes': { bg: 'bg-orange-100', text: 'text-orange-700', hover: 'hover:bg-orange-50' },
+            'alertas': { bg: 'bg-red-100', text: 'text-red-700', hover: 'hover:bg-red-50' }
+        };
+        
+        // Actualizar menú activo con colores personalizados
+        document.querySelectorAll('aside nav a').forEach(link => {
+            // Remover todas las clases de color posibles
+            link.classList.remove(
+                'bg-blue-100', 'text-blue-700', 'font-semibold',
+                'bg-purple-100', 'text-purple-700',
+                'bg-green-100', 'text-green-700',
+                'bg-indigo-100', 'text-indigo-700',
+                'bg-teal-100', 'text-teal-700',
+                'bg-orange-100', 'text-orange-700',
+                'bg-red-100', 'text-red-700'
+            );
+            
+            // Restaurar estilo por defecto
+            if (!link.classList.contains('text-gray-700')) {
+                link.classList.add('text-gray-700');
+            }
+            
+            // Verificar el onclick para encontrar el link correcto
+            const onclick = link.getAttribute('onclick');
+            if (onclick) {
+                const match = onclick.match(/showView\(['"](.+?)['"]\)/);
+                if (match && match[1] === viewName) {
+                    // Remover gris y agregar color específico
+                    link.classList.remove('text-gray-700');
+                    const colors = colorMap[viewName];
+                    if (colors) {
+                        link.classList.add(colors.bg, colors.text, 'font-semibold');
+                    }
+                }
+            }
+        });
+        
+        // Cargar datos según la vista
+        if (viewName === 'dashboard') {
+            loadDashboardData();
+        } else if (viewName === 'pacientes') {
+            cargarPacientes();
+        } else if (viewName === 'registrar') {
+            // Limpiar formulario al entrar
+            const form = document.getElementById('form-registrar-paciente');
+            if (form) form.reset();
+        } else if (viewName === 'analytics') {
+            loadAnalytics();
+        } else if (viewName === 'exportar') {
+            // Vista de exportar no requiere carga inicial
+        } else if (viewName === 'reportes') {
+            loadReportesData();
+        } else if (viewName === 'alertas') {
+            loadAlertasData();
+        }
+    }
 }
 
 // ==========================================

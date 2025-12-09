@@ -39,35 +39,35 @@
         <!-- Sidebar -->
         <aside class="w-64 bg-white shadow-lg min-h-screen">
             <nav class="p-4 space-y-2">
-                <a href="#dashboard" class="sidebar-link active flex items-center px-4 py-3 rounded-lg bg-blue-50 text-blue-600 font-semibold">
+                <a onclick="showView('dashboard')" class="sidebar-link bg-blue-100 text-blue-700 flex items-center px-4 py-3 rounded-lg font-semibold cursor-pointer transition-colors hover:bg-blue-50">
                     <i class="fas fa-chart-line mr-3"></i>Dashboard
                 </a>
                 
                 <!-- Solo para Personal Médico -->
-                <a href="#pacientes" data-role="medico" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                <a onclick="showView('pacientes')" data-role="medico" data-color="purple" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-purple-50 cursor-pointer transition-colors">
                     <i class="fas fa-users mr-3"></i>Gestionar Pacientes
                 </a>
-                <a href="#registrar" data-role="medico" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                <a onclick="showView('registrar')" data-role="medico" data-color="green" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-green-50 cursor-pointer transition-colors">
                     <i class="fas fa-plus-circle mr-3"></i>Registrar Paciente
                 </a>
                 
                 <!-- Solo para Investigación -->
-                <a href="#analytics" data-role="investigador" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                <a onclick="showView('analytics')" data-role="investigador" data-color="indigo" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-indigo-50 cursor-pointer transition-colors">
                     <i class="fas fa-chart-bar mr-3"></i>Análisis Avanzado
                 </a>
-                <a href="#exportar" data-role="investigador" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                <a onclick="showView('exportar')" data-role="investigador" data-color="teal" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-teal-50 cursor-pointer transition-colors">
                     <i class="fas fa-download mr-3"></i>Exportar Datos
                 </a>
                 
                 <!-- Solo para Institución -->
-                <a href="#reportes" data-role="institucion" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                <a onclick="showView('reportes')" data-role="institucion" data-color="orange" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-orange-50 cursor-pointer transition-colors">
                     <i class="fas fa-file-pdf mr-3"></i>Reportes
                 </a>
-                <a href="#alertas" data-role="institucion" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                <a onclick="showView('alertas')" data-role="institucion" data-color="red" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-red-50 cursor-pointer transition-colors">
                     <i class="fas fa-exclamation-triangle mr-3"></i>Alertas de Riesgo
                 </a>
                 
-                <a href="about.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100">
+                <a href="about.html" class="sidebar-link flex items-center px-4 py-3 rounded-lg text-gray-700 hover:bg-gray-100 transition-colors">
                     <i class="fas fa-info-circle mr-3"></i>Acerca de
                 </a>
             </nav>
@@ -78,54 +78,75 @@
             
             <!-- Dashboard View -->
             <section id="view-dashboard">
-                <h1 class="text-3xl font-bold text-gray-900 mb-8">Dashboard - Análisis Nutricional</h1>
+                <div class="flex items-center justify-between mb-8">
+                    <h1 class="text-3xl font-bold text-gray-900 flex items-center">
+                        <i class="fas fa-chart-line text-blue-600 mr-3"></i>
+                        Dashboard - Análisis Nutricional
+                    </h1>
+                    <button 
+                        onclick="loadDashboardData()" 
+                        class="bg-blue-600 hover:bg-blue-700 text-white px-4 py-2 rounded-lg font-semibold transition-colors shadow-lg hover:shadow-xl flex items-center"
+                        title="Actualizar datos"
+                    >
+                        <i class="fas fa-sync-alt mr-2"></i>
+                        Actualizar
+                    </button>
+                </div>
                 
                 <!-- Stats Cards -->
                 <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
-                    <div class="bg-white rounded-xl shadow p-6">
+                    <!-- Total Pacientes - AZUL -->
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-all duration-300">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-gray-500 text-sm font-medium">Total Pacientes</p>
-                                <p class="text-3xl font-bold text-gray-900" id="stat-total">0</p>
+                                <p class="text-blue-100 text-sm font-medium mb-1">Total Pacientes</p>
+                                <p class="text-4xl font-bold" id="stat-total">0</p>
+                                <p class="text-blue-100 text-xs mt-1">Registrados en el sistema</p>
                             </div>
-                            <div class="bg-blue-100 p-3 rounded-full">
-                                <i class="fas fa-users text-2xl text-blue-600"></i>
+                            <div class="bg-white bg-opacity-20 p-4 rounded-full">
+                                <i class="fas fa-users text-3xl"></i>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="bg-white rounded-xl shadow p-6">
+                    <!-- Riesgo Alto - ROJO -->
+                    <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-all duration-300">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-gray-500 text-sm font-medium">Riesgo Alto</p>
-                                <p class="text-3xl font-bold text-red-600" id="stat-alto">0</p>
+                                <p class="text-red-100 text-sm font-medium mb-1">Riesgo Alto</p>
+                                <p class="text-4xl font-bold" id="stat-alto">0</p>
+                                <p class="text-red-100 text-xs mt-1">Requieren atención urgente</p>
                             </div>
-                            <div class="bg-red-100 p-3 rounded-full">
-                                <i class="fas fa-exclamation-triangle text-2xl text-red-600"></i>
+                            <div class="bg-white bg-opacity-20 p-4 rounded-full">
+                                <i class="fas fa-exclamation-triangle text-3xl"></i>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="bg-white rounded-xl shadow p-6">
+                    <!-- Riesgo Medio - NARANJA -->
+                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-all duration-300">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-gray-500 text-sm font-medium">Riesgo Medio</p>
-                                <p class="text-3xl font-bold text-yellow-600" id="stat-medio">0</p>
+                                <p class="text-orange-100 text-sm font-medium mb-1">Riesgo Medio</p>
+                                <p class="text-4xl font-bold" id="stat-medio">0</p>
+                                <p class="text-orange-100 text-xs mt-1">En seguimiento continuo</p>
                             </div>
-                            <div class="bg-yellow-100 p-3 rounded-full">
-                                <i class="fas fa-exclamation-circle text-2xl text-yellow-600"></i>
+                            <div class="bg-white bg-opacity-20 p-4 rounded-full">
+                                <i class="fas fa-exclamation-circle text-3xl"></i>
                             </div>
                         </div>
                     </div>
                     
-                    <div class="bg-white rounded-xl shadow p-6">
+                    <!-- Riesgo Bajo - VERDE -->
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white transform hover:scale-105 transition-all duration-300">
                         <div class="flex items-center justify-between">
                             <div>
-                                <p class="text-gray-500 text-sm font-medium">Riesgo Bajo</p>
-                                <p class="text-3xl font-bold text-green-600" id="stat-bajo">0</p>
+                                <p class="text-green-100 text-sm font-medium mb-1">Riesgo Bajo</p>
+                                <p class="text-4xl font-bold" id="stat-bajo">0</p>
+                                <p class="text-green-100 text-xs mt-1">Estado nutricional normal</p>
                             </div>
-                            <div class="bg-green-100 p-3 rounded-full">
-                                <i class="fas fa-check-circle text-2xl text-green-600"></i>
+                            <div class="bg-white bg-opacity-20 p-4 rounded-full">
+                                <i class="fas fa-check-circle text-3xl"></i>
                             </div>
                         </div>
                     </div>
@@ -133,34 +154,65 @@
 
                 <!-- Charts -->
                 <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-8">
-                    <div class="bg-white rounded-xl shadow p-6">
-                        <h3 class="text-lg font-bold text-gray-900 mb-4">Distribución de Riesgo</h3>
-                        <canvas id="chart-riesgo"></canvas>
+                    <!-- Gráfica de Distribución -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                                <i class="fas fa-chart-pie text-purple-600 mr-2"></i>
+                                Distribución de Riesgo
+                            </h3>
+                        </div>
+                        <div class="h-64 flex items-center justify-center">
+                            <canvas id="chart-riesgo"></canvas>
+                        </div>
                     </div>
-                    <div class="bg-white rounded-xl shadow p-6">
-                        <h3 class="text-lg font-bold text-gray-900 mb-4">Tendencia Mensual</h3>
-                        <canvas id="chart-tendencia"></canvas>
+                    
+                    <!-- Gráfica de Tendencia -->
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-4">
+                            <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                                <i class="fas fa-chart-area text-indigo-600 mr-2"></i>
+                                Tendencia Mensual
+                            </h3>
+                        </div>
+                        <div class="h-64">
+                            <canvas id="chart-tendencia"></canvas>
+                        </div>
                     </div>
                 </div>
 
                 <!-- Tabla Recientes -->
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Casos Recientes</h3>
+                <div class="bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                            <i class="fas fa-clock text-blue-600 mr-2"></i>
+                            Pacientes Recientes
+                        </h3>
+                        <button 
+                            onclick="showView('pacientes')" 
+                            class="text-sm text-blue-600 hover:text-blue-800 font-semibold transition-colors"
+                        >
+                            Ver todos <i class="fas fa-arrow-right ml-1"></i>
+                        </button>
+                    </div>
                     <div class="overflow-x-auto">
                         <table class="w-full">
-                            <thead class="bg-gray-50">
+                            <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                                 <tr>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">ID</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Edad</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Peso</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Riesgo</th>
-                                    <th class="px-4 py-3 text-left text-xs font-medium text-gray-500 uppercase">Acción</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Paciente</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Registro</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Edad</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Peso</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Talla</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Riesgo</th>
+                                    <th class="px-4 py-3 text-left text-xs font-semibold text-gray-700 uppercase tracking-wider">Acción</th>
                                 </tr>
                             </thead>
                             <tbody id="tabla-recientes" class="divide-y divide-gray-200">
                                 <tr>
-                                    <td colspan="6" class="px-4 py-8 text-center text-gray-500">Cargando datos...</td>
+                                    <td colspan="7" class="px-4 py-8 text-center text-gray-500">
+                                        <i class="fas fa-spinner fa-spin mr-2"></i>Cargando datos...
+                                    </td>
                                 </tr>
                             </tbody>
                         </table>

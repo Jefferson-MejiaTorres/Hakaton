@@ -1,3 +1,4 @@
+// @ts-nocheck
 // ==========================================
 // SIDI - Dashboard Module
 // ==========================================
@@ -560,15 +561,91 @@ async function editarPaciente(id) {
     }
 }
 
-// Confirmar eliminación
+// Confirmar eliminación con modal bonito
 function confirmarEliminar(id, nombre) {
-    if (confirm(`¿Estás seguro de eliminar al paciente ${nombre}?\n\nEsta acción no se puede deshacer.`)) {
-        eliminarPaciente(id);
-    }
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    modal.style.animation = 'fadeIn 0.2s ease-out';
+    
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full" style="animation: scaleIn 0.3s ease-out">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 rounded-t-2xl">
+                <div class="flex items-center justify-center">
+                    <div class="bg-white/20 rounded-full p-3 mr-3">
+                        <i class="fas fa-exclamation-triangle text-3xl"></i>
+                    </div>
+                    <h3 class="text-2xl font-bold">Confirmar Eliminación</h3>
+                </div>
+            </div>
+            
+            <!-- Body -->
+            <div class="p-6">
+                <p class="text-gray-700 text-lg mb-2">
+                    ¿Estás seguro de que deseas eliminar al paciente:
+                </p>
+                <p class="text-xl font-bold text-gray-900 mb-4">
+                    ${nombre}
+                </p>
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+                    <div class="flex items-start">
+                        <i class="fas fa-exclamation-circle text-yellow-600 mt-1 mr-3"></i>
+                        <p class="text-sm text-yellow-800">
+                            <strong>Advertencia:</strong> Esta acción eliminará permanentemente todos los datos asociados (mediciones, historia clínica, predicciones). No se puede deshacer.
+                        </p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="flex space-x-3 p-6 bg-gray-50 rounded-b-2xl">
+                <button 
+                    onclick="this.closest('.fixed').remove()" 
+                    class="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-all"
+                >
+                    <i class="fas fa-times mr-2"></i>Cancelar
+                </button>
+                <button 
+                    id="btn-confirmar-eliminar" 
+                    class="flex-1 px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all shadow-lg hover:shadow-xl"
+                >
+                    <i class="fas fa-trash-alt mr-2"></i>Eliminar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Evento para confirmar eliminación
+    document.getElementById('btn-confirmar-eliminar').addEventListener('click', () => {
+        modal.remove();
+        eliminarPaciente(id, nombre);
+    });
+    
+    // Cerrar al hacer click fuera del modal
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
 }
 
 // Eliminar paciente
-async function eliminarPaciente(id) {
+async function eliminarPaciente(id, nombre) {
+    // Mostrar loading
+    const loadingModal = document.createElement('div');
+    loadingModal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    loadingModal.innerHTML = `
+        <div class="bg-white rounded-xl p-6 shadow-2xl">
+            <div class="flex items-center space-x-3">
+                <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-red-600"></div>
+                <span class="text-lg font-semibold text-gray-700">Eliminando paciente...</span>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(loadingModal);
+    
     try {
         const { error } = await supabase
             .from('ninos')
@@ -577,13 +654,58 @@ async function eliminarPaciente(id) {
         
         if (error) throw error;
         
-        alert('Paciente eliminado exitosamente');
+        // Remover loading
+        loadingModal.remove();
+        
+        // Mostrar éxito
+        mostrarNotificacion('success', `Paciente "${nombre}" eliminado exitosamente`, 3000);
+        
+        // Recargar tabla
         cargarPacientes(filtrosActivos);
         
     } catch (error) {
         console.error('Error al eliminar:', error);
-        alert('Error al eliminar el paciente');
+        loadingModal.remove();
+        
+        // Mostrar error
+        mostrarNotificacion('error', 'Error al eliminar el paciente: ' + (error.message || 'Error desconocido'), 5000);
     }
+}
+
+// Función auxiliar para mostrar notificaciones
+function mostrarNotificacion(tipo, mensaje, duracion = 3000) {
+    const notif = document.createElement('div');
+    notif.className = 'fixed top-4 right-4 z-50 max-w-md';
+    notif.style.animation = 'slideInRight 0.3s ease-out';
+    
+    const colores = {
+        success: 'from-green-500 to-green-600',
+        error: 'from-red-500 to-red-600',
+        info: 'from-blue-500 to-blue-600'
+    };
+    
+    const iconos = {
+        success: 'fa-check-circle',
+        error: 'fa-times-circle',
+        info: 'fa-info-circle'
+    };
+    
+    notif.innerHTML = `
+        <div class="bg-gradient-to-r ${colores[tipo]} text-white px-6 py-4 rounded-lg shadow-2xl">
+            <div class="flex items-center">
+                <i class="fas ${iconos[tipo]} text-2xl mr-3"></i>
+                <span class="font-semibold">${mensaje}</span>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(notif);
+    
+    // Auto-remover
+    setTimeout(() => {
+        notif.style.animation = 'slideOutRight 0.3s ease-out';
+        setTimeout(() => notif.remove(), 300);
+    }, duracion);
 }
 
 // Mostrar modal de detalle

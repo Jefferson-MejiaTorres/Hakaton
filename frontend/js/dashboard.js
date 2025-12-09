@@ -320,21 +320,244 @@ function setupLogout() {
 }
 
 // ==========================================
-// Form Paciente Handler
+// REGISTRAR PACIENTE - Funcionalidad Completa
 // ==========================================
-const formPaciente = document.getElementById('form-paciente');
-if (formPaciente) {
-    formPaciente.addEventListener('submit', async (e) => {
+const formRegistrarPaciente = document.getElementById('form-registrar-paciente');
+if (formRegistrarPaciente) {
+    formRegistrarPaciente.addEventListener('submit', async (e) => {
         e.preventDefault();
         
-        // Aquí conectar con Supabase para guardar paciente
-        alert('Funcionalidad de guardado en desarrollo. Conectar con Supabase.');
+        // Mostrar loading
+        const loadingModal = mostrarModalLoading('Registrando paciente...');
         
-        // Simulación
-        console.log('Guardando paciente...');
-        
-        // Reset form
-        formPaciente.reset();
+        try {
+            // 1. Recopilar datos del formulario
+            const formData = new FormData(formRegistrarPaciente);
+            
+            const datosNino = {
+                nombre: formData.get('nombre'),
+                apellido: formData.get('apellido'),
+                fecha_nacimiento: formData.get('fecha_nacimiento'),
+                sexo: formData.get('sexo'),
+                documento_identidad: formData.get('documento_identidad')
+            };
+            
+            // 2. Insertar niño en la tabla 'ninos'
+            const { data: ninoCreado, error: errorNino } = await supabase
+                .from('ninos')
+                .insert([datosNino])
+                .select()
+                .single();
+            
+            if (errorNino) throw errorNino;
+            
+            const ninoId = ninoCreado.id;
+            
+            // 3. Calcular IMC
+            const peso = parseFloat(formData.get('peso'));
+            const talla = parseFloat(formData.get('talla'));
+            const imc = (peso / Math.pow(talla / 100, 2)).toFixed(2);
+            
+            // 4. Insertar medición antropométrica
+            const datosMedicion = {
+                nino_id: ninoId,
+                fecha_medicion: new Date().toISOString().split('T')[0],
+                peso: peso,
+                talla: talla,
+                perimetro_braquial: formData.get('perimetro_braquial') ? parseFloat(formData.get('perimetro_braquial')) : null,
+                peso_al_nacer: formData.get('peso_al_nacer') ? parseInt(formData.get('peso_al_nacer')) : null,
+                imc: parseFloat(imc)
+            };
+            
+            const { error: errorMedicion } = await supabase
+                .from('mediciones_antropometricas')
+                .insert([datosMedicion]);
+            
+            if (errorMedicion) throw errorMedicion;
+            
+            // 5. Insertar datos sociodemográficos (si hay)
+            const zona = formData.get('zona_residencia');
+            const nivelEducativo = formData.get('nivel_educativo_madre');
+            const ingreso = formData.get('ingreso_familiar_mensual');
+            
+            if (zona || nivelEducativo || ingreso) {
+                const datosSociodem = {
+                    nino_id: ninoId,
+                    zona_residencia: zona || null,
+                    nivel_educativo_madre: nivelEducativo || null,
+                    ingreso_familiar_mensual: ingreso ? parseFloat(ingreso) : null
+                };
+                
+                const { error: errorSociodem } = await supabase
+                    .from('datos_sociodemograficos')
+                    .insert([datosSociodem]);
+                
+                if (errorSociodem) throw errorSociodem;
+            }
+            
+            // Cerrar loading
+            loadingModal.remove();
+            
+            // Mostrar modal de éxito
+            mostrarModalExito(ninoCreado, imc);
+            
+            // Limpiar formulario
+            formRegistrarPaciente.reset();
+            
+        } catch (error) {
+            console.error('Error al registrar paciente:', error);
+            loadingModal.remove();
+            
+            // Mostrar modal de error
+            mostrarModalError(error.message || 'Error desconocido al registrar el paciente');
+        }
+    });
+}
+
+// Modal de loading
+function mostrarModalLoading(mensaje) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50';
+    modal.innerHTML = `
+        <div class="bg-white rounded-xl p-8 shadow-2xl">
+            <div class="flex items-center space-x-4">
+                <div class="animate-spin rounded-full h-12 w-12 border-b-4 border-blue-600"></div>
+                <span class="text-xl font-semibold text-gray-700">${mensaje}</span>
+            </div>
+        </div>
+    `;
+    document.body.appendChild(modal);
+    return modal;
+}
+
+// Modal de éxito
+function mostrarModalExito(paciente, imc) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    modal.style.animation = 'fadeIn 0.3s ease-out';
+    
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full" style="animation: scaleIn 0.3s ease-out">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-green-500 to-blue-600 text-white p-6 rounded-t-2xl">
+                <div class="flex items-center justify-center">
+                    <div class="bg-white/20 rounded-full p-4 mr-3">
+                        <i class="fas fa-check-circle text-4xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold">¡Paciente Registrado!</h3>
+                        <p class="text-green-100">El registro se completó exitosamente</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Body -->
+            <div class="p-6">
+                <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded mb-4">
+                    <h4 class="font-bold text-gray-900 mb-2">Datos del Paciente:</h4>
+                    <ul class="space-y-1 text-gray-700">
+                        <li><strong>Nombre:</strong> ${paciente.nombre} ${paciente.apellido}</li>
+                        <li><strong>Documento:</strong> ${paciente.documento_identidad}</li>
+                        <li><strong>Fecha Nacimiento:</strong> ${new Date(paciente.fecha_nacimiento).toLocaleDateString('es-ES')}</li>
+                        <li><strong>Sexo:</strong> ${paciente.sexo === 'M' ? 'Masculino' : 'Femenino'}</li>
+                        <li><strong>IMC Calculado:</strong> ${imc}</li>
+                    </ul>
+                </div>
+                
+                <div class="bg-green-50 border-l-4 border-green-600 p-4 rounded">
+                    <p class="text-sm text-green-800">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        El paciente ha sido registrado y está disponible en el sistema.
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="flex space-x-3 p-6 bg-gray-50 rounded-b-2xl">
+                <button 
+                    onclick="this.closest('.fixed').remove()" 
+                    class="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-all"
+                >
+                    <i class="fas fa-plus mr-2"></i>Registrar Otro
+                </button>
+                <button 
+                    onclick="this.closest('.fixed').remove(); document.querySelector('[href=\\\'#pacientes\\\']').click();" 
+                    class="flex-1 px-6 py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all"
+                >
+                    <i class="fas fa-users mr-2"></i>Ver Pacientes
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Cerrar al hacer click fuera
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
+// Modal de error
+function mostrarModalError(mensaje) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    modal.style.animation = 'fadeIn 0.3s ease-out';
+    
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-2xl max-w-md w-full" style="animation: scaleIn 0.3s ease-out">
+            <!-- Header -->
+            <div class="bg-gradient-to-r from-red-600 to-red-700 text-white p-6 rounded-t-2xl">
+                <div class="flex items-center justify-center">
+                    <div class="bg-white/20 rounded-full p-4 mr-3">
+                        <i class="fas fa-times-circle text-4xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold">Error al Registrar</h3>
+                        <p class="text-red-100">No se pudo completar el registro</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Body -->
+            <div class="p-6">
+                <div class="bg-red-50 border-l-4 border-red-600 p-4 rounded mb-4">
+                    <h4 class="font-bold text-gray-900 mb-2">Detalles del Error:</h4>
+                    <p class="text-gray-700">${mensaje}</p>
+                </div>
+                
+                <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+                    <p class="text-sm text-yellow-800">
+                        <i class="fas fa-lightbulb mr-2"></i>
+                        <strong>Sugerencias:</strong><br>
+                        • Verifica que todos los campos requeridos estén completos<br>
+                        • El documento de identidad debe ser único<br>
+                        • Verifica los permisos de Supabase
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="p-6 bg-gray-50 rounded-b-2xl">
+                <button 
+                    onclick="this.closest('.fixed').remove()" 
+                    class="w-full px-6 py-3 bg-red-600 text-white rounded-lg font-semibold hover:bg-red-700 transition-all"
+                >
+                    <i class="fas fa-redo mr-2"></i>Reintentar
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Cerrar al hacer click fuera
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
     });
 }
 

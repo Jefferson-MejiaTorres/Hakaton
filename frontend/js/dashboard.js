@@ -508,7 +508,9 @@ async function loadRecentCases() {
 // ==========================================
 // Ver detalle desde dashboard
 // ==========================================
-function verDetallePaciente(ninoId) {
+// Ver detalle desde dashboard - Redirección
+// ==========================================
+function verDetallePacienteDesdeOtraVista(ninoId) {
     // Cambiar a vista de pacientes
     document.querySelectorAll('main > section').forEach(section => section.classList.add('hidden'));
     document.getElementById('view-pacientes').classList.remove('hidden');
@@ -523,10 +525,9 @@ function verDetallePaciente(ninoId) {
     // Cargar pacientes y mostrar el detalle
     cargarPacientes().then(() => {
         // Buscar y abrir el modal del paciente
-        const btnVer = document.querySelector(`button[onclick="verDetallesPaciente(${ninoId})"]`);
-        if (btnVer) {
-            btnVer.click();
-        }
+        setTimeout(() => {
+            verDetallePaciente(ninoId);
+        }, 500);
     });
 }
 
@@ -624,9 +625,9 @@ window.showView = function(viewName) {
         } else if (viewName === 'exportar') {
             // Vista de exportar no requiere carga inicial
         } else if (viewName === 'reportes') {
-            loadReportesData();
+            cargarReportes();
         } else if (viewName === 'alertas') {
-            loadAlertasData();
+            cargarAlertas();
         }
     }
 }
@@ -677,6 +678,10 @@ function setupNavigation() {
                     cargarAnalisisAvanzado();
                 } else if (href === '#exportar') {
                     cargarExportarDatos();
+                } else if (href === '#reportes') {
+                    cargarReportes();
+                } else if (href === '#alertas') {
+                    cargarAlertas();
                 }
             }
             
@@ -3573,3 +3578,1185 @@ window.seleccionarTodosCampos = seleccionarTodosCampos;
 window.ejecutarExportacion = ejecutarExportacion;
 
 console.log('✅ Módulo de exportación cargado correctamente');
+
+// ==========================================
+// === MÓDULO DE GENERACIÓN DE REPORTES PDF ===
+// ==========================================
+
+// Variable global para datos de reportes
+let datosReporte = [];
+
+/**
+ * Cargar vista de reportes
+ */
+async function cargarReportes() {
+    console.log('📄 Cargando módulo de reportes...');
+    
+    // Configurar fechas por defecto (último mes)
+    const fechaFin = new Date();
+    const fechaInicio = new Date();
+    fechaInicio.setMonth(fechaInicio.getMonth() - 1);
+    
+    document.getElementById('reporte-fecha-inicio').value = fechaInicio.toISOString().split('T')[0];
+    document.getElementById('reporte-fecha-fin').value = fechaFin.toISOString().split('T')[0];
+    
+    // Cargar vista previa
+    await actualizarVistaPrevia();
+}
+
+/**
+ * Actualizar vista previa de estadísticas
+ */
+async function actualizarVistaPrevia() {
+    console.log('🔄 Actualizando vista previa...');
+    
+    try {
+        const fechaInicio = document.getElementById('reporte-fecha-inicio').value;
+        const fechaFin = document.getElementById('reporte-fecha-fin').value;
+        const zona = document.getElementById('reporte-zona').value;
+        
+        // Obtener datos con el mismo approach de 4 pasos
+        const { data: ninos } = await supabase.from('ninos').select('*');
+        
+        if (!ninos || ninos.length === 0) {
+            actualizarPreviewUI(0, 0, 0, 0);
+            return;
+        }
+        
+        const ninosIds = ninos.map(n => n.id);
+        
+        // Obtener datos relacionados
+        let queryMediciones = supabase.from('mediciones_antropometricas').select('*').in('nino_id', ninosIds);
+        if (fechaInicio) queryMediciones = queryMediciones.gte('fecha_medicion', fechaInicio);
+        if (fechaFin) queryMediciones = queryMediciones.lte('fecha_medicion', fechaFin);
+        
+        const { data: mediciones } = await queryMediciones;
+        
+        let querySociodem = supabase.from('datos_sociodemograficos').select('*').in('nino_id', ninosIds);
+        if (zona) querySociodem = querySociodem.eq('zona', zona);
+        
+        const { data: sociodem } = await querySociodem;
+        const { data: predicciones } = await supabase.from('predicciones').select('*').in('nino_id', ninosIds);
+        
+        // Combinar datos
+        datosReporte = ninos.map(nino => {
+            const medicion = mediciones?.find(m => m.nino_id === nino.id);
+            const datos_socio = sociodem?.find(s => s.nino_id === nino.id);
+            const prediccion = predicciones?.find(p => p.nino_id === nino.id);
+            
+            return {
+                nino,
+                medicion: medicion || null,
+                datos_socio: datos_socio || null,
+                prediccion: prediccion || null
+            };
+        }).filter(item => {
+            if (zona && (!item.datos_socio || item.datos_socio.zona !== zona)) return false;
+            return true;
+        });
+        
+        // Calcular estadísticas
+        const total = datosReporte.length;
+        const alto = datosReporte.filter(item => item.prediccion?.nivel_riesgo === 'alto').length;
+        const moderado = datosReporte.filter(item => item.prediccion?.nivel_riesgo === 'moderado').length;
+        const bajo = datosReporte.filter(item => item.prediccion?.nivel_riesgo === 'bajo').length;
+        
+        actualizarPreviewUI(total, alto, moderado, bajo);
+        
+        console.log(`✅ Vista previa actualizada: ${total} pacientes`);
+        
+    } catch (error) {
+        console.error('❌ Error al actualizar vista previa:', error);
+        actualizarPreviewUI(0, 0, 0, 0);
+    }
+}
+
+/**
+ * Actualizar UI de vista previa
+ */
+function actualizarPreviewUI(total, alto, moderado, bajo) {
+    document.getElementById('preview-total').textContent = total;
+    document.getElementById('preview-alto').textContent = alto;
+    document.getElementById('preview-moderado').textContent = moderado;
+    document.getElementById('preview-bajo').textContent = bajo;
+}
+
+/**
+ * Generar reporte según tipo
+ */
+async function generarReporte(tipo) {
+    console.log(`📄 Generando reporte: ${tipo}`);
+    
+    if (datosReporte.length === 0) {
+        alert('No hay datos para generar el reporte. Por favor, ajusta los filtros.');
+        return;
+    }
+    
+    // Mostrar estado de carga
+    const statusDiv = document.getElementById('reporte-status');
+    statusDiv.classList.remove('hidden');
+    
+    try {
+        let contenidoHTML = '';
+        
+        switch (tipo) {
+            case 'ejecutivo':
+                contenidoHTML = generarReporteEjecutivo();
+                break;
+            case 'zona':
+                contenidoHTML = generarReporteZona();
+                break;
+            case 'alto-riesgo':
+                contenidoHTML = generarReporteAltoRiesgo();
+                break;
+            case 'personalizado':
+                contenidoHTML = generarReportePersonalizado();
+                break;
+            default:
+                throw new Error('Tipo de reporte no válido');
+        }
+        
+        // Convertir HTML a PDF y descargar
+        await descargarReportePDF(contenidoHTML, tipo);
+        
+        // Ocultar estado
+        setTimeout(() => {
+            statusDiv.classList.add('hidden');
+        }, 1000);
+        
+    } catch (error) {
+        console.error('❌ Error al generar reporte:', error);
+        alert('Error al generar el reporte. Por favor, intenta de nuevo.');
+        statusDiv.classList.add('hidden');
+    }
+}
+
+/**
+ * Generar contenido HTML para Reporte Ejecutivo
+ */
+function generarReporteEjecutivo() {
+    const fechaInicio = document.getElementById('reporte-fecha-inicio').value;
+    const fechaFin = document.getElementById('reporte-fecha-fin').value;
+    const zona = document.getElementById('reporte-zona').value;
+    
+    // Calcular estadísticas
+    const total = datosReporte.length;
+    const alto = datosReporte.filter(i => i.prediccion?.nivel_riesgo === 'alto').length;
+    const moderado = datosReporte.filter(i => i.prediccion?.nivel_riesgo === 'moderado').length;
+    const bajo = datosReporte.filter(i => i.prediccion?.nivel_riesgo === 'bajo').length;
+    const sinEvaluar = total - alto - moderado - bajo;
+    
+    // Distribución por zona
+    const urbana = datosReporte.filter(i => i.datos_socio?.zona === 'Urbana').length;
+    const rural = datosReporte.filter(i => i.datos_socio?.zona === 'Rural').length;
+    
+    // Distribución por sexo
+    const masculino = datosReporte.filter(i => i.nino.sexo === 'M').length;
+    const femenino = datosReporte.filter(i => i.nino.sexo === 'F').length;
+    
+    // Promedios
+    const medicionesConDatos = datosReporte.filter(i => i.medicion);
+    const pesoPromedio = medicionesConDatos.length > 0 
+        ? (medicionesConDatos.reduce((sum, i) => sum + (parseFloat(i.medicion.peso) || 0), 0) / medicionesConDatos.length).toFixed(1)
+        : 0;
+    const tallaPromedio = medicionesConDatos.length > 0
+        ? (medicionesConDatos.reduce((sum, i) => sum + (parseFloat(i.medicion.talla) || 0), 0) / medicionesConDatos.length).toFixed(1)
+        : 0;
+    
+    const html = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte Ejecutivo - SIDI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            color: #333;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #0066CC;
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            color: #0066CC;
+            margin: 0;
+            font-size: 28px;
+        }
+        .header p {
+            color: #666;
+            margin: 5px 0;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section h2 {
+            color: #0066CC;
+            border-bottom: 2px solid #00A86B;
+            padding-bottom: 10px;
+            margin-bottom: 15px;
+        }
+        .stats-grid {
+            display: grid;
+            grid-template-columns: repeat(2, 1fr);
+            gap: 20px;
+            margin-bottom: 20px;
+        }
+        .stat-box {
+            border: 2px solid #e0e0e0;
+            border-radius: 8px;
+            padding: 15px;
+            text-align: center;
+        }
+        .stat-box h3 {
+            margin: 0 0 10px 0;
+            color: #666;
+            font-size: 14px;
+            font-weight: normal;
+        }
+        .stat-box .value {
+            font-size: 32px;
+            font-weight: bold;
+            color: #0066CC;
+        }
+        .risk-alto { color: #DC2626; }
+        .risk-moderado { color: #F59E0B; }
+        .risk-bajo { color: #10B981; }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        table th {
+            background-color: #0066CC;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>📊 REPORTE EJECUTIVO</h1>
+        <p><strong>Sistema Inteligente de Detección de Desnutrición Infantil</strong></p>
+        <p>Universidad de Pamplona - Norte de Santander</p>
+        <p>Período: ${new Date(fechaInicio).toLocaleDateString('es-ES')} - ${new Date(fechaFin).toLocaleDateString('es-ES')}</p>
+        ${zona ? `<p>Zona: ${zona}</p>` : ''}
+        <p>Fecha de generación: ${new Date().toLocaleDateString('es-ES')} ${new Date().toLocaleTimeString('es-ES')}</p>
+    </div>
+
+    <div class="section">
+        <h2>Resumen General</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <h3>Total de Pacientes</h3>
+                <div class="value">${total}</div>
+            </div>
+            <div class="stat-box">
+                <h3>Alto Riesgo</h3>
+                <div class="value risk-alto">${alto}</div>
+                <small>${total > 0 ? ((alto/total)*100).toFixed(1) : 0}%</small>
+            </div>
+            <div class="stat-box">
+                <h3>Riesgo Moderado</h3>
+                <div class="value risk-moderado">${moderado}</div>
+                <small>${total > 0 ? ((moderado/total)*100).toFixed(1) : 0}%</small>
+            </div>
+            <div class="stat-box">
+                <h3>Bajo Riesgo</h3>
+                <div class="value risk-bajo">${bajo}</div>
+                <small>${total > 0 ? ((bajo/total)*100).toFixed(1) : 0}%</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Distribución Geográfica</h2>
+        <table>
+            <tr>
+                <th>Zona</th>
+                <th>Cantidad</th>
+                <th>Porcentaje</th>
+            </tr>
+            <tr>
+                <td>Zona Urbana</td>
+                <td>${urbana}</td>
+                <td>${total > 0 ? ((urbana/total)*100).toFixed(1) : 0}%</td>
+            </tr>
+            <tr>
+                <td>Zona Rural</td>
+                <td>${rural}</td>
+                <td>${total > 0 ? ((rural/total)*100).toFixed(1) : 0}%</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Distribución por Sexo</h2>
+        <table>
+            <tr>
+                <th>Sexo</th>
+                <th>Cantidad</th>
+                <th>Porcentaje</th>
+            </tr>
+            <tr>
+                <td>Masculino</td>
+                <td>${masculino}</td>
+                <td>${total > 0 ? ((masculino/total)*100).toFixed(1) : 0}%</td>
+            </tr>
+            <tr>
+                <td>Femenino</td>
+                <td>${femenino}</td>
+                <td>${total > 0 ? ((femenino/total)*100).toFixed(1) : 0}%</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Indicadores Antropométricos Promedio</h2>
+        <div class="stats-grid">
+            <div class="stat-box">
+                <h3>Peso Promedio</h3>
+                <div class="value">${pesoPromedio}</div>
+                <small>kg</small>
+            </div>
+            <div class="stat-box">
+                <h3>Talla Promedio</h3>
+                <div class="value">${tallaPromedio}</div>
+                <small>cm</small>
+            </div>
+        </div>
+    </div>
+
+    <div class="section">
+        <h2>Conclusiones y Recomendaciones</h2>
+        <ul>
+            <li>Se identificaron <strong>${alto}</strong> casos de alto riesgo que requieren atención inmediata.</li>
+            <li>El ${total > 0 ? ((alto/total)*100).toFixed(1) : 0}% de los casos evaluados presenta riesgo alto de desnutrición.</li>
+            <li>Se recomienda realizar seguimiento mensual a todos los casos de alto y moderado riesgo.</li>
+            <li>Es necesario fortalecer programas nutricionales en ${rural > urbana ? 'zona rural' : 'zona urbana'}.</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        <p>Este reporte fue generado automáticamente por SIDI</p>
+        <p>© 2025 Universidad de Pamplona - Todos los derechos reservados</p>
+    </div>
+</body>
+</html>
+    `;
+    
+    return html;
+}
+
+/**
+ * Generar contenido HTML para Reporte por Zona
+ */
+function generarReporteZona() {
+    const fechaInicio = document.getElementById('reporte-fecha-inicio').value;
+    const fechaFin = document.getElementById('reporte-fecha-fin').value;
+    
+    // Separar por zona
+    const datosUrbana = datosReporte.filter(i => i.datos_socio?.zona === 'Urbana');
+    const datosRural = datosReporte.filter(i => i.datos_socio?.zona === 'Rural');
+    
+    // Estadísticas por zona
+    const statsUrbana = calcularEstadisticasZona(datosUrbana);
+    const statsRural = calcularEstadisticasZona(datosRural);
+    
+    const html = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Reporte por Zona - SIDI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            color: #333;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #0066CC;
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            color: #0066CC;
+            margin: 0;
+            font-size: 28px;
+        }
+        .section {
+            margin-bottom: 30px;
+        }
+        .section h2 {
+            color: #0066CC;
+            border-bottom: 2px solid #00A86B;
+            padding-bottom: 10px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+        }
+        table th {
+            background-color: #0066CC;
+            color: white;
+            padding: 12px;
+            text-align: left;
+        }
+        table td {
+            border: 1px solid #ddd;
+            padding: 10px;
+        }
+        .zona-urbana { background-color: #EFF6FF; }
+        .zona-rural { background-color: #F0FDF4; }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>🗺️ REPORTE DE ANÁLISIS POR ZONA</h1>
+        <p><strong>Sistema Inteligente de Detección de Desnutrición Infantil</strong></p>
+        <p>Período: ${new Date(fechaInicio).toLocaleDateString('es-ES')} - ${new Date(fechaFin).toLocaleDateString('es-ES')}</p>
+        <p>Fecha de generación: ${new Date().toLocaleString('es-ES')}</p>
+    </div>
+
+    <div class="section">
+        <h2>Comparativa General</h2>
+        <table>
+            <tr>
+                <th>Indicador</th>
+                <th class="zona-urbana">Zona Urbana</th>
+                <th class="zona-rural">Zona Rural</th>
+            </tr>
+            <tr>
+                <td><strong>Total Pacientes</strong></td>
+                <td class="zona-urbana">${statsUrbana.total}</td>
+                <td class="zona-rural">${statsRural.total}</td>
+            </tr>
+            <tr>
+                <td>Alto Riesgo</td>
+                <td class="zona-urbana">${statsUrbana.alto} (${statsUrbana.porcentajeAlto}%)</td>
+                <td class="zona-rural">${statsRural.alto} (${statsRural.porcentajeAlto}%)</td>
+            </tr>
+            <tr>
+                <td>Riesgo Moderado</td>
+                <td class="zona-urbana">${statsUrbana.moderado} (${statsUrbana.porcentajeModerado}%)</td>
+                <td class="zona-rural">${statsRural.moderado} (${statsRural.porcentajeModerado}%)</td>
+            </tr>
+            <tr>
+                <td>Bajo Riesgo</td>
+                <td class="zona-urbana">${statsUrbana.bajo} (${statsUrbana.porcentajeBajo}%)</td>
+                <td class="zona-rural">${statsRural.bajo} (${statsRural.porcentajeBajo}%)</td>
+            </tr>
+            <tr>
+                <td>Peso Promedio (kg)</td>
+                <td class="zona-urbana">${statsUrbana.pesoPromedio}</td>
+                <td class="zona-rural">${statsRural.pesoPromedio}</td>
+            </tr>
+            <tr>
+                <td>Talla Promedio (cm)</td>
+                <td class="zona-urbana">${statsUrbana.tallaPromedio}</td>
+                <td class="zona-rural">${statsRural.tallaPromedio}</td>
+            </tr>
+        </table>
+    </div>
+
+    <div class="section">
+        <h2>Análisis y Recomendaciones</h2>
+        <h3>Zona Urbana</h3>
+        <ul>
+            <li>Total de pacientes evaluados: ${statsUrbana.total}</li>
+            <li>Casos de alto riesgo: ${statsUrbana.alto} (${statsUrbana.porcentajeAlto}%)</li>
+            <li>Se recomienda ${statsUrbana.alto > 0 ? 'fortalecer programas de seguimiento nutricional' : 'mantener los programas actuales'}</li>
+        </ul>
+        
+        <h3>Zona Rural</h3>
+        <ul>
+            <li>Total de pacientes evaluados: ${statsRural.total}</li>
+            <li>Casos de alto riesgo: ${statsRural.alto} (${statsRural.porcentajeAlto}%)</li>
+            <li>Se recomienda ${statsRural.alto > statsUrbana.alto ? 'priorizar intervenciones en esta zona' : 'mantener vigilancia continua'}</li>
+        </ul>
+    </div>
+
+    <div class="footer">
+        <p>Este reporte fue generado automáticamente por SIDI</p>
+        <p>© 2025 Universidad de Pamplona</p>
+    </div>
+</body>
+</html>
+    `;
+    
+    return html;
+}
+
+/**
+ * Calcular estadísticas para una zona específica
+ */
+function calcularEstadisticasZona(datos) {
+    const total = datos.length;
+    const alto = datos.filter(i => i.prediccion?.nivel_riesgo === 'alto').length;
+    const moderado = datos.filter(i => i.prediccion?.nivel_riesgo === 'moderado').length;
+    const bajo = datos.filter(i => i.prediccion?.nivel_riesgo === 'bajo').length;
+    
+    const medicionesConDatos = datos.filter(i => i.medicion);
+    const pesoPromedio = medicionesConDatos.length > 0 
+        ? (medicionesConDatos.reduce((sum, i) => sum + (parseFloat(i.medicion.peso) || 0), 0) / medicionesConDatos.length).toFixed(1)
+        : 0;
+    const tallaPromedio = medicionesConDatos.length > 0
+        ? (medicionesConDatos.reduce((sum, i) => sum + (parseFloat(i.medicion.talla) || 0), 0) / medicionesConDatos.length).toFixed(1)
+        : 0;
+    
+    return {
+        total,
+        alto,
+        moderado,
+        bajo,
+        porcentajeAlto: total > 0 ? ((alto/total)*100).toFixed(1) : 0,
+        porcentajeModerado: total > 0 ? ((moderado/total)*100).toFixed(1) : 0,
+        porcentajeBajo: total > 0 ? ((bajo/total)*100).toFixed(1) : 0,
+        pesoPromedio,
+        tallaPromedio
+    };
+}
+
+/**
+ * Generar contenido HTML para Reporte de Alto Riesgo
+ */
+function generarReporteAltoRiesgo() {
+    const casosAltoRiesgo = datosReporte.filter(i => i.prediccion?.nivel_riesgo === 'alto');
+    
+    let filasTabla = '';
+    casosAltoRiesgo.forEach((item, index) => {
+        const nombre = `${item.nino.nombre} ${item.nino.apellido}`;
+        const edad = item.nino.fecha_nacimiento ? calcularEdadMeses(item.nino.fecha_nacimiento) : 'N/D';
+        const peso = item.medicion?.peso || 'N/D';
+        const talla = item.medicion?.talla || 'N/D';
+        const zona = item.datos_socio?.zona || 'N/D';
+        const probabilidad = item.prediccion?.probabilidad_riesgo 
+            ? `${(item.prediccion.probabilidad_riesgo * 100).toFixed(1)}%` 
+            : 'N/D';
+        
+        filasTabla += `
+            <tr>
+                <td>${index + 1}</td>
+                <td>${nombre}</td>
+                <td>${edad} meses</td>
+                <td>${item.nino.sexo === 'M' ? 'Masculino' : 'Femenino'}</td>
+                <td>${peso} kg</td>
+                <td>${talla} cm</td>
+                <td>${zona}</td>
+                <td><strong>${probabilidad}</strong></td>
+            </tr>
+        `;
+    });
+    
+    const html = `
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <title>Casos de Alto Riesgo - SIDI</title>
+    <style>
+        body {
+            font-family: Arial, sans-serif;
+            margin: 40px;
+            color: #333;
+            line-height: 1.6;
+        }
+        .header {
+            text-align: center;
+            margin-bottom: 40px;
+            border-bottom: 3px solid #DC2626;
+            padding-bottom: 20px;
+        }
+        .header h1 {
+            color: #DC2626;
+            margin: 0;
+            font-size: 28px;
+        }
+        .alert-box {
+            background-color: #FEE2E2;
+            border-left: 4px solid #DC2626;
+            padding: 15px;
+            margin-bottom: 30px;
+            border-radius: 4px;
+        }
+        table {
+            width: 100%;
+            border-collapse: collapse;
+            margin-top: 15px;
+            font-size: 12px;
+        }
+        table th {
+            background-color: #DC2626;
+            color: white;
+            padding: 10px;
+            text-align: left;
+        }
+        table td {
+            border: 1px solid #ddd;
+            padding: 8px;
+        }
+        table tr:nth-child(even) {
+            background-color: #f9f9f9;
+        }
+        .footer {
+            margin-top: 40px;
+            text-align: center;
+            font-size: 12px;
+            color: #999;
+            border-top: 1px solid #ddd;
+            padding-top: 20px;
+        }
+    </style>
+</head>
+<body>
+    <div class="header">
+        <h1>⚠️ REPORTE DE CASOS DE ALTO RIESGO</h1>
+        <p><strong>Sistema Inteligente de Detección de Desnutrición Infantil</strong></p>
+        <p>Fecha de generación: ${new Date().toLocaleString('es-ES')}</p>
+    </div>
+
+    <div class="alert-box">
+        <strong>⚠️ ATENCIÓN:</strong> Este reporte contiene ${casosAltoRiesgo.length} casos clasificados como ALTO RIESGO que requieren intervención inmediata.
+    </div>
+
+    <table>
+        <thead>
+            <tr>
+                <th>#</th>
+                <th>Paciente</th>
+                <th>Edad</th>
+                <th>Sexo</th>
+                <th>Peso</th>
+                <th>Talla</th>
+                <th>Zona</th>
+                <th>Probabilidad</th>
+            </tr>
+        </thead>
+        <tbody>
+            ${filasTabla || '<tr><td colspan="8" style="text-align:center;">No hay casos de alto riesgo en el período seleccionado</td></tr>'}
+        </tbody>
+    </table>
+
+    <div style="margin-top: 30px;">
+        <h2 style="color: #DC2626;">Plan de Acción Recomendado</h2>
+        <ol>
+            <li><strong>Contacto Inmediato:</strong> Establecer comunicación con las familias en las próximas 24-48 horas.</li>
+            <li><strong>Evaluación Médica:</strong> Programar consulta con nutricionista y pediatra.</li>
+            <li><strong>Seguimiento:</strong> Realizar control semanal durante el primer mes.</li>
+            <li><strong>Apoyo Nutricional:</strong> Gestionar suplementos alimenticios si es necesario.</li>
+            <li><strong>Educación:</strong> Capacitar a las familias sobre alimentación adecuada.</li>
+        </ol>
+    </div>
+
+    <div class="footer">
+        <p>Este reporte fue generado automáticamente por SIDI</p>
+        <p>© 2025 Universidad de Pamplona</p>
+    </div>
+</body>
+</html>
+    `;
+    
+    return html;
+}
+
+/**
+ * Generar reporte personalizado
+ */
+function generarReportePersonalizado() {
+    // Por ahora, generar reporte ejecutivo
+    // TODO: Implementar selección personalizada de campos
+    return generarReporteEjecutivo();
+}
+
+/**
+ * Descargar reporte como PDF (simulado con HTML)
+ */
+async function descargarReportePDF(htmlContent, tipo) {
+    // Crear un blob con el contenido HTML
+    const blob = new Blob([htmlContent], { type: 'text/html;charset=utf-8' });
+    
+    // Crear enlace de descarga
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = `SIDI_Reporte_${tipo}_${obtenerTimestamp()}.html`;
+    
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    
+    URL.revokeObjectURL(url);
+    
+    console.log(`✅ Reporte ${tipo} descargado correctamente`);
+    
+    // Nota: Para generar PDF real, se necesitaría una librería como jsPDF o html2pdf
+    // Por ahora descargamos como HTML que se puede abrir en el navegador e imprimir como PDF
+}
+
+// Exportar funciones al objeto window
+window.cargarReportes = cargarReportes;
+window.actualizarVistaPrevia = actualizarVistaPrevia;
+window.generarReporte = generarReporte;
+
+console.log('✅ Módulo de reportes cargado correctamente');
+
+// ==========================================
+// === MÓDULO DE ALERTAS DE RIESGO ===
+// ==========================================
+
+// Variables globales para alertas
+let alertasData = [];
+let alertaSeleccionada = null;
+
+/**
+ * Cargar vista de alertas
+ */
+async function cargarAlertas() {
+    console.log('🔔 Cargando módulo de alertas...');
+    await cargarTodasLasAlertas();
+}
+
+/**
+ * Cargar todas las alertas de alto riesgo
+ */
+async function cargarTodasLasAlertas() {
+    console.log('📋 Obteniendo alertas de alto riesgo...');
+    
+    try {
+        // Obtener todos los pacientes con predicción de alto riesgo
+        const { data: predicciones, error: errorPredicciones } = await supabase
+            .from('predicciones')
+            .select('*')
+            .eq('nivel_riesgo', 'alto')
+            .order('fecha_prediccion', { ascending: false });
+        
+        if (errorPredicciones) {
+            console.error('❌ Error al obtener predicciones:', errorPredicciones);
+            throw errorPredicciones;
+        }
+        
+        console.log(`✅ Predicciones obtenidas: ${predicciones?.length || 0}`);
+        
+        if (!predicciones || predicciones.length === 0) {
+            console.log('⚠️ No hay predicciones de alto riesgo');
+            alertasData = [];
+            actualizarUIAlertas();
+            return;
+        }
+        
+        const ninosIds = predicciones.map(p => p.nino_id);
+        console.log('👶 IDs de niños:', ninosIds);
+        
+        // Obtener datos de los niños
+        const { data: ninos, error: errorNinos } = await supabase
+            .from('ninos')
+            .select('*')
+            .in('id', ninosIds);
+        
+        if (errorNinos) {
+            console.error('❌ Error al obtener niños:', errorNinos);
+            throw errorNinos;
+        }
+        
+        console.log(`✅ Niños obtenidos: ${ninos?.length || 0}`);
+        
+        // Obtener datos sociodemográficos
+        const { data: sociodem, error: errorSociodem } = await supabase
+            .from('datos_sociodemograficos')
+            .select('*')
+            .in('nino_id', ninosIds);
+        
+        if (errorSociodem) {
+            console.error('❌ Error al obtener datos sociodemográficos:', errorSociodem);
+            // No es crítico, continuamos
+        }
+        
+        console.log(`✅ Datos sociodemográficos obtenidos: ${sociodem?.length || 0}`);
+        
+        // Combinar datos y crear alertas
+        alertasData = predicciones.map(prediccion => {
+            const nino = ninos?.find(n => n.id === prediccion.nino_id);
+            const datos_socio = sociodem?.find(s => s.nino_id === prediccion.nino_id);
+            
+            if (!nino) return null;
+            
+            // Simular estado de alerta (en producción vendría de una tabla de seguimiento)
+            const diasDesdeDeteccion = Math.floor((new Date() - new Date(prediccion.fecha_prediccion)) / (1000 * 60 * 60 * 24));
+            let estado = 'pendiente';
+            
+            if (diasDesdeDeteccion > 7) {
+                estado = Math.random() > 0.5 ? 'seguimiento' : 'resuelto';
+            }
+            
+            return {
+                id: prediccion.id,
+                nino_id: prediccion.nino_id,
+                nombre: `${nino.nombre} ${nino.apellido}`,
+                fecha_nacimiento: nino.fecha_nacimiento,
+                sexo: nino.sexo,
+                zona: datos_socio?.zona_residencia || 'N/D',
+                nivel_riesgo: prediccion.nivel_riesgo,
+                probabilidad: prediccion.probabilidad_riesgo,
+                fecha_deteccion: prediccion.fecha_prediccion,
+                estado: estado,
+                dias_desde_deteccion: diasDesdeDeteccion,
+                tipo_desnutricion: prediccion.tipo_desnutricion
+            };
+        }).filter(a => a !== null);
+        
+        console.log(`✅ ${alertasData.length} alertas procesadas y cargadas`);
+        actualizarUIAlertas();
+        
+    } catch (error) {
+        console.error('❌ Error al cargar alertas:', error);
+        alertasData = [];
+        actualizarUIAlertas();
+    }
+}
+
+/**
+ * Actualizar toda la UI de alertas
+ */
+function actualizarUIAlertas() {
+    console.log('🔄 Actualizando UI de alertas...');
+    actualizarKPIsAlertas();
+    actualizarTablaAlertas(alertasData);
+    verificarCasosCriticos();
+    console.log('✅ UI de alertas actualizada');
+}
+
+/**
+ * Actualizar KPIs de alertas
+ */
+function actualizarKPIsAlertas() {
+    const criticos = alertasData.filter(a => a.dias_desde_deteccion > 2 && a.estado === 'pendiente').length;
+    const pendientes = alertasData.filter(a => a.estado === 'pendiente').length;
+    const seguimiento = alertasData.filter(a => a.estado === 'seguimiento').length;
+    const resueltos = alertasData.filter(a => a.estado === 'resuelto').length;
+    
+    console.log('📊 KPIs:', { criticos, pendientes, seguimiento, resueltos });
+    
+    const elemCriticos = document.getElementById('alertas-criticos');
+    const elemPendientes = document.getElementById('alertas-pendientes');
+    const elemSeguimiento = document.getElementById('alertas-seguimiento');
+    const elemResueltos = document.getElementById('alertas-resueltos');
+    
+    if (elemCriticos) elemCriticos.textContent = criticos;
+    if (elemPendientes) elemPendientes.textContent = pendientes;
+    if (elemSeguimiento) elemSeguimiento.textContent = seguimiento;
+    if (elemResueltos) elemResueltos.textContent = resueltos;
+}
+
+/**
+ * Actualizar tabla de alertas
+ */
+function actualizarTablaAlertas(alertas) {
+    console.log(`📋 Actualizando tabla con ${alertas?.length || 0} alertas`);
+    
+    const tbody = document.getElementById('tabla-alertas');
+    const totalSpan = document.getElementById('total-alertas-mostradas');
+    
+    if (!tbody) {
+        console.error('❌ No se encontró el elemento tabla-alertas');
+        return;
+    }
+    
+    if (!totalSpan) {
+        console.error('❌ No se encontró el elemento total-alertas-mostradas');
+    }
+    
+    if (!alertas || alertas.length === 0) {
+        tbody.innerHTML = `
+            <tr>
+                <td colspan="7" class="px-6 py-12 text-center">
+                    <div class="flex flex-col items-center">
+                        <i class="fas fa-check-circle text-6xl text-green-500 mb-4"></i>
+                        <p class="text-gray-600 text-lg font-semibold">No hay alertas activas</p>
+                        <p class="text-gray-500 text-sm">Todos los casos de alto riesgo están bajo control</p>
+                    </div>
+                </td>
+            </tr>
+        `;
+        if (totalSpan) totalSpan.textContent = '0 alertas';
+        console.log('✅ Tabla actualizada (sin alertas)');
+        return;
+    }
+    
+    if (totalSpan) totalSpan.textContent = `${alertas.length} alerta${alertas.length !== 1 ? 's' : ''}`;
+    
+    tbody.innerHTML = alertas.map(alerta => {
+        const edad = calcularEdadMeses(alerta.fecha_nacimiento);
+        const fechaFormato = new Date(alerta.fecha_deteccion).toLocaleDateString('es-ES');
+        
+        // Badge de estado
+        let estadoBadge = '';
+        if (alerta.estado === 'pendiente') {
+            estadoBadge = '<span class="px-3 py-1 rounded-full text-xs font-bold bg-orange-100 text-orange-800"><i class="fas fa-clock mr-1"></i>Pendiente</span>';
+        } else if (alerta.estado === 'seguimiento') {
+            estadoBadge = '<span class="px-3 py-1 rounded-full text-xs font-bold bg-blue-100 text-blue-800"><i class="fas fa-user-check mr-1"></i>En Seguimiento</span>';
+        } else if (alerta.estado === 'resuelto') {
+            estadoBadge = '<span class="px-3 py-1 rounded-full text-xs font-bold bg-green-100 text-green-800"><i class="fas fa-check-circle mr-1"></i>Resuelto</span>';
+        }
+        
+        // Indicador de urgencia
+        let urgenciaClass = '';
+        if (alerta.dias_desde_deteccion > 2 && alerta.estado === 'pendiente') {
+            urgenciaClass = 'bg-red-50 border-l-4 border-red-500';
+        }
+        
+        return `
+            <tr class="${urgenciaClass} hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4">
+                    <div class="flex items-center">
+                        <div class="flex-shrink-0 h-10 w-10 bg-red-100 rounded-full flex items-center justify-center">
+                            <i class="fas fa-user text-red-600"></i>
+                        </div>
+                        <div class="ml-4">
+                            <p class="font-semibold text-gray-900">${alerta.nombre}</p>
+                            <p class="text-xs text-gray-500">${alerta.sexo === 'M' ? 'Masculino' : 'Femenino'}</p>
+                        </div>
+                    </div>
+                </td>
+                <td class="px-6 py-4 text-sm text-gray-700">
+                    ${edad} meses
+                </td>
+                <td class="px-6 py-4">
+                    <span class="px-2 py-1 rounded text-xs font-semibold ${alerta.zona?.toLowerCase() === 'urbana' ? 'bg-blue-100 text-blue-800' : 'bg-green-100 text-green-800'}">
+                        ${alerta.zona}
+                    </span>
+                </td>
+                <td class="px-6 py-4">
+                    <div class="flex items-center">
+                        <span class="px-3 py-1 rounded-full text-xs font-bold bg-red-100 text-red-800">
+                            <i class="fas fa-exclamation-triangle mr-1"></i>ALTO
+                        </span>
+                        <span class="ml-2 text-xs text-gray-600">${alerta.probabilidad ? `${(alerta.probabilidad * 100).toFixed(1)}%` : ''}</span>
+                    </div>
+                </td>
+                <td class="px-6 py-4 text-sm">
+                    <p class="text-gray-900">${fechaFormato}</p>
+                    <p class="text-xs text-gray-500">Hace ${alerta.dias_desde_deteccion} día${alerta.dias_desde_deteccion !== 1 ? 's' : ''}</p>
+                </td>
+                <td class="px-6 py-4">
+                    ${estadoBadge}
+                </td>
+                <td class="px-6 py-4">
+                    <div class="flex gap-2">
+                        <button onclick="verDetalleAlerta(${alerta.nino_id})" class="px-3 py-1 bg-blue-600 text-white rounded hover:bg-blue-700 text-xs font-semibold" title="Ver detalles">
+                            <i class="fas fa-eye"></i>
+                        </button>
+                        <button onclick="abrirModalAlerta(${alerta.id}, '${alerta.nombre.replace(/'/g, "\\'")}')" class="px-3 py-1 bg-green-600 text-white rounded hover:bg-green-700 text-xs font-semibold" title="Actualizar estado">
+                            <i class="fas fa-edit"></i>
+                        </button>
+                    </div>
+                </td>
+            </tr>
+        `;
+    }).join('');
+    
+    console.log('✅ Tabla actualizada con', alertas.length, 'filas');
+}
+
+/**
+ * Verificar casos críticos que requieren atención urgente
+ */
+function verificarCasosCriticos() {
+    const criticos = alertasData.filter(a => 
+        a.dias_desde_deteccion > 2 && a.estado === 'pendiente'
+    ).length;
+    
+    const banner = document.getElementById('banner-criticos');
+    const numCriticos = document.getElementById('banner-num-criticos');
+    
+    if (criticos > 0) {
+        numCriticos.textContent = criticos;
+        banner.classList.remove('hidden');
+    } else {
+        banner.classList.add('hidden');
+    }
+}
+
+/**
+ * Aplicar filtros a las alertas
+ */
+function aplicarFiltrosAlertas() {
+    const estadoFiltro = document.getElementById('filtro-estado-alerta').value;
+    const zonaFiltro = document.getElementById('filtro-zona-alerta').value;
+    const diasFiltro = document.getElementById('filtro-dias-alerta').value;
+    
+    let alertasFiltradas = [...alertasData];
+    
+    // Filtro por estado
+    if (estadoFiltro) {
+        alertasFiltradas = alertasFiltradas.filter(a => a.estado === estadoFiltro);
+    }
+    
+    // Filtro por zona
+    if (zonaFiltro) {
+        alertasFiltradas = alertasFiltradas.filter(a => a.zona === zonaFiltro);
+    }
+    
+    // Filtro por días
+    if (diasFiltro) {
+        const dias = parseInt(diasFiltro);
+        alertasFiltradas = alertasFiltradas.filter(a => a.dias_desde_deteccion <= dias);
+    }
+    
+    actualizarTablaAlertas(alertasFiltradas);
+    console.log(`🔍 Filtros aplicados: ${alertasFiltradas.length} alertas mostradas`);
+}
+
+/**
+ * Filtrar solo casos críticos
+ */
+function filtrarCriticos() {
+    document.getElementById('filtro-estado-alerta').value = 'pendiente';
+    document.getElementById('filtro-dias-alerta').value = '';
+    
+    const criticas = alertasData.filter(a => 
+        a.dias_desde_deteccion > 2 && a.estado === 'pendiente'
+    );
+    
+    actualizarTablaAlertas(criticas);
+}
+
+/**
+ * Ver detalle de una alerta
+ */
+function verDetalleAlerta(ninoId) {
+    console.log('👁️ Ver detalle de paciente:', ninoId);
+    // Redirigir a la vista de pacientes con el detalle
+    showView('pacientes');
+    setTimeout(() => {
+        verDetallePaciente(ninoId);
+    }, 500);
+}
+
+/**
+ * Abrir modal para actualizar estado de alerta
+ */
+function abrirModalAlerta(alertaId, nombrePaciente) {
+    alertaSeleccionada = alertasData.find(a => a.id === alertaId);
+    
+    if (!alertaSeleccionada) {
+        alert('Error: No se encontró la alerta');
+        return;
+    }
+    
+    document.getElementById('modal-paciente-nombre').textContent = nombrePaciente;
+    document.getElementById('modal-nuevo-estado').value = alertaSeleccionada.estado;
+    document.getElementById('modal-notas').value = '';
+    
+    document.getElementById('modal-accion-alerta').classList.remove('hidden');
+}
+
+/**
+ * Cerrar modal de alerta
+ */
+function cerrarModalAlerta() {
+    document.getElementById('modal-accion-alerta').classList.add('hidden');
+    alertaSeleccionada = null;
+}
+
+/**
+ * Guardar estado actualizado de alerta
+ */
+async function guardarEstadoAlerta() {
+    if (!alertaSeleccionada) return;
+    
+    const nuevoEstado = document.getElementById('modal-nuevo-estado').value;
+    const notas = document.getElementById('modal-notas').value;
+    
+    console.log('💾 Actualizando estado de alerta:', {
+        id: alertaSeleccionada.id,
+        estado: nuevoEstado,
+        notas: notas
+    });
+    
+    // En producción, aquí se actualizaría la base de datos
+    // Por ahora solo actualizamos localmente
+    alertaSeleccionada.estado = nuevoEstado;
+    
+    // Actualizar UI
+    actualizarUIAlertas();
+    cerrarModalAlerta();
+    
+    // Mostrar notificación
+    mostrarNotificacion('Estado actualizado correctamente', 'success');
+}
+
+/**
+ * Mostrar notificación temporal
+ */
+function mostrarNotificacion(mensaje, tipo = 'info') {
+    const colores = {
+        success: 'bg-green-500',
+        error: 'bg-red-500',
+        info: 'bg-blue-500',
+        warning: 'bg-yellow-500'
+    };
+    
+    const iconos = {
+        success: 'fa-check-circle',
+        error: 'fa-times-circle',
+        info: 'fa-info-circle',
+        warning: 'fa-exclamation-triangle'
+    };
+    
+    const notif = document.createElement('div');
+    notif.className = `fixed top-20 right-4 ${colores[tipo]} text-white px-6 py-4 rounded-lg shadow-2xl z-50 animate-slide-in flex items-center gap-3`;
+    notif.innerHTML = `
+        <i class="fas ${iconos[tipo]} text-xl"></i>
+        <span class="font-semibold">${mensaje}</span>
+    `;
+    
+    document.body.appendChild(notif);
+    
+    setTimeout(() => {
+        notif.classList.add('animate-slide-out');
+        setTimeout(() => notif.remove(), 300);
+    }, 3000);
+}
+
+// Exportar funciones al objeto window
+window.cargarAlertas = cargarAlertas;
+window.aplicarFiltrosAlertas = aplicarFiltrosAlertas;
+window.filtrarCriticos = filtrarCriticos;
+window.verDetalleAlerta = verDetalleAlerta;
+window.abrirModalAlerta = abrirModalAlerta;
+window.cerrarModalAlerta = cerrarModalAlerta;
+window.guardarEstadoAlerta = guardarEstadoAlerta;
+
+console.log('✅ Módulo de alertas cargado correctamente');

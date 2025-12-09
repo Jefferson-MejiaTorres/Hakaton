@@ -988,87 +988,398 @@
 
             <!-- Reportes (Solo Institución) -->
             <section id="view-reportes" class="hidden" data-role="institucion">
-                <h1 class="text-3xl font-bold text-gray-900 mb-8">Generar Reportes</h1>
-                
+                <h1 class="text-3xl font-bold text-gray-900 mb-8">
+                    <i class="fas fa-file-pdf mr-3 text-red-600"></i>Generar Reportes
+                </h1>
+
+                <!-- Filtros de Reportes -->
+                <div class="bg-gradient-to-br from-red-50 to-orange-50 rounded-xl shadow-lg p-6 mb-8">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-sliders-h mr-2"></i>Configuración de Reportes
+                    </h2>
+                    <div class="grid md:grid-cols-4 gap-4">
+                        <div>
+                            <label for="reporte-fecha-inicio" class="block text-sm font-semibold text-gray-700 mb-2">Fecha Inicio</label>
+                            <input type="date" id="reporte-fecha-inicio" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label for="reporte-fecha-fin" class="block text-sm font-semibold text-gray-700 mb-2">Fecha Fin</label>
+                            <input type="date" id="reporte-fecha-fin" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label for="reporte-zona" class="block text-sm font-semibold text-gray-700 mb-2">Zona</label>
+                            <select id="reporte-zona" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                                <option value="">Todas</option>
+                                <option value="Urbana">Urbana</option>
+                                <option value="Rural">Rural</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="actualizarVistaPrevia()" class="w-full bg-red-600 text-white py-2 rounded-lg hover:bg-red-700 transition-colors">
+                                <i class="fas fa-sync mr-2"></i>Actualizar
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Vista Previa de Estadísticas -->
+                <div id="reporte-preview" class="grid md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-gray-600 text-sm font-semibold">Total Pacientes</span>
+                            <i class="fas fa-users text-blue-600 text-xl"></i>
+                        </div>
+                        <p class="text-3xl font-bold text-gray-900" id="preview-total">0</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-gray-600 text-sm font-semibold">Alto Riesgo</span>
+                            <i class="fas fa-exclamation-triangle text-red-600 text-xl"></i>
+                        </div>
+                        <p class="text-3xl font-bold text-red-600" id="preview-alto">0</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-gray-600 text-sm font-semibold">Riesgo Moderado</span>
+                            <i class="fas fa-exclamation-circle text-yellow-600 text-xl"></i>
+                        </div>
+                        <p class="text-3xl font-bold text-yellow-600" id="preview-moderado">0</p>
+                    </div>
+                    <div class="bg-white rounded-xl shadow-lg p-6">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-gray-600 text-sm font-semibold">Bajo Riesgo</span>
+                            <i class="fas fa-check-circle text-green-600 text-xl"></i>
+                        </div>
+                        <p class="text-3xl font-bold text-green-600" id="preview-bajo">0</p>
+                    </div>
+                </div>
+
+                <!-- Tipos de Reportes -->
                 <div class="grid md:grid-cols-2 gap-6">
-                    <div class="bg-white rounded-xl shadow p-8 hover:shadow-xl transition-shadow">
-                        <div class="flex items-center justify-center w-16 h-16 bg-red-100 rounded-full mb-4">
-                            <i class="fas fa-file-pdf text-3xl text-red-600"></i>
+                    <!-- Reporte Ejecutivo -->
+                    <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+                        <div class="flex items-center justify-center w-20 h-20 bg-gradient-to-br from-red-100 to-red-200 rounded-full mb-6 mx-auto">
+                            <i class="fas fa-file-pdf text-4xl text-red-600"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Reporte Mensual</h3>
-                        <p class="text-gray-600 mb-6">Resumen completo de casos detectados en el último mes</p>
-                        <button class="btn-generar-reporte w-full bg-red-600 text-white py-3 rounded-lg hover:bg-red-700" data-tipo="mensual">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3 text-center">Reporte Ejecutivo</h3>
+                        <p class="text-gray-600 mb-6 text-center">Resumen completo con estadísticas generales, gráficas y análisis del período seleccionado</p>
+                        <ul class="space-y-2 mb-6">
+                            <li class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                Estadísticas generales
+                            </li>
+                            <li class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                Distribución por zonas
+                            </li>
+                            <li class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                Niveles de riesgo
+                            </li>
+                            <li class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                Tendencias mensuales
+                            </li>
+                        </ul>
+                        <button onclick="generarReporte('ejecutivo')" class="w-full bg-gradient-to-r from-red-600 to-red-700 text-white py-4 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all font-bold">
                             <i class="fas fa-download mr-2"></i>Generar PDF
                         </button>
                     </div>
                     
-                    <div class="bg-white rounded-xl shadow p-8 hover:shadow-xl transition-shadow">
-                        <div class="flex items-center justify-center w-16 h-16 bg-blue-100 rounded-full mb-4">
-                            <i class="fas fa-chart-pie text-3xl text-blue-600"></i>
+                    <!-- Reporte por Zona -->
+                    <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+                        <div class="flex items-center justify-center w-20 h-20 bg-gradient-to-br from-blue-100 to-blue-200 rounded-full mb-6 mx-auto">
+                            <i class="fas fa-map-marked-alt text-4xl text-blue-600"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Reporte por Zona</h3>
-                        <p class="text-gray-600 mb-6">Análisis comparativo entre zonas urbanas y rurales</p>
-                        <button class="btn-generar-reporte w-full bg-blue-600 text-white py-3 rounded-lg hover:bg-blue-700" data-tipo="zona">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3 text-center">Análisis por Zona</h3>
+                        <p class="text-gray-600 mb-6 text-center">Comparativa detallada entre zonas urbanas y rurales con estadísticas específicas</p>
+                        <ul class="space-y-2 mb-6">
+                            <li class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                Comparación urbano/rural
+                            </li>
+                            <li class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                Indicadores por zona
+                            </li>
+                            <li class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                Análisis socioeconómico
+                            </li>
+                            <li class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                Recomendaciones zonales
+                            </li>
+                        </ul>
+                        <button onclick="generarReporte('zona')" class="w-full bg-gradient-to-r from-blue-600 to-blue-700 text-white py-4 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all font-bold">
                             <i class="fas fa-download mr-2"></i>Generar PDF
                         </button>
                     </div>
                     
-                    <div class="bg-white rounded-xl shadow p-8 hover:shadow-xl transition-shadow">
-                        <div class="flex items-center justify-center w-16 h-16 bg-green-100 rounded-full mb-4">
-                            <i class="fas fa-calendar text-3xl text-green-600"></i>
+                    <!-- Casos Críticos -->
+                    <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+                        <div class="flex items-center justify-center w-20 h-20 bg-gradient-to-br from-purple-100 to-purple-200 rounded-full mb-6 mx-auto">
+                            <i class="fas fa-exclamation-triangle text-4xl text-purple-600"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Reporte Trimestral</h3>
-                        <p class="text-gray-600 mb-6">Análisis de tendencias de los últimos 3 meses</p>
-                        <button class="btn-generar-reporte w-full bg-green-600 text-white py-3 rounded-lg hover:bg-green-700" data-tipo="trimestral">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3 text-center">Casos de Alto Riesgo</h3>
+                        <p class="text-gray-600 mb-6 text-center">Listado detallado de pacientes críticos que requieren atención prioritaria inmediata</p>
+                        <ul class="space-y-2 mb-6">
+                            <li class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                Pacientes en riesgo alto
+                            </li>
+                            <li class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                Datos completos
+                            </li>
+                            <li class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                Predicciones ML
+                            </li>
+                            <li class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                Plan de acción sugerido
+                            </li>
+                        </ul>
+                        <button onclick="generarReporte('alto-riesgo')" class="w-full bg-gradient-to-r from-purple-600 to-purple-700 text-white py-4 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all font-bold">
                             <i class="fas fa-download mr-2"></i>Generar PDF
                         </button>
                     </div>
                     
-                    <div class="bg-white rounded-xl shadow p-8 hover:shadow-xl transition-shadow">
-                        <div class="flex items-center justify-center w-16 h-16 bg-purple-100 rounded-full mb-4">
-                            <i class="fas fa-exclamation-circle text-3xl text-purple-600"></i>
+                    <!-- Reporte Personalizado -->
+                    <div class="bg-white rounded-xl shadow-lg p-8 hover:shadow-xl transition-shadow">
+                        <div class="flex items-center justify-center w-20 h-20 bg-gradient-to-br from-green-100 to-green-200 rounded-full mb-6 mx-auto">
+                            <i class="fas fa-cog text-4xl text-green-600"></i>
                         </div>
-                        <h3 class="text-xl font-bold text-gray-900 mb-2">Casos de Alto Riesgo</h3>
-                        <p class="text-gray-600 mb-6">Listado detallado de casos críticos que requieren atención</p>
-                        <button class="btn-generar-reporte w-full bg-purple-600 text-white py-3 rounded-lg hover:bg-purple-700" data-tipo="alto-riesgo">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-3 text-center">Reporte Personalizado</h3>
+                        <p class="text-gray-600 mb-6 text-center">Crea un reporte a medida seleccionando las secciones y datos específicos que necesitas</p>
+                        <ul class="space-y-2 mb-6">
+                            <li class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                Selección de campos
+                            </li>
+                            <li class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                Filtros avanzados
+                            </li>
+                            <li class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                Gráficas opcionales
+                            </li>
+                            <li class="flex items-center text-sm text-gray-700">
+                                <i class="fas fa-check text-green-600 mr-2"></i>
+                                Formato personalizable
+                            </li>
+                        </ul>
+                        <button onclick="generarReporte('personalizado')" class="w-full bg-gradient-to-r from-green-600 to-green-700 text-white py-4 rounded-lg hover:shadow-lg transform hover:scale-105 transition-all font-bold">
                             <i class="fas fa-download mr-2"></i>Generar PDF
                         </button>
+                    </div>
+                </div>
+
+                <!-- Estado de Generación -->
+                <div id="reporte-status" class="hidden mt-8 bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="animate-spin rounded-full h-10 w-10 border-b-2 border-red-600"></div>
+                        <div>
+                            <p class="font-bold text-gray-900 text-lg">Generando reporte...</p>
+                            <p class="text-sm text-gray-600">Por favor espera mientras procesamos los datos</p>
+                        </div>
                     </div>
                 </div>
             </section>
 
             <!-- Alertas de Riesgo (Solo Institución) -->
             <section id="view-alertas" class="hidden" data-role="institucion">
-                <h1 class="text-3xl font-bold text-gray-900 mb-8">Alertas de Alto Riesgo</h1>
-                
-                <div class="bg-red-50 border-l-4 border-red-600 p-6 rounded-lg mb-6">
-                    <div class="flex items-center">
-                        <i class="fas fa-exclamation-triangle text-2xl text-red-600 mr-4"></i>
-                        <div>
-                            <h3 class="text-lg font-bold text-red-900">Casos Críticos Detectados</h3>
-                            <p class="text-red-700">Se han identificado <span id="num-alertas" class="font-bold">0</span> casos que requieren atención inmediata</p>
+                <h1 class="text-3xl font-bold text-gray-900 mb-8">
+                    <i class="fas fa-bell mr-3 text-red-600"></i>Alertas de Alto Riesgo
+                </h1>
+
+                <!-- Resumen de Alertas -->
+                <div class="grid md:grid-cols-4 gap-6 mb-8">
+                    <div class="bg-gradient-to-br from-red-500 to-red-600 rounded-xl shadow-lg p-6 text-white">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-semibold opacity-90">Críticos</span>
+                            <i class="fas fa-exclamation-circle text-2xl"></i>
+                        </div>
+                        <p class="text-4xl font-bold" id="alertas-criticos">0</p>
+                        <p class="text-xs opacity-80 mt-1">Requieren atención inmediata</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-orange-500 to-orange-600 rounded-xl shadow-lg p-6 text-white">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-semibold opacity-90">Pendientes</span>
+                            <i class="fas fa-clock text-2xl"></i>
+                        </div>
+                        <p class="text-4xl font-bold" id="alertas-pendientes">0</p>
+                        <p class="text-xs opacity-80 mt-1">Sin seguimiento asignado</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-blue-500 to-blue-600 rounded-xl shadow-lg p-6 text-white">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-semibold opacity-90">En Seguimiento</span>
+                            <i class="fas fa-user-check text-2xl"></i>
+                        </div>
+                        <p class="text-4xl font-bold" id="alertas-seguimiento">0</p>
+                        <p class="text-xs opacity-80 mt-1">Con atención activa</p>
+                    </div>
+                    
+                    <div class="bg-gradient-to-br from-green-500 to-green-600 rounded-xl shadow-lg p-6 text-white">
+                        <div class="flex items-center justify-between mb-2">
+                            <span class="text-sm font-semibold opacity-90">Resueltos</span>
+                            <i class="fas fa-check-circle text-2xl"></i>
+                        </div>
+                        <p class="text-4xl font-bold" id="alertas-resueltos">0</p>
+                        <p class="text-xs opacity-80 mt-1">Casos cerrados este mes</p>
+                    </div>
+                </div>
+
+                <!-- Filtros de Alertas -->
+                <div class="bg-white rounded-xl shadow-lg p-6 mb-8">
+                    <div class="flex flex-wrap items-center gap-4">
+                        <div class="flex-1 min-w-[200px]">
+                            <label for="filtro-estado-alerta" class="block text-sm font-semibold text-gray-700 mb-2">Estado</label>
+                            <select id="filtro-estado-alerta" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                                <option value="">Todos los estados</option>
+                                <option value="pendiente">Pendiente</option>
+                                <option value="seguimiento">En Seguimiento</option>
+                                <option value="resuelto">Resuelto</option>
+                            </select>
+                        </div>
+                        <div class="flex-1 min-w-[200px]">
+                            <label for="filtro-zona-alerta" class="block text-sm font-semibold text-gray-700 mb-2">Zona</label>
+                            <select id="filtro-zona-alerta" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                                <option value="">Todas las zonas</option>
+                                <option value="Urbana">Urbana</option>
+                                <option value="Rural">Rural</option>
+                            </select>
+                        </div>
+                        <div class="flex-1 min-w-[200px]">
+                            <label for="filtro-dias-alerta" class="block text-sm font-semibold text-gray-700 mb-2">Antigüedad</label>
+                            <select id="filtro-dias-alerta" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-red-500 focus:border-transparent">
+                                <option value="">Todas</option>
+                                <option value="1">Últimas 24 horas</option>
+                                <option value="7">Última semana</option>
+                                <option value="30">Último mes</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="aplicarFiltrosAlertas()" class="px-6 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 transition-colors font-semibold">
+                                <i class="fas fa-filter mr-2"></i>Filtrar
+                            </button>
                         </div>
                     </div>
                 </div>
-                
-                <div class="bg-white rounded-xl shadow overflow-hidden">
-                    <table class="min-w-full">
-                        <thead class="bg-red-50">
-                            <tr>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-red-900 uppercase">Paciente</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-red-900 uppercase">Edad</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-red-900 uppercase">Zona</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-red-900 uppercase">Nivel Riesgo</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-red-900 uppercase">Fecha Detección</th>
-                                <th class="px-6 py-3 text-left text-xs font-medium text-red-900 uppercase">Estado</th>
-                            </tr>
-                        </thead>
-                        <tbody id="tabla-alertas" class="divide-y divide-gray-200">
-                            <tr>
-                                <td colspan="6" class="px-6 py-8 text-center text-gray-500">Cargando alertas...</td>
-                            </tr>
-                        </tbody>
-                    </table>
+
+                <!-- Banner de Alerta Crítica -->
+                <div id="banner-criticos" class="hidden bg-red-50 border-l-4 border-red-600 p-6 rounded-lg mb-6 animate-pulse">
+                    <div class="flex items-center">
+                        <i class="fas fa-exclamation-triangle text-3xl text-red-600 mr-4"></i>
+                        <div class="flex-1">
+                            <h3 class="text-xl font-bold text-red-900">⚠️ Atención Urgente Requerida</h3>
+                            <p class="text-red-700 mt-1">
+                                Hay <span id="banner-num-criticos" class="font-bold">0</span> casos críticos que no han recibido seguimiento en las últimas 48 horas
+                            </p>
+                        </div>
+                        <button onclick="filtrarCriticos()" class="px-4 py-2 bg-red-600 text-white rounded-lg hover:bg-red-700 font-semibold">
+                            Ver Casos
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Tabla de Alertas -->
+                <div class="bg-white rounded-xl shadow-lg overflow-hidden">
+                    <div class="px-6 py-4 bg-gradient-to-r from-red-500 to-red-600 text-white">
+                        <div class="flex items-center justify-between">
+                            <h2 class="text-xl font-bold">
+                                <i class="fas fa-list mr-2"></i>Listado de Alertas
+                            </h2>
+                            <span id="total-alertas-mostradas" class="text-sm opacity-90">0 alertas</span>
+                        </div>
+                    </div>
+                    
+                    <div class="overflow-x-auto">
+                        <table class="min-w-full divide-y divide-gray-200">
+                            <thead class="bg-gray-50">
+                                <tr>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                        Paciente
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                        Edad
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                        Zona
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                        Riesgo
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                        Fecha Detección
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                        Estado
+                                    </th>
+                                    <th class="px-6 py-3 text-left text-xs font-bold text-gray-700 uppercase tracking-wider">
+                                        Acciones
+                                    </th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-alertas" class="bg-white divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="7" class="px-6 py-12 text-center">
+                                        <div class="flex flex-col items-center">
+                                            <div class="animate-spin rounded-full h-12 w-12 border-b-2 border-red-600 mb-4"></div>
+                                            <p class="text-gray-500">Cargando alertas...</p>
+                                        </div>
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+
+                <!-- Modal de Acciones -->
+                <div id="modal-accion-alerta" class="hidden fixed inset-0 bg-black bg-opacity-50 z-50 flex items-center justify-center p-4">
+                    <div class="bg-white rounded-xl shadow-2xl max-w-md w-full p-8 transform transition-all">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-2xl font-bold text-gray-900">
+                                <i class="fas fa-clipboard-check mr-2 text-blue-600"></i>
+                                Actualizar Estado
+                            </h3>
+                            <button onclick="cerrarModalAlerta()" class="text-gray-400 hover:text-gray-600" title="Cerrar modal">
+                                <i class="fas fa-times text-2xl"></i>
+                            </button>
+                        </div>
+                        
+                        <div class="mb-6">
+                            <p class="text-gray-600 mb-2">Paciente:</p>
+                            <p id="modal-paciente-nombre" class="font-bold text-lg text-gray-900">-</p>
+                        </div>
+
+                        <div class="mb-6">
+                            <label for="modal-nuevo-estado" class="block text-sm font-semibold text-gray-700 mb-2">Cambiar Estado</label>
+                            <select id="modal-nuevo-estado" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="pendiente">⏳ Pendiente</option>
+                                <option value="seguimiento">👨‍⚕️ En Seguimiento</option>
+                                <option value="resuelto">✅ Resuelto</option>
+                            </select>
+                        </div>
+
+                        <div class="mb-6">
+                            <label class="block text-sm font-semibold text-gray-700 mb-2">Notas (opcional)</label>
+                            <textarea id="modal-notas" rows="3" class="w-full px-4 py-3 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent" placeholder="Agregar observaciones..."></textarea>
+                        </div>
+
+                        <div class="flex gap-3">
+                            <button onclick="cerrarModalAlerta()" class="flex-1 px-4 py-3 border border-gray-300 rounded-lg hover:bg-gray-50 font-semibold">
+                                Cancelar
+                            </button>
+                            <button onclick="guardarEstadoAlerta()" class="flex-1 px-4 py-3 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold">
+                                <i class="fas fa-save mr-2"></i>Guardar
+                            </button>
+                        </div>
+                    </div>
                 </div>
             </section>
 

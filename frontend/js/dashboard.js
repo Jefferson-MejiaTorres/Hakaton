@@ -21,6 +21,13 @@ document.addEventListener('DOMContentLoaded', async () => {
             return;
         }
         
+        // Obtener rol del usuario
+        const userRole = localStorage.getItem('userRole') || session.user.user_metadata?.rol || 'medico';
+        console.log('Rol del usuario:', userRole);
+        
+        // Filtrar menú según rol
+        filterMenuByRole(userRole);
+        
         // Mostrar nombre de usuario
         const userName = document.getElementById('user-name');
         if (userName) {
@@ -41,6 +48,21 @@ document.addEventListener('DOMContentLoaded', async () => {
         window.location.href = 'index.html';
     }
 });
+
+// ==========================================
+// Filtrar menú según rol
+// ==========================================
+function filterMenuByRole(role) {
+    // Ocultar todos los items con data-role
+    document.querySelectorAll('[data-role]').forEach(item => {
+        item.style.display = 'none';
+    });
+    
+    // Mostrar solo los del rol actual
+    document.querySelectorAll(`[data-role="${role}"]`).forEach(item => {
+        item.style.display = '';
+    });
+}
 
 // ==========================================
 // Cargar datos del dashboard
@@ -220,8 +242,11 @@ function setupNavigation() {
     const views = {
         '#dashboard': 'view-dashboard',
         '#pacientes': 'view-pacientes',
-        '#predicciones': 'view-predicciones',
-        '#registrar': 'view-registrar'
+        '#registrar': 'view-registrar',
+        '#analytics': 'view-analytics',
+        '#exportar': 'view-exportar',
+        '#reportes': 'view-reportes',
+        '#alertas': 'view-alertas'
     };
     
     links.forEach(link => {

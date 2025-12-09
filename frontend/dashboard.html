@@ -396,108 +396,592 @@
 
             <!-- Análisis Avanzado (Solo Investigación) -->
             <section id="view-analytics" class="hidden" data-role="investigador">
-                <h1 class="text-3xl font-bold text-gray-900 mb-8">Análisis Avanzado de Datos</h1>
-                
-                <!-- Filtros temporales -->
-                <div class="bg-white rounded-xl shadow p-6 mb-6">
-                    <div class="grid md:grid-cols-4 gap-4">
+                <!-- Header -->
+                <div class="mb-8">
+                    <h1 class="text-4xl font-bold text-gray-900 flex items-center mb-2">
+                        <i class="fas fa-chart-line text-indigo-600 mr-3"></i>
+                        Análisis Avanzado de Datos
+                    </h1>
+                    <p class="text-gray-600">Análisis estadístico detallado y tendencias temporales</p>
+                </div>
+
+                <!-- Panel de Filtros Avanzados -->
+                <div class="bg-gradient-to-r from-indigo-50 to-purple-50 rounded-2xl shadow-lg p-6 mb-8 border border-indigo-100">
+                    <div class="flex items-center justify-between mb-4">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                            <i class="fas fa-filter text-indigo-600 mr-2"></i>
+                            Filtros de Análisis
+                        </h3>
+                        <button id="btn-limpiar-filtros-analytics" class="text-sm text-indigo-600 hover:text-indigo-800 font-semibold">
+                            <i class="fas fa-redo mr-1"></i>Limpiar
+                        </button>
+                    </div>
+                    <div class="grid md:grid-cols-5 gap-4">
                         <div>
-                            <label for="fecha-inicio" class="block text-sm font-medium text-gray-700 mb-2">Fecha Inicio</label>
-                            <input type="date" id="fecha-inicio" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600">
+                            <label for="fecha-inicio-analytics" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-calendar-alt mr-1"></i>Fecha Inicio
+                            </label>
+                            <input 
+                                type="date" 
+                                id="fecha-inicio-analytics" 
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                            >
                         </div>
                         <div>
-                            <label for="fecha-fin" class="block text-sm font-medium text-gray-700 mb-2">Fecha Fin</label>
-                            <input type="date" id="fecha-fin" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600">
+                            <label for="fecha-fin-analytics" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-calendar-check mr-1"></i>Fecha Fin
+                            </label>
+                            <input 
+                                type="date" 
+                                id="fecha-fin-analytics" 
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                            >
                         </div>
                         <div>
-                            <label for="zona-analisis" class="block text-sm font-medium text-gray-700 mb-2">Zona</label>
-                            <select id="zona-analisis" class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-blue-600">
-                                <option value="">Todas</option>
+                            <label for="zona-analytics" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-map-marked-alt mr-1"></i>Zona
+                            </label>
+                            <select 
+                                id="zona-analytics" 
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                            >
+                                <option value="">Todas las zonas</option>
                                 <option value="urbana">Urbana</option>
                                 <option value="rural">Rural</option>
                             </select>
                         </div>
-                        <button id="btn-analizar" class="self-end bg-green-600 text-white px-6 py-2 rounded-lg hover:bg-green-700">
-                            <i class="fas fa-chart-line mr-2"></i>Analizar
+                        <div>
+                            <label for="riesgo-analytics" class="block text-sm font-semibold text-gray-700 mb-2">
+                                <i class="fas fa-exclamation-triangle mr-1"></i>Nivel de Riesgo
+                            </label>
+                            <select 
+                                id="riesgo-analytics" 
+                                class="w-full px-4 py-2.5 border border-gray-300 rounded-lg focus:ring-2 focus:ring-indigo-500 focus:border-indigo-500 transition-all"
+                            >
+                                <option value="">Todos los niveles</option>
+                                <option value="alto">Alto Riesgo</option>
+                                <option value="medio">Riesgo Medio</option>
+                                <option value="bajo">Bajo Riesgo</option>
+                            </select>
+                        </div>
+                        <button 
+                            id="btn-aplicar-filtros-analytics" 
+                            class="self-end bg-gradient-to-r from-indigo-600 to-purple-600 text-white px-6 py-2.5 rounded-lg hover:from-indigo-700 hover:to-purple-700 transition-all shadow-md hover:shadow-lg font-semibold"
+                        >
+                            <i class="fas fa-search mr-2"></i>Analizar
                         </button>
                     </div>
                 </div>
-                
-                <!-- Gráficas avanzadas -->
-                <div class="grid md:grid-cols-2 gap-6 mb-6">
-                    <div class="bg-white rounded-xl shadow p-6">
-                        <h3 class="text-lg font-bold text-gray-900 mb-4">Distribución por Zona</h3>
-                        <canvas id="chart-zona"></canvas>
+
+                <!-- Indicadores Clave (KPIs) -->
+                <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mb-8">
+                    <!-- Total Pacientes Analizados -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-indigo-500 hover:shadow-xl transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 font-semibold mb-1">Total Pacientes</p>
+                                <p id="kpi-total-pacientes" class="text-3xl font-bold text-indigo-600">0</p>
+                            </div>
+                            <div class="w-14 h-14 bg-indigo-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-users text-2xl text-indigo-600"></i>
+                            </div>
+                        </div>
                     </div>
-                    <div class="bg-white rounded-xl shadow p-6">
-                        <h3 class="text-lg font-bold text-gray-900 mb-4">Tendencia por Edad</h3>
-                        <canvas id="chart-edad"></canvas>
+
+                    <!-- Promedio Peso -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-blue-500 hover:shadow-xl transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 font-semibold mb-1">Peso Promedio</p>
+                                <p id="kpi-peso-promedio" class="text-3xl font-bold text-blue-600">0 <span class="text-lg">kg</span></p>
+                            </div>
+                            <div class="w-14 h-14 bg-blue-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-weight text-2xl text-blue-600"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- Promedio Talla -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-emerald-500 hover:shadow-xl transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 font-semibold mb-1">Talla Promedio</p>
+                                <p id="kpi-talla-promedio" class="text-3xl font-bold text-emerald-600">0 <span class="text-lg">cm</span></p>
+                            </div>
+                            <div class="w-14 h-14 bg-emerald-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-ruler-vertical text-2xl text-emerald-600"></i>
+                            </div>
+                        </div>
+                    </div>
+
+                    <!-- IMC Promedio -->
+                    <div class="bg-white rounded-xl shadow-lg p-6 border-l-4 border-purple-500 hover:shadow-xl transition-shadow">
+                        <div class="flex items-center justify-between">
+                            <div>
+                                <p class="text-sm text-gray-600 font-semibold mb-1">IMC Promedio</p>
+                                <p id="kpi-imc-promedio" class="text-3xl font-bold text-purple-600">0.0</p>
+                            </div>
+                            <div class="w-14 h-14 bg-purple-100 rounded-full flex items-center justify-center">
+                                <i class="fas fa-heartbeat text-2xl text-purple-600"></i>
+                            </div>
+                        </div>
                     </div>
                 </div>
-                
-                <!-- Estadísticas detalladas -->
-                <div class="bg-white rounded-xl shadow p-6">
-                    <h3 class="text-lg font-bold text-gray-900 mb-4">Estadísticas Detalladas</h3>
-                    <div id="stats-detalladas" class="grid md:grid-cols-3 gap-6">
-                        <div class="text-center">
-                            <p class="text-gray-600 mb-2">Promedio de Peso</p>
-                            <p class="text-3xl font-bold text-blue-600">-- kg</p>
+
+                <!-- Gráficas Principales -->
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <!-- Distribución por Zona Geográfica -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                                <div class="w-10 h-10 bg-gradient-to-br from-blue-500 to-blue-600 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                                    <i class="fas fa-map-marker-alt text-white text-lg"></i>
+                                </div>
+                                <span>Distribución por Zona</span>
+                            </h3>
+                            <span class="px-3 py-1 bg-blue-100 text-blue-700 rounded-full text-xs font-semibold">
+                                Geográfico
+                            </span>
                         </div>
-                        <div class="text-center">
-                            <p class="text-gray-600 mb-2">Promedio de Talla</p>
-                            <p class="text-3xl font-bold text-green-600">-- cm</p>
+                        <div class="h-80">
+                            <canvas id="chart-zona-analytics"></canvas>
                         </div>
-                        <div class="text-center">
-                            <p class="text-gray-600 mb-2">IMC Promedio</p>
-                            <p class="text-3xl font-bold text-purple-600">--</p>
+                        <div class="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 gap-4 text-center">
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Zona Urbana</p>
+                                <p id="zona-urbana-count" class="text-xl font-bold text-blue-600">0</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Zona Rural</p>
+                                <p id="zona-rural-count" class="text-xl font-bold text-emerald-600">0</p>
+                            </div>
                         </div>
+                    </div>
+
+                    <!-- Distribución por Nivel de Riesgo -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                                <div class="w-10 h-10 bg-gradient-to-br from-red-500 to-orange-600 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                                    <i class="fas fa-exclamation-circle text-white text-lg"></i>
+                                </div>
+                                <span>Distribución por Riesgo</span>
+                            </h3>
+                            <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-xs font-semibold">
+                                Riesgo
+                            </span>
+                        </div>
+                        <div class="h-80">
+                            <canvas id="chart-riesgo-analytics"></canvas>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-100 grid grid-cols-3 gap-4 text-center">
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Alto</p>
+                                <p id="riesgo-alto-count" class="text-xl font-bold text-red-600">0</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Medio</p>
+                                <p id="riesgo-medio-count" class="text-xl font-bold text-yellow-600">0</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Bajo</p>
+                                <p id="riesgo-bajo-count" class="text-xl font-bold text-green-600">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Gráficas Secundarias -->
+                <div class="grid md:grid-cols-2 gap-6 mb-8">
+                    <!-- Distribución por Rango de Edad -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                                <div class="w-10 h-10 bg-gradient-to-br from-purple-500 to-pink-600 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                                    <i class="fas fa-child text-white text-lg"></i>
+                                </div>
+                                <span>Distribución por Edad</span>
+                            </h3>
+                            <span class="px-3 py-1 bg-purple-100 text-purple-700 rounded-full text-xs font-semibold">
+                                Rangos
+                            </span>
+                        </div>
+                        <div class="h-80">
+                            <canvas id="chart-edad-analytics"></canvas>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-100 text-center">
+                            <p class="text-sm text-gray-500">
+                                <i class="fas fa-info-circle mr-1"></i>
+                                Agrupación por rangos etarios (0-12, 13-24, 25-36, 37-48, 49-60 meses)
+                            </p>
+                        </div>
+                    </div>
+
+                    <!-- Distribución por Sexo -->
+                    <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow">
+                        <div class="flex items-center justify-between mb-6">
+                            <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                                <div class="w-10 h-10 bg-gradient-to-br from-pink-500 to-blue-600 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                                    <i class="fas fa-venus-mars text-white text-lg"></i>
+                                </div>
+                                <span>Distribución por Sexo</span>
+                            </h3>
+                            <span class="px-3 py-1 bg-pink-100 text-pink-700 rounded-full text-xs font-semibold">
+                                Género
+                            </span>
+                        </div>
+                        <div class="h-80">
+                            <canvas id="chart-sexo-analytics"></canvas>
+                        </div>
+                        <div class="mt-4 pt-4 border-t border-gray-100 grid grid-cols-2 gap-4 text-center">
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Femenino</p>
+                                <p id="sexo-femenino-count" class="text-xl font-bold text-pink-600">0</p>
+                            </div>
+                            <div>
+                                <p class="text-xs text-gray-500 mb-1">Masculino</p>
+                                <p id="sexo-masculino-count" class="text-xl font-bold text-blue-600">0</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Tendencia Temporal -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100 hover:shadow-xl transition-shadow mb-8">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                            <div class="w-10 h-10 bg-gradient-to-br from-indigo-500 to-blue-600 rounded-lg flex items-center justify-center mr-3 shadow-md">
+                                <i class="fas fa-chart-line text-white text-lg"></i>
+                            </div>
+                            <span>Tendencia de Registros Mensuales</span>
+                        </h3>
+                        <span class="px-3 py-1 bg-indigo-100 text-indigo-700 rounded-full text-xs font-semibold">
+                            Temporal
+                        </span>
+                    </div>
+                    <div class="h-80">
+                        <canvas id="chart-tendencia-analytics"></canvas>
+                    </div>
+                    <div class="mt-4 pt-4 border-t border-gray-100 text-center">
+                        <p class="text-sm text-gray-500">
+                            <i class="fas fa-calendar-alt mr-1"></i>
+                            Evolución de registros de pacientes en los últimos 12 meses
+                        </p>
+                    </div>
+                </div>
+
+                <!-- Tabla de Estadísticas Detalladas -->
+                <div class="bg-white rounded-2xl shadow-lg p-6 border border-gray-100">
+                    <div class="flex items-center justify-between mb-6">
+                        <h3 class="text-lg font-bold text-gray-900 flex items-center">
+                            <i class="fas fa-table text-indigo-600 mr-2"></i>
+                            Estadísticas Detalladas por Zona
+                        </h3>
+                        <button id="btn-exportar-tabla-analytics" class="text-sm bg-emerald-600 text-white px-4 py-2 rounded-lg hover:bg-emerald-700 transition-colors font-semibold">
+                            <i class="fas fa-file-excel mr-1"></i>Exportar
+                        </button>
+                    </div>
+                    <div class="overflow-x-auto">
+                        <table class="w-full">
+                            <thead class="bg-gradient-to-r from-indigo-50 to-purple-50">
+                                <tr>
+                                    <th class="px-6 py-4 text-left text-sm font-bold text-gray-700">Zona</th>
+                                    <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">Total</th>
+                                    <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">Peso Prom.</th>
+                                    <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">Talla Prom.</th>
+                                    <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">IMC Prom.</th>
+                                    <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">Alto Riesgo</th>
+                                    <th class="px-6 py-4 text-center text-sm font-bold text-gray-700">% Alto Riesgo</th>
+                                </tr>
+                            </thead>
+                            <tbody id="tabla-stats-zona" class="divide-y divide-gray-200">
+                                <tr>
+                                    <td colspan="7" class="px-6 py-8 text-center text-gray-500">
+                                        <i class="fas fa-spinner fa-spin mr-2"></i>Cargando estadísticas...
+                                    </td>
+                                </tr>
+                            </tbody>
+                        </table>
                     </div>
                 </div>
             </section>
 
             <!-- Exportar Datos (Solo Investigación) -->
             <section id="view-exportar" class="hidden" data-role="investigador">
-                <h1 class="text-3xl font-bold text-gray-900 mb-8">Exportar Datos</h1>
+                <h1 class="text-3xl font-bold text-gray-900 mb-8">
+                    <i class="fas fa-download mr-3"></i>Exportar Datos
+                </h1>
                 
-                <div class="bg-white rounded-xl shadow p-8 max-w-2xl">
-                    <div class="space-y-6">
+                <!-- Panel de Filtros de Exportación -->
+                <div class="bg-gradient-to-br from-blue-50 to-indigo-50 rounded-xl shadow-lg p-6 mb-8">
+                    <h2 class="text-xl font-bold text-gray-800 mb-4">
+                        <i class="fas fa-filter mr-2"></i>Filtros de Exportación
+                    </h2>
+                    <div class="grid md:grid-cols-3 gap-4">
                         <div>
-                            <label class="block text-gray-700 font-semibold mb-2">Selecciona el formato de exportación</label>
-                            <div class="space-y-3">
-                                <label class="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
-                                    <input type="radio" name="formato" value="csv" checked class="text-blue-600">
-                                    <div>
-                                        <p class="font-semibold">CSV</p>
-                                        <p class="text-sm text-gray-600">Archivo separado por comas, compatible con Excel</p>
-                                    </div>
-                                </label>
-                                <label class="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
-                                    <input type="radio" name="formato" value="json" class="text-blue-600">
-                                    <div>
-                                        <p class="font-semibold">JSON</p>
-                                        <p class="text-sm text-gray-600">Formato de datos estructurado para desarrolladores</p>
-                                    </div>
-                                </label>
-                                <label class="flex items-center space-x-3 p-4 border rounded-lg cursor-pointer hover:bg-gray-50">
-                                    <input type="radio" name="formato" value="excel" class="text-blue-600">
-                                    <div>
-                                        <p class="font-semibold">Excel (.xlsx)</p>
-                                        <p class="text-sm text-gray-600">Archivo de Excel con formato</p>
-                                    </div>
-                                </label>
+                            <label for="export-fecha-inicio" class="block text-sm font-semibold text-gray-700 mb-2">Fecha Inicio</label>
+                            <input type="date" id="export-fecha-inicio" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label for="export-fecha-fin" class="block text-sm font-semibold text-gray-700 mb-2">Fecha Fin</label>
+                            <input type="date" id="export-fecha-fin" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                        </div>
+                        <div>
+                            <label for="export-zona" class="block text-sm font-semibold text-gray-700 mb-2">Zona</label>
+                            <select id="export-zona" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Todas las zonas</option>
+                                <option value="Urbana">Urbana</option>
+                                <option value="Rural">Rural</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="export-riesgo" class="block text-sm font-semibold text-gray-700 mb-2">Nivel de Riesgo</label>
+                            <select id="export-riesgo" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Todos los niveles</option>
+                                <option value="bajo">Bajo</option>
+                                <option value="moderado">Moderado</option>
+                                <option value="alto">Alto</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label for="export-sexo" class="block text-sm font-semibold text-gray-700 mb-2">Sexo</label>
+                            <select id="export-sexo" class="w-full px-4 py-2 rounded-lg border border-gray-300 focus:ring-2 focus:ring-blue-500 focus:border-transparent">
+                                <option value="">Ambos</option>
+                                <option value="M">Masculino</option>
+                                <option value="F">Femenino</option>
+                            </select>
+                        </div>
+                        <div class="flex items-end">
+                            <button onclick="aplicarFiltrosExport()" class="w-full bg-blue-600 text-white py-2 rounded-lg hover:bg-blue-700 transition-colors">
+                                <i class="fas fa-check mr-2"></i>Aplicar Filtros
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Resultados de Filtrado -->
+                <div id="export-results-summary" class="bg-white rounded-xl shadow p-4 mb-6 hidden">
+                    <div class="flex items-center justify-between">
+                        <div class="flex items-center space-x-4">
+                            <i class="fas fa-info-circle text-blue-600 text-2xl"></i>
+                            <div>
+                                <p class="font-semibold text-gray-800">
+                                    <span id="export-total-registros">0</span> registros listos para exportar
+                                </p>
+                                <p class="text-sm text-gray-600" id="export-filtros-aplicados"></p>
                             </div>
                         </div>
-                        
-                        <div>
-                            <label class="flex items-center space-x-3">
-                                <input type="checkbox" id="incluir-predicciones" checked class="text-blue-600 rounded">
-                                <span class="text-gray-700">Incluir predicciones de ML</span>
+                        <button onclick="limpiarFiltrosExport()" class="text-blue-600 hover:text-blue-700 text-sm font-semibold">
+                            <i class="fas fa-times mr-1"></i>Limpiar filtros
+                        </button>
+                    </div>
+                </div>
+
+                <!-- Opciones de Exportación -->
+                <div class="grid md:grid-cols-2 gap-6">
+                    <!-- Configuración de Formato -->
+                    <div class="bg-white rounded-xl shadow-lg p-8">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                            <i class="fas fa-file-export mr-2 text-blue-600"></i>Formato de Exportación
+                        </h2>
+                        <div class="space-y-4">
+                            <label class="flex items-start space-x-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-blue-50 transition-colors format-option">
+                                <input type="radio" name="formato" value="csv" checked class="text-blue-600 mt-1">
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <p class="font-bold text-gray-900">CSV</p>
+                                        <i class="fas fa-file-csv text-2xl text-green-600"></i>
+                                    </div>
+                                    <p class="text-sm text-gray-600">Archivo separado por comas, compatible con Excel y otras hojas de cálculo</p>
+                                    <div class="mt-2 text-xs text-gray-500">
+                                        <i class="fas fa-check-circle mr-1"></i>Universal • Ligero • Fácil de importar
+                                    </div>
+                                </div>
+                            </label>
+                            
+                            <label class="flex items-start space-x-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-purple-50 transition-colors format-option">
+                                <input type="radio" name="formato" value="json" class="text-purple-600 mt-1">
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <p class="font-bold text-gray-900">JSON</p>
+                                        <i class="fas fa-code text-2xl text-purple-600"></i>
+                                    </div>
+                                    <p class="text-sm text-gray-600">Formato estructurado ideal para APIs y procesamiento programático</p>
+                                    <div class="mt-2 text-xs text-gray-500">
+                                        <i class="fas fa-check-circle mr-1"></i>Estructurado • Legible • Para desarrolladores
+                                    </div>
+                                </div>
+                            </label>
+                            
+                            <label class="flex items-start space-x-3 p-4 border-2 rounded-lg cursor-pointer hover:bg-green-50 transition-colors format-option">
+                                <input type="radio" name="formato" value="excel" class="text-green-600 mt-1">
+                                <div class="flex-1">
+                                    <div class="flex items-center justify-between mb-1">
+                                        <p class="font-bold text-gray-900">Excel (.xlsx)</p>
+                                        <i class="fas fa-file-excel text-2xl text-green-700"></i>
+                                    </div>
+                                    <p class="text-sm text-gray-600">Archivo Excel con formato y múltiples hojas para análisis avanzado</p>
+                                    <div class="mt-2 text-xs text-gray-500">
+                                        <i class="fas fa-check-circle mr-1"></i>Profesional • Múltiples hojas • Con formato
+                                    </div>
+                                </div>
                             </label>
                         </div>
-                        
-                        <button id="btn-exportar" class="w-full bg-gradient-to-r from-green-600 to-blue-600 text-white py-4 rounded-lg font-bold text-lg hover:shadow-lg transform hover:scale-105 transition-all">
-                            <i class="fas fa-download mr-2"></i>Descargar Datos
+                    </div>
+
+                    <!-- Configuración de Campos -->
+                    <div class="bg-white rounded-xl shadow-lg p-8">
+                        <h2 class="text-2xl font-bold text-gray-900 mb-6">
+                            <i class="fas fa-list-check mr-2 text-purple-600"></i>Campos a Incluir
+                        </h2>
+                        <div class="space-y-3 max-h-96 overflow-y-auto pr-2">
+                            <!-- Datos Básicos -->
+                            <div class="bg-blue-50 rounded-lg p-3">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" id="campo-datos-basicos" checked class="text-blue-600 rounded w-5 h-5" onchange="toggleCamposSeccion('basicos', this.checked)">
+                                    <span class="font-bold text-gray-900">
+                                        <i class="fas fa-user mr-2"></i>Datos Básicos del Paciente
+                                    </span>
+                                </label>
+                                <div id="campos-basicos" class="ml-8 mt-2 space-y-2">
+                                    <label class="flex items-center space-x-2 text-sm">
+                                        <input type="checkbox" name="campo" value="nombre_completo" checked class="campo-basico">
+                                        <span>Nombre Completo</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 text-sm">
+                                        <input type="checkbox" name="campo" value="fecha_nacimiento" checked class="campo-basico">
+                                        <span>Fecha de Nacimiento</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 text-sm">
+                                        <input type="checkbox" name="campo" value="edad_meses" checked class="campo-basico">
+                                        <span>Edad (meses)</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 text-sm">
+                                        <input type="checkbox" name="campo" value="sexo" checked class="campo-basico">
+                                        <span>Sexo</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Mediciones Antropométricas -->
+                            <div class="bg-green-50 rounded-lg p-3">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" id="campo-mediciones" checked class="text-green-600 rounded w-5 h-5" onchange="toggleCamposSeccion('mediciones', this.checked)">
+                                    <span class="font-bold text-gray-900">
+                                        <i class="fas fa-ruler-vertical mr-2"></i>Mediciones Antropométricas
+                                    </span>
+                                </label>
+                                <div id="campos-mediciones" class="ml-8 mt-2 space-y-2">
+                                    <label class="flex items-center space-x-2 text-sm">
+                                        <input type="checkbox" name="campo" value="peso" checked class="campo-medicion">
+                                        <span>Peso (kg)</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 text-sm">
+                                        <input type="checkbox" name="campo" value="talla" checked class="campo-medicion">
+                                        <span>Talla (cm)</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 text-sm">
+                                        <input type="checkbox" name="campo" value="imc" checked class="campo-medicion">
+                                        <span>IMC</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 text-sm">
+                                        <input type="checkbox" name="campo" value="perimetro_cefalico" class="campo-medicion">
+                                        <span>Perímetro Cefálico</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 text-sm">
+                                        <input type="checkbox" name="campo" value="fecha_medicion" checked class="campo-medicion">
+                                        <span>Fecha de Medición</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Datos Sociodemográficos -->
+                            <div class="bg-yellow-50 rounded-lg p-3">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" id="campo-sociodem" checked class="text-yellow-600 rounded w-5 h-5" onchange="toggleCamposSeccion('sociodem', this.checked)">
+                                    <span class="font-bold text-gray-900">
+                                        <i class="fas fa-home mr-2"></i>Datos Sociodemográficos
+                                    </span>
+                                </label>
+                                <div id="campos-sociodem" class="ml-8 mt-2 space-y-2">
+                                    <label class="flex items-center space-x-2 text-sm">
+                                        <input type="checkbox" name="campo" value="zona" checked class="campo-sociodem">
+                                        <span>Zona (Urbana/Rural)</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 text-sm">
+                                        <input type="checkbox" name="campo" value="departamento" class="campo-sociodem">
+                                        <span>Departamento</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 text-sm">
+                                        <input type="checkbox" name="campo" value="municipio" class="campo-sociodem">
+                                        <span>Municipio</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 text-sm">
+                                        <input type="checkbox" name="campo" value="nivel_educativo_madre" class="campo-sociodem">
+                                        <span>Nivel Educativo Madre</span>
+                                    </label>
+                                </div>
+                            </div>
+
+                            <!-- Predicciones ML -->
+                            <div class="bg-purple-50 rounded-lg p-3">
+                                <label class="flex items-center space-x-3 cursor-pointer">
+                                    <input type="checkbox" id="campo-predicciones" checked class="text-purple-600 rounded w-5 h-5" onchange="toggleCamposSeccion('predicciones', this.checked)">
+                                    <span class="font-bold text-gray-900">
+                                        <i class="fas fa-brain mr-2"></i>Predicciones ML
+                                    </span>
+                                </label>
+                                <div id="campos-predicciones" class="ml-8 mt-2 space-y-2">
+                                    <label class="flex items-center space-x-2 text-sm">
+                                        <input type="checkbox" name="campo" value="nivel_riesgo" checked class="campo-prediccion">
+                                        <span>Nivel de Riesgo</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 text-sm">
+                                        <input type="checkbox" name="campo" value="probabilidad_riesgo" checked class="campo-prediccion">
+                                        <span>Probabilidad (%)</span>
+                                    </label>
+                                    <label class="flex items-center space-x-2 text-sm">
+                                        <input type="checkbox" name="campo" value="tipo_desnutricion" class="campo-prediccion">
+                                        <span>Tipo de Desnutrición</span>
+                                    </label>
+                                </div>
+                            </div>
+                        </div>
+
+                        <!-- Botones de Selección Rápida -->
+                        <div class="mt-4 flex gap-2">
+                            <button onclick="seleccionarTodosCampos(true)" class="flex-1 text-sm bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200">
+                                <i class="fas fa-check-double mr-1"></i>Todos
+                            </button>
+                            <button onclick="seleccionarTodosCampos(false)" class="flex-1 text-sm bg-gray-100 text-gray-700 py-2 rounded-lg hover:bg-gray-200">
+                                <i class="fas fa-times mr-1"></i>Ninguno
+                            </button>
+                        </div>
+                    </div>
+                </div>
+
+                <!-- Botón de Exportación -->
+                <div class="mt-8 bg-gradient-to-r from-green-500 to-blue-600 rounded-xl shadow-lg p-8">
+                    <div class="flex items-center justify-between">
+                        <div class="text-white">
+                            <h3 class="text-2xl font-bold mb-2">¿Listo para exportar?</h3>
+                            <p class="text-green-100">Se generará un archivo con los datos seleccionados según tus filtros y configuración</p>
+                        </div>
+                        <button id="btn-exportar" onclick="ejecutarExportacion()" class="bg-white text-blue-600 px-8 py-4 rounded-lg font-bold text-lg hover:shadow-2xl transform hover:scale-105 transition-all flex items-center space-x-3">
+                            <i class="fas fa-download text-2xl"></i>
+                            <span>Exportar Ahora</span>
                         </button>
+                    </div>
+                </div>
+
+                <!-- Estado de Exportación -->
+                <div id="export-status" class="hidden mt-6 bg-white rounded-xl shadow-lg p-6">
+                    <div class="flex items-center space-x-4">
+                        <div class="animate-spin rounded-full h-8 w-8 border-b-2 border-blue-600"></div>
+                        <div>
+                            <p class="font-semibold text-gray-900">Generando exportación...</p>
+                            <p class="text-sm text-gray-600">Procesando <span id="export-progress">0</span> registros</p>
+                        </div>
                     </div>
                 </div>
             </section>

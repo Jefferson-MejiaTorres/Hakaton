@@ -1275,3 +1275,198 @@ img:hover {
         font-size: 18px;
     }
 }
+
+/* ==========================================
+   ESTILOS PARA MÓDULO DE EXPORTACIÓN
+   ========================================== */
+
+/* Radio buttons de formato con efecto hover */
+.format-option {
+    transition: all var(--transition-base);
+}
+
+.format-option:has(input:checked) {
+    border-color: #3b82f6;
+    background-color: #eff6ff;
+    box-shadow: 0 0 0 3px rgba(59, 130, 246, 0.1);
+}
+
+.format-option:hover {
+    transform: translateY(-2px);
+    box-shadow: var(--shadow-md);
+}
+
+/* Checkboxes de campos con animación */
+input[type="checkbox"] {
+    transition: all var(--transition-fast);
+    cursor: pointer;
+}
+
+input[type="checkbox"]:hover {
+    transform: scale(1.1);
+}
+
+input[type="checkbox"]:checked {
+    animation: checkPulse 0.3s ease;
+}
+
+@keyframes checkPulse {
+    0% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(1.2);
+    }
+    100% {
+        transform: scale(1);
+    }
+}
+
+/* Secciones de campos con animación de despliegue */
+#campos-basicos,
+#campos-mediciones,
+#campos-sociodem,
+#campos-predicciones {
+    transition: all var(--transition-base);
+    overflow: hidden;
+}
+
+/* Botón de exportación con efecto especial */
+#btn-exportar {
+    position: relative;
+    overflow: hidden;
+}
+
+#btn-exportar::before {
+    content: '';
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    width: 0;
+    height: 0;
+    border-radius: 50%;
+    background: rgba(255, 255, 255, 0.3);
+    transform: translate(-50%, -50%);
+    transition: width 0.6s, height 0.6s;
+}
+
+#btn-exportar:hover::before {
+    width: 300px;
+    height: 300px;
+}
+
+/* Animación de estado de exportación */
+#export-status {
+    animation: slideInUp 0.3s ease;
+}
+
+@keyframes slideInUp {
+    from {
+        opacity: 0;
+        transform: translateY(20px);
+    }
+    to {
+        opacity: 1;
+        transform: translateY(0);
+    }
+}
+
+/* Resumen de resultados con efecto de entrada */
+#export-results-summary {
+    animation: expandIn 0.4s cubic-bezier(0.68, -0.55, 0.265, 1.55);
+}
+
+@keyframes expandIn {
+    from {
+        opacity: 0;
+        transform: scale(0.9);
+    }
+    to {
+        opacity: 1;
+        transform: scale(1);
+    }
+}
+
+/* Mejora visual para select y input en filtros */
+#export-fecha-inicio,
+#export-fecha-fin,
+#export-zona,
+#export-riesgo,
+#export-sexo {
+    transition: all var(--transition-base);
+}
+
+#export-fecha-inicio:focus,
+#export-fecha-fin:focus,
+#export-zona:focus,
+#export-riesgo:focus,
+#export-sexo:focus {
+    transform: translateY(-2px);
+    box-shadow: 0 4px 12px rgba(59, 130, 246, 0.15);
+}
+
+/* Scroll suave para lista de campos */
+.max-h-96 {
+    /* Fallback para navegadores modernos */
+    overflow-y: auto;
+}
+
+/* Estilos de scrollbar para navegadores basados en Webkit (Chrome, Safari, Edge) */
+.max-h-96::-webkit-scrollbar {
+    width: 8px;
+}
+
+.max-h-96::-webkit-scrollbar-track {
+    background: #f1f5f9;
+    border-radius: 4px;
+}
+
+.max-h-96::-webkit-scrollbar-thumb {
+    background: #cbd5e1;
+    border-radius: 4px;
+}
+
+.max-h-96::-webkit-scrollbar-thumb:hover {
+    background: #94a3b8;
+}
+
+/* Soporte para Firefox (opcional) */
+@supports (scrollbar-width: thin) {
+    .max-h-96 {
+        scrollbar-width: thin;
+        scrollbar-color: #cbd5e1 #f1f5f9;
+    }
+}
+
+/* Iconos de formato con color dinámico */
+.fa-file-csv {
+    transition: all var(--transition-fast);
+}
+
+.fa-file-excel {
+    transition: all var(--transition-fast);
+}
+
+.fa-code {
+    transition: all var(--transition-fast);
+}
+
+.format-option:hover .fa-file-csv,
+.format-option:hover .fa-file-excel,
+.format-option:hover .fa-code {
+    transform: scale(1.15) rotate(5deg);
+}
+
+/* Efecto de pulso para botón aplicar filtros */
+button[onclick="aplicarFiltrosExport()"]:active {
+    animation: buttonPulse 0.3s ease;
+}
+
+@keyframes buttonPulse {
+    0%, 100% {
+        transform: scale(1);
+    }
+    50% {
+        transform: scale(0.95);
+    }
+}

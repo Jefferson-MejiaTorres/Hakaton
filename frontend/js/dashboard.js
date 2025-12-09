@@ -620,7 +620,7 @@ window.showView = function(viewName) {
             const form = document.getElementById('form-registrar-paciente');
             if (form) form.reset();
         } else if (viewName === 'analytics') {
-            loadAnalytics();
+            cargarAnalisisAvanzado();
         } else if (viewName === 'exportar') {
             // Vista de exportar no requiere carga inicial
         } else if (viewName === 'reportes') {
@@ -651,8 +651,8 @@ function setupNavigation() {
         link.addEventListener('click', (e) => {
             const href = link.getAttribute('href');
             
-            // Si es link externo, permitir navegación normal
-            if (!href.startsWith('#')) return;
+            // Si es link externo o no tiene href, permitir navegación normal
+            if (!href || !href.startsWith('#')) return;
             
             e.preventDefault();
             
@@ -673,6 +673,10 @@ function setupNavigation() {
                     cargarPacientes();
                 } else if (href === '#agregar-medicion') {
                     setupBuscadorPacientes();
+                } else if (href === '#analytics') {
+                    cargarAnalisisAvanzado();
+                } else if (href === '#exportar') {
+                    cargarExportarDatos();
                 }
             }
             
@@ -2446,5 +2450,1126 @@ function seleccionarPacienteParaMedicion(ninoId, nombre, apellido) {
 // Exportar nueva función
 window.seleccionarPacienteParaMedicion = seleccionarPacienteParaMedicion;
 
+// ==========================================
+// ANÁLISIS AVANZADO (Rol Investigación)
+// ==========================================
+
+let analyticsCharts = {};
+
+// Función auxiliar: Calcular edad en meses
+function calcularEdadMeses(fechaNacimiento) {
+    const hoy = new Date();
+    const nacimiento = new Date(fechaNacimiento);
+    const diffTime = Math.abs(hoy - nacimiento);
+    const diffMonths = Math.floor(diffTime / (1000 * 60 * 60 * 24 * 30.44));
+    return diffMonths;
+}
+
+// Cargar Análisis Avanzado
+async function cargarAnalisisAvanzado() {
+    try {
+        console.log('🔍 Cargando análisis avanzado...');
+
+        // Configurar fechas por defecto (últimos 12 meses para tener más datos)
+        const hoy = new Date();
+        const hace12Meses = new Date();
+        hace12Meses.setMonth(hace12Meses.getMonth() - 12);
+
+        document.getElementById('fecha-inicio-analytics').value = hace12Meses.toISOString().split('T')[0];
+        document.getElementById('fecha-fin-analytics').value = hoy.toISOString().split('T')[0];
+
+        // Aplicar análisis inicial (sin filtros de fecha para obtener TODOS los datos)
+        await aplicarFiltrosAnalytics(true);
+
+    } catch (error) {
+        console.error('Error al cargar análisis avanzado:', error);
+    }
+}
+
+// Aplicar Filtros de Análisis
+async function aplicarFiltrosAnalytics(cargarTodos = false) {
+    try {
+        console.log('📊 Aplicando filtros de análisis...');
+
+        const fechaInicio = document.getElementById('fecha-inicio-analytics').value;
+        const fechaFin = document.getElementById('fecha-fin-analytics').value;
+        const zona = document.getElementById('zona-analytics').value;
+        const nivelRiesgo = document.getElementById('riesgo-analytics').value;
+
+        console.log('Filtros:', { fechaInicio, fechaFin, zona, nivelRiesgo, cargarTodos });
+
+        // PRIMERO: Obtener TODOS los niños (sin filtros complejos)
+        let query = supabase
+            .from('ninos')
+            .select('*')
+            .order('fecha_registro', { ascending: false });
+
+        // NO aplicar filtros de fecha en la carga inicial para ver si hay datos
+        if (!cargarTodos && fechaInicio) {
+            query = query.gte('fecha_registro', fechaInicio);
+        }
+        if (!cargarTodos && fechaFin) {
+            query = query.lte('fecha_registro', fechaFin);
+        }
+
+        const { data: ninos, error: errorNinos } = await query;
+
+        if (errorNinos) {
+            console.error('Error obteniendo niños:', errorNinos);
+            throw errorNinos;
+        }
+
+        console.log('✅ Niños obtenidos:', ninos?.length || 0);
+
+        if (!ninos || ninos.length === 0) {
+            console.warn('⚠️ No hay pacientes en la base de datos');
+            // Mostrar datos vacíos
+            const datosVacios = {
+                totalPacientes: 0,
+                porZona: { urbana: 0, rural: 0 },
+                porRiesgo: { alto: 0, medio: 0, bajo: 0, sin_evaluar: 0 },
+                porEdad: { '0-12': 0, '13-24': 0, '25-36': 0, '37-48': 0, '49-60': 0, '60+': 0 },
+                porSexo: { M: 0, F: 0 },
+                pesoTotal: 0,
+                tallaTotal: 0,
+                imcTotal: 0,
+                contadorMediciones: 0,
+                porMes: {},
+                estadisticasZona: {
+                    urbana: { total: 0, peso: 0, talla: 0, imc: 0, altoRiesgo: 0, contadorMediciones: 0 },
+                    rural: { total: 0, peso: 0, talla: 0, imc: 0, altoRiesgo: 0, contadorMediciones: 0 }
+                }
+            };
+            actualizarKPIsAnalytics(datosVacios);
+            generarGraficasAnalytics(datosVacios);
+            generarTablaEstadisticas(datosVacios);
+            return;
+        }
+
+        // SEGUNDO: Obtener datos relacionados para cada niño
+        const ninosIds = ninos.map(n => n.id);
+
+        // Obtener mediciones
+        const { data: mediciones } = await supabase
+            .from('mediciones_antropometricas')
+            .select('*')
+            .in('nino_id', ninosIds)
+            .order('fecha_medicion', { ascending: false });
+
+        console.log('✅ Mediciones obtenidas:', mediciones?.length || 0);
+
+        // Obtener datos sociodemográficos
+        const { data: sociodem } = await supabase
+            .from('datos_sociodemograficos')
+            .select('*')
+            .in('nino_id', ninosIds);
+
+        console.log('✅ Datos sociodem obtenidos:', sociodem?.length || 0);
+
+        // Obtener predicciones
+        const { data: predicciones } = await supabase
+            .from('predicciones')
+            .select('*')
+            .in('nino_id', ninosIds)
+            .order('fecha_prediccion', { ascending: false });
+
+        console.log('✅ Predicciones obtenidas:', predicciones?.length || 0);
+
+        // TERCERO: Combinar los datos
+        const pacientesCompletos = ninos.map(nino => {
+            // Obtener la medición más reciente
+            const medicionesNino = mediciones?.filter(m => m.nino_id === nino.id) || [];
+            const medicionReciente = medicionesNino.length > 0 ? [medicionesNino[0]] : [];
+
+            // Obtener datos sociodem
+            const sociodemNino = sociodem?.filter(s => s.nino_id === nino.id) || [];
+
+            // Obtener predicción más reciente
+            const prediccionesNino = predicciones?.filter(p => p.nino_id === nino.id) || [];
+            const prediccionReciente = prediccionesNino.length > 0 ? [prediccionesNino[0]] : [];
+
+            return {
+                ...nino,
+                mediciones_antropometricas: medicionReciente,
+                datos_sociodemograficos: sociodemNino,
+                predicciones: prediccionReciente
+            };
+        });
+
+        console.log('✅ Pacientes completos:', pacientesCompletos.length);
+        console.log('Muestra de datos:', pacientesCompletos.slice(0, 2));
+
+        // CUARTO: Filtrar por zona y riesgo (lado cliente)
+        let pacientesFiltrados = pacientesCompletos;
+
+        // Filtro por zona
+        if (zona) {
+            pacientesFiltrados = pacientesFiltrados.filter(p => {
+                const zonaP = p.datos_sociodemograficos?.[0]?.zona_residencia?.toLowerCase();
+                return zonaP === zona.toLowerCase();
+            });
+            console.log(`Después de filtro zona (${zona}):`, pacientesFiltrados.length);
+        }
+
+        // Filtro por riesgo
+        if (nivelRiesgo) {
+            pacientesFiltrados = pacientesFiltrados.filter(p => {
+                const riesgoP = p.predicciones?.[0]?.nivel_riesgo?.toLowerCase();
+                return riesgoP === nivelRiesgo.toLowerCase();
+            });
+            console.log(`Después de filtro riesgo (${nivelRiesgo}):`, pacientesFiltrados.length);
+        }
+
+        console.log('Total pacientes filtrados:', pacientesFiltrados.length);
+
+        // Procesar datos para análisis
+        const datosAnalisis = procesarDatosAnalytics(pacientesFiltrados);
+
+        // Actualizar KPIs
+        actualizarKPIsAnalytics(datosAnalisis);
+
+        // Generar gráficas
+        generarGraficasAnalytics(datosAnalisis);
+
+        // Generar tabla de estadísticas
+        generarTablaEstadisticas(datosAnalisis);
+
+    } catch (error) {
+        console.error('Error al aplicar filtros:', error);
+        alert('Error al cargar análisis: ' + error.message);
+    }
+}
+
+// Procesar Datos para Análisis
+function procesarDatosAnalytics(pacientes) {
+    console.log('🔄 Procesando datos de', pacientes.length, 'pacientes');
+
+    const datos = {
+        totalPacientes: pacientes.length,
+        porZona: { urbana: 0, rural: 0 },
+        porRiesgo: { alto: 0, medio: 0, bajo: 0, sin_evaluar: 0 },
+        porEdad: { '0-12': 0, '13-24': 0, '25-36': 0, '37-48': 0, '49-60': 0, '60+': 0 },
+        porSexo: { M: 0, F: 0 },
+        pesoTotal: 0,
+        tallaTotal: 0,
+        imcTotal: 0,
+        contadorMediciones: 0,
+        porMes: {},
+        estadisticasZona: {
+            urbana: { total: 0, peso: 0, talla: 0, imc: 0, altoRiesgo: 0, contadorMediciones: 0 },
+            rural: { total: 0, peso: 0, talla: 0, imc: 0, altoRiesgo: 0, contadorMediciones: 0 }
+        }
+    };
+
+    pacientes.forEach(paciente => {
+        // Zona - usar 'urbana' si no hay datos
+        const zonaBD = paciente.datos_sociodemograficos?.[0]?.zona_residencia;
+        const zona = zonaBD ? zonaBD.toLowerCase() : 'urbana';
+        
+        // Asegurar que la zona existe en el objeto
+        if (!datos.porZona[zona]) {
+            datos.porZona[zona] = 0;
+        }
+        datos.porZona[zona]++;
+
+        // Riesgo
+        const riesgoBD = paciente.predicciones?.[0]?.nivel_riesgo;
+        const riesgo = riesgoBD ? riesgoBD.toLowerCase() : 'sin_evaluar';
+        datos.porRiesgo[riesgo] = (datos.porRiesgo[riesgo] || 0) + 1;
+
+        // Edad
+        try {
+            const edadMeses = calcularEdadMeses(paciente.fecha_nacimiento);
+            if (edadMeses <= 12) datos.porEdad['0-12']++;
+            else if (edadMeses <= 24) datos.porEdad['13-24']++;
+            else if (edadMeses <= 36) datos.porEdad['25-36']++;
+            else if (edadMeses <= 48) datos.porEdad['37-48']++;
+            else if (edadMeses <= 60) datos.porEdad['49-60']++;
+            else datos.porEdad['60+']++;
+        } catch (error) {
+            console.warn('Error calculando edad para paciente:', paciente.id, error);
+        }
+
+        // Sexo
+        if (paciente.sexo) {
+            datos.porSexo[paciente.sexo] = (datos.porSexo[paciente.sexo] || 0) + 1;
+        }
+
+        // Mediciones - puede ser array o un solo objeto
+        const mediciones = Array.isArray(paciente.mediciones_antropometricas) 
+            ? paciente.mediciones_antropometricas 
+            : (paciente.mediciones_antropometricas ? [paciente.mediciones_antropometricas] : []);
+
+        if (mediciones.length > 0) {
+            // Usar la medición más reciente
+            const medicion = mediciones[0];
+            
+            if (medicion.peso) {
+                datos.pesoTotal += parseFloat(medicion.peso);
+                datos.contadorMediciones++;
+            }
+            if (medicion.talla) {
+                datos.tallaTotal += parseFloat(medicion.talla);
+            }
+            if (medicion.imc) {
+                datos.imcTotal += parseFloat(medicion.imc);
+            }
+
+            // Estadísticas por zona
+            const zonaKey = (zona === 'urbana' || zona === 'rural') ? zona : 'urbana';
+            if (datos.estadisticasZona[zonaKey]) {
+                datos.estadisticasZona[zonaKey].total++;
+                datos.estadisticasZona[zonaKey].contadorMediciones++;
+                
+                if (medicion.peso) {
+                    datos.estadisticasZona[zonaKey].peso += parseFloat(medicion.peso);
+                }
+                if (medicion.talla) {
+                    datos.estadisticasZona[zonaKey].talla += parseFloat(medicion.talla);
+                }
+                if (medicion.imc) {
+                    datos.estadisticasZona[zonaKey].imc += parseFloat(medicion.imc);
+                }
+                
+                if (riesgo === 'alto') {
+                    datos.estadisticasZona[zonaKey].altoRiesgo++;
+                }
+            }
+        }
+
+        // Por mes
+        try {
+            const fecha = new Date(paciente.fecha_registro);
+            const mes = fecha.toLocaleDateString('es-ES', { year: 'numeric', month: 'short' });
+            datos.porMes[mes] = (datos.porMes[mes] || 0) + 1;
+        } catch (error) {
+            console.warn('Error procesando fecha para paciente:', paciente.id, error);
+        }
+    });
+
+    console.log('✅ Datos procesados:', {
+        total: datos.totalPacientes,
+        zonas: datos.porZona,
+        riesgos: datos.porRiesgo,
+        mediciones: datos.contadorMediciones
+    });
+
+    return datos;
+}
+
+// Actualizar KPIs
+function actualizarKPIsAnalytics(datos) {
+    document.getElementById('kpi-total-pacientes').textContent = datos.totalPacientes;
+    
+    const pesoProm = datos.contadorMediciones > 0 ? (datos.pesoTotal / datos.contadorMediciones).toFixed(1) : '0';
+    document.getElementById('kpi-peso-promedio').innerHTML = `${pesoProm} <span class="text-lg">kg</span>`;
+    
+    const tallaProm = datos.contadorMediciones > 0 ? (datos.tallaTotal / datos.contadorMediciones).toFixed(1) : '0';
+    document.getElementById('kpi-talla-promedio').innerHTML = `${tallaProm} <span class="text-lg">cm</span>`;
+    
+    const imcProm = datos.contadorMediciones > 0 ? (datos.imcTotal / datos.contadorMediciones).toFixed(1) : '0';
+    document.getElementById('kpi-imc-promedio').textContent = imcProm;
+
+    // Contadores de zona
+    document.getElementById('zona-urbana-count').textContent = datos.porZona.urbana || 0;
+    document.getElementById('zona-rural-count').textContent = datos.porZona.rural || 0;
+
+    // Contadores de riesgo
+    document.getElementById('riesgo-alto-count').textContent = datos.porRiesgo.alto || 0;
+    document.getElementById('riesgo-medio-count').textContent = datos.porRiesgo.medio || 0;
+    document.getElementById('riesgo-bajo-count').textContent = datos.porRiesgo.bajo || 0;
+
+    // Contadores de sexo
+    document.getElementById('sexo-femenino-count').textContent = datos.porSexo.F || 0;
+    document.getElementById('sexo-masculino-count').textContent = datos.porSexo.M || 0;
+}
+
+// Generar Gráficas
+function generarGraficasAnalytics(datos) {
+    // Destruir gráficas existentes
+    Object.values(analyticsCharts).forEach(chart => chart?.destroy());
+    analyticsCharts = {};
+
+    // 1. Gráfica de Zona
+    const ctxZona = document.getElementById('chart-zona-analytics')?.getContext('2d');
+    if (ctxZona) {
+        analyticsCharts.zona = new Chart(ctxZona, {
+            type: 'doughnut',
+            data: {
+                labels: ['Zona Urbana', 'Zona Rural'],
+                datasets: [{
+                    data: [datos.porZona.urbana || 0, datos.porZona.rural || 0],
+                    backgroundColor: ['#3B82F6', '#10B981'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 20, font: { size: 12, weight: 'bold' } } },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const porcentaje = ((context.parsed / total) * 100).toFixed(1);
+                                return `${context.label}: ${context.parsed} (${porcentaje}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 2. Gráfica de Riesgo
+    const ctxRiesgo = document.getElementById('chart-riesgo-analytics')?.getContext('2d');
+    if (ctxRiesgo) {
+        analyticsCharts.riesgo = new Chart(ctxRiesgo, {
+            type: 'pie',
+            data: {
+                labels: ['Alto Riesgo', 'Riesgo Medio', 'Bajo Riesgo', 'Sin Evaluar'],
+                datasets: [{
+                    data: [
+                        datos.porRiesgo.alto || 0,
+                        datos.porRiesgo.medio || 0,
+                        datos.porRiesgo.bajo || 0,
+                        datos.porRiesgo.sin_evaluar || 0
+                    ],
+                    backgroundColor: ['#EF4444', '#F59E0B', '#10B981', '#9CA3AF'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 20, font: { size: 12, weight: 'bold' } } },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const porcentaje = ((context.parsed / total) * 100).toFixed(1);
+                                return `${context.label}: ${context.parsed} (${porcentaje}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 3. Gráfica de Edad
+    const ctxEdad = document.getElementById('chart-edad-analytics')?.getContext('2d');
+    if (ctxEdad) {
+        analyticsCharts.edad = new Chart(ctxEdad, {
+            type: 'bar',
+            data: {
+                labels: ['0-12 meses', '13-24 meses', '25-36 meses', '37-48 meses', '49-60 meses', '60+ meses'],
+                datasets: [{
+                    label: 'Número de Pacientes',
+                    data: [
+                        datos.porEdad['0-12'],
+                        datos.porEdad['13-24'],
+                        datos.porEdad['25-36'],
+                        datos.porEdad['37-48'],
+                        datos.porEdad['49-60'],
+                        datos.porEdad['60+']
+                    ],
+                    backgroundColor: 'rgba(147, 51, 234, 0.8)',
+                    borderColor: '#9333EA',
+                    borderWidth: 2,
+                    borderRadius: 8
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { backgroundColor: '#1F2937', titleFont: { size: 14 }, bodyFont: { size: 13 } }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, font: { size: 11 } },
+                        grid: { color: '#E5E7EB' }
+                    },
+                    x: {
+                        ticks: { font: { size: 11 } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+
+    // 4. Gráfica de Sexo
+    const ctxSexo = document.getElementById('chart-sexo-analytics')?.getContext('2d');
+    if (ctxSexo) {
+        analyticsCharts.sexo = new Chart(ctxSexo, {
+            type: 'doughnut',
+            data: {
+                labels: ['Femenino', 'Masculino'],
+                datasets: [{
+                    data: [datos.porSexo.F || 0, datos.porSexo.M || 0],
+                    backgroundColor: ['#EC4899', '#3B82F6'],
+                    borderWidth: 0
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { position: 'bottom', labels: { padding: 20, font: { size: 12, weight: 'bold' } } },
+                    tooltip: {
+                        callbacks: {
+                            label: (context) => {
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const porcentaje = ((context.parsed / total) * 100).toFixed(1);
+                                return `${context.label}: ${context.parsed} (${porcentaje}%)`;
+                            }
+                        }
+                    }
+                }
+            }
+        });
+    }
+
+    // 5. Gráfica de Tendencia
+    const ctxTendencia = document.getElementById('chart-tendencia-analytics')?.getContext('2d');
+    if (ctxTendencia) {
+        const meses = Object.keys(datos.porMes).sort();
+        const valores = meses.map(mes => datos.porMes[mes]);
+
+        analyticsCharts.tendencia = new Chart(ctxTendencia, {
+            type: 'line',
+            data: {
+                labels: meses,
+                datasets: [{
+                    label: 'Registros por Mes',
+                    data: valores,
+                    backgroundColor: 'rgba(99, 102, 241, 0.1)',
+                    borderColor: '#6366F1',
+                    borderWidth: 3,
+                    fill: true,
+                    tension: 0.4,
+                    pointBackgroundColor: '#6366F1',
+                    pointBorderColor: '#fff',
+                    pointBorderWidth: 2,
+                    pointRadius: 5,
+                    pointHoverRadius: 7
+                }]
+            },
+            options: {
+                responsive: true,
+                maintainAspectRatio: false,
+                plugins: {
+                    legend: { display: false },
+                    tooltip: { backgroundColor: '#1F2937', titleFont: { size: 14 }, bodyFont: { size: 13 } }
+                },
+                scales: {
+                    y: {
+                        beginAtZero: true,
+                        ticks: { stepSize: 1, font: { size: 11 } },
+                        grid: { color: '#E5E7EB' }
+                    },
+                    x: {
+                        ticks: { font: { size: 11 } },
+                        grid: { display: false }
+                    }
+                }
+            }
+        });
+    }
+}
+
+// Generar Tabla de Estadísticas
+function generarTablaEstadisticas(datos) {
+    const tbody = document.getElementById('tabla-stats-zona');
+    if (!tbody) return;
+
+    const zonas = ['urbana', 'rural'];
+    const rows = zonas.map(zona => {
+        const stats = datos.estadisticasZona[zona];
+        
+        // Usar contadorMediciones para promedios, no total
+        const contadorMed = stats.contadorMediciones || 0;
+        const pesoProm = contadorMed > 0 ? (stats.peso / contadorMed).toFixed(1) : '0.0';
+        const tallaProm = contadorMed > 0 ? (stats.talla / contadorMed).toFixed(1) : '0.0';
+        const imcProm = contadorMed > 0 ? (stats.imc / contadorMed).toFixed(1) : '0.0';
+        const porcAltoRiesgo = stats.total > 0 ? ((stats.altoRiesgo / stats.total) * 100).toFixed(1) : '0.0';
+
+        return `
+            <tr class="hover:bg-gray-50 transition-colors">
+                <td class="px-6 py-4 font-semibold text-gray-900 capitalize">
+                    <i class="fas fa-map-marker-alt mr-2 ${zona === 'urbana' ? 'text-blue-600' : 'text-emerald-600'}"></i>
+                    ${zona}
+                </td>
+                <td class="px-6 py-4 text-center font-bold text-gray-900">${stats.total}</td>
+                <td class="px-6 py-4 text-center text-blue-600 font-semibold">${pesoProm} kg</td>
+                <td class="px-6 py-4 text-center text-emerald-600 font-semibold">${tallaProm} cm</td>
+                <td class="px-6 py-4 text-center text-purple-600 font-semibold">${imcProm}</td>
+                <td class="px-6 py-4 text-center">
+                    <span class="px-3 py-1 bg-red-100 text-red-700 rounded-full text-sm font-bold">
+                        ${stats.altoRiesgo}
+                    </span>
+                </td>
+                <td class="px-6 py-4 text-center">
+                    <span class="px-3 py-1 ${porcAltoRiesgo > 30 ? 'bg-red-100 text-red-700' : porcAltoRiesgo > 15 ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'} rounded-full text-sm font-bold">
+                        ${porcAltoRiesgo}%
+                    </span>
+                </td>
+            </tr>
+        `;
+    }).join('');
+
+    tbody.innerHTML = rows;
+}
+
+// Event Listeners para Analytics
+document.addEventListener('DOMContentLoaded', () => {
+    // Botón aplicar filtros
+    const btnAplicar = document.getElementById('btn-aplicar-filtros-analytics');
+    if (btnAplicar) {
+        btnAplicar.addEventListener('click', aplicarFiltrosAnalytics);
+    }
+
+    // Botón limpiar filtros
+    const btnLimpiar = document.getElementById('btn-limpiar-filtros-analytics');
+    if (btnLimpiar) {
+        btnLimpiar.addEventListener('click', () => {
+            document.getElementById('fecha-inicio-analytics').value = '';
+            document.getElementById('fecha-fin-analytics').value = '';
+            document.getElementById('zona-analytics').value = '';
+            document.getElementById('riesgo-analytics').value = '';
+            cargarAnalisisAvanzado();
+        });
+    }
+
+    // Botón exportar tabla
+    const btnExportar = document.getElementById('btn-exportar-tabla-analytics');
+    if (btnExportar) {
+        btnExportar.addEventListener('click', () => {
+            alert('Función de exportación disponible en la sección "Exportar Datos"');
+        });
+    }
+});
+
+// Exportar funciones
+window.cargarAnalisisAvanzado = cargarAnalisisAvanzado;
+window.aplicarFiltrosAnalytics = aplicarFiltrosAnalytics;
+
 // Inicializar
 setupFiltros();
+
+// ==========================================
+// === MÓDULO DE EXPORTACIÓN DE DATOS ===
+// ==========================================
+
+// Variable global para almacenar datos filtrados
+let datosParaExportar = [];
+
+/**
+ * Cargar vista de exportación
+ */
+async function cargarExportarDatos() {
+    console.log('📤 Cargando módulo de exportación...');
+    
+    // Configurar fechas por defecto (últimos 12 meses)
+    const fechaFin = new Date();
+    const fechaInicio = new Date();
+    fechaInicio.setMonth(fechaInicio.getMonth() - 12);
+    
+    document.getElementById('export-fecha-inicio').value = fechaInicio.toISOString().split('T')[0];
+    document.getElementById('export-fecha-fin').value = fechaFin.toISOString().split('T')[0];
+    
+    // Cargar datos iniciales
+    await aplicarFiltrosExport();
+}
+
+/**
+ * Aplicar filtros y cargar datos para exportación
+ */
+async function aplicarFiltrosExport() {
+    console.log('🔍 Aplicando filtros de exportación...');
+    
+    try {
+        // Obtener valores de filtros
+        const fechaInicio = document.getElementById('export-fecha-inicio').value;
+        const fechaFin = document.getElementById('export-fecha-fin').value;
+        const zona = document.getElementById('export-zona').value;
+        const riesgo = document.getElementById('export-riesgo').value;
+        const sexo = document.getElementById('export-sexo').value;
+        
+        // Paso 1: Obtener todos los niños
+        let queryNinos = supabase
+            .from('ninos')
+            .select('*');
+        
+        if (sexo) {
+            queryNinos = queryNinos.eq('sexo', sexo);
+        }
+        
+        const { data: ninos, error: errorNinos } = await queryNinos;
+        
+        if (errorNinos) throw errorNinos;
+        
+        console.log(`✅ Niños obtenidos: ${ninos?.length || 0}`);
+        
+        if (!ninos || ninos.length === 0) {
+            datosParaExportar = [];
+            actualizarResumenExport(0, 'No hay datos para los filtros seleccionados');
+            return;
+        }
+        
+        const ninosIds = ninos.map(n => n.id);
+        
+        // Paso 2: Obtener mediciones
+        let queryMediciones = supabase
+            .from('mediciones_antropometricas')
+            .select('*')
+            .in('nino_id', ninosIds);
+        
+        if (fechaInicio) {
+            queryMediciones = queryMediciones.gte('fecha_medicion', fechaInicio);
+        }
+        if (fechaFin) {
+            queryMediciones = queryMediciones.lte('fecha_medicion', fechaFin);
+        }
+        
+        const { data: mediciones, error: errorMediciones } = await queryMediciones;
+        
+        if (errorMediciones) throw errorMediciones;
+        
+        console.log(`✅ Mediciones obtenidas: ${mediciones?.length || 0}`);
+        
+        // Paso 3: Obtener datos sociodemográficos
+        let querySociodem = supabase
+            .from('datos_sociodemograficos')
+            .select('*')
+            .in('nino_id', ninosIds);
+        
+        if (zona) {
+            querySociodem = querySociodem.eq('zona', zona);
+        }
+        
+        const { data: sociodem, error: errorSociodem } = await querySociodem;
+        
+        if (errorSociodem) throw errorSociodem;
+        
+        console.log(`✅ Datos sociodemográficos obtenidos: ${sociodem?.length || 0}`);
+        
+        // Paso 4: Obtener predicciones
+        let queryPredicciones = supabase
+            .from('predicciones')
+            .select('*')
+            .in('nino_id', ninosIds);
+        
+        if (riesgo) {
+            queryPredicciones = queryPredicciones.eq('nivel_riesgo', riesgo);
+        }
+        
+        const { data: predicciones, error: errorPredicciones } = await queryPredicciones;
+        
+        if (errorPredicciones) throw errorPredicciones;
+        
+        console.log(`✅ Predicciones obtenidas: ${predicciones?.length || 0}`);
+        
+        // Paso 5: Combinar datos
+        datosParaExportar = ninos.map(nino => {
+            const medicion = mediciones?.find(m => m.nino_id === nino.id);
+            const datos_socio = sociodem?.find(s => s.nino_id === nino.id);
+            const prediccion = predicciones?.find(p => p.nino_id === nino.id);
+            
+            return {
+                nino,
+                medicion: medicion || null,
+                datos_socio: datos_socio || null,
+                prediccion: prediccion || null
+            };
+        }).filter(item => {
+            // Aplicar filtros adicionales
+            if (zona && (!item.datos_socio || item.datos_socio.zona !== zona)) return false;
+            if (riesgo && (!item.prediccion || item.prediccion.nivel_riesgo !== riesgo)) return false;
+            if (fechaInicio && item.medicion && item.medicion.fecha_medicion < fechaInicio) return false;
+            if (fechaFin && item.medicion && item.medicion.fecha_medicion > fechaFin) return false;
+            
+            return true;
+        });
+        
+        console.log(`✅ Datos combinados y filtrados: ${datosParaExportar.length}`);
+        
+        // Actualizar resumen
+        const filtrosTexto = construirTextoFiltros(fechaInicio, fechaFin, zona, riesgo, sexo);
+        actualizarResumenExport(datosParaExportar.length, filtrosTexto);
+        
+    } catch (error) {
+        console.error('❌ Error al cargar datos para exportar:', error);
+        alert('Error al cargar datos. Por favor, intenta de nuevo.');
+        datosParaExportar = [];
+        actualizarResumenExport(0, 'Error al cargar datos');
+    }
+}
+
+/**
+ * Construir texto descriptivo de filtros aplicados
+ */
+function construirTextoFiltros(fechaInicio, fechaFin, zona, riesgo, sexo) {
+    const filtros = [];
+    
+    if (fechaInicio || fechaFin) {
+        if (fechaInicio && fechaFin) {
+            filtros.push(`Período: ${new Date(fechaInicio).toLocaleDateString('es-ES')} - ${new Date(fechaFin).toLocaleDateString('es-ES')}`);
+        } else if (fechaInicio) {
+            filtros.push(`Desde: ${new Date(fechaInicio).toLocaleDateString('es-ES')}`);
+        } else {
+            filtros.push(`Hasta: ${new Date(fechaFin).toLocaleDateString('es-ES')}`);
+        }
+    }
+    
+    if (zona) filtros.push(`Zona: ${zona}`);
+    if (riesgo) filtros.push(`Riesgo: ${riesgo}`);
+    if (sexo) filtros.push(`Sexo: ${sexo === 'M' ? 'Masculino' : 'Femenino'}`);
+    
+    return filtros.length > 0 ? filtros.join(' • ') : 'Sin filtros aplicados';
+}
+
+/**
+ * Actualizar resumen de exportación
+ */
+function actualizarResumenExport(total, filtrosTexto) {
+    const summary = document.getElementById('export-results-summary');
+    const totalElement = document.getElementById('export-total-registros');
+    const filtrosElement = document.getElementById('export-filtros-aplicados');
+    
+    if (summary && totalElement && filtrosElement) {
+        totalElement.textContent = total;
+        filtrosElement.textContent = filtrosTexto;
+        
+        if (total > 0) {
+            summary.classList.remove('hidden');
+        } else {
+            summary.classList.add('hidden');
+        }
+    }
+}
+
+/**
+ * Limpiar todos los filtros
+ */
+function limpiarFiltrosExport() {
+    const fechaFin = new Date();
+    const fechaInicio = new Date();
+    fechaInicio.setMonth(fechaInicio.getMonth() - 12);
+    
+    document.getElementById('export-fecha-inicio').value = fechaInicio.toISOString().split('T')[0];
+    document.getElementById('export-fecha-fin').value = fechaFin.toISOString().split('T')[0];
+    document.getElementById('export-zona').value = '';
+    document.getElementById('export-riesgo').value = '';
+    document.getElementById('export-sexo').value = '';
+    
+    aplicarFiltrosExport();
+}
+
+/**
+ * Toggle campos de una sección
+ */
+function toggleCamposSeccion(seccion, checked) {
+    const campos = document.querySelectorAll(`.campo-${seccion}`);
+    campos.forEach(campo => {
+        campo.checked = checked;
+    });
+}
+
+/**
+ * Seleccionar todos o ningún campo
+ */
+function seleccionarTodosCampos(seleccionar) {
+    const checkboxes = document.querySelectorAll('input[name="campo"]');
+    checkboxes.forEach(cb => {
+        cb.checked = seleccionar;
+    });
+    
+    // También actualizar checkboxes de secciones
+    document.getElementById('campo-datos-basicos').checked = seleccionar;
+    document.getElementById('campo-mediciones').checked = seleccionar;
+    document.getElementById('campo-sociodem').checked = seleccionar;
+    document.getElementById('campo-predicciones').checked = seleccionar;
+}
+
+/**
+ * Ejecutar exportación según formato seleccionado
+ */
+async function ejecutarExportacion() {
+    if (datosParaExportar.length === 0) {
+        alert('No hay datos para exportar. Por favor, aplica filtros primero.');
+        return;
+    }
+    
+    // Mostrar estado de carga
+    const statusDiv = document.getElementById('export-status');
+    const progressSpan = document.getElementById('export-progress');
+    statusDiv.classList.remove('hidden');
+    progressSpan.textContent = datosParaExportar.length;
+    
+    try {
+        // Obtener formato seleccionado
+        const formato = document.querySelector('input[name="formato"]:checked').value;
+        
+        // Obtener campos seleccionados
+        const camposSeleccionados = Array.from(document.querySelectorAll('input[name="campo"]:checked'))
+            .map(cb => cb.value);
+        
+        if (camposSeleccionados.length === 0) {
+            alert('Por favor, selecciona al menos un campo para exportar.');
+            statusDiv.classList.add('hidden');
+            return;
+        }
+        
+        console.log('📋 Exportando en formato:', formato);
+        console.log('📋 Campos seleccionados:', camposSeleccionados);
+        
+        // Ejecutar exportación según formato
+        switch (formato) {
+            case 'csv':
+                exportarCSV(datosParaExportar, camposSeleccionados);
+                break;
+            case 'json':
+                exportarJSON(datosParaExportar, camposSeleccionados);
+                break;
+            case 'excel':
+                exportarExcel(datosParaExportar, camposSeleccionados);
+                break;
+            default:
+                alert('Formato no válido');
+        }
+        
+        // Ocultar estado después de 2 segundos
+        setTimeout(() => {
+            statusDiv.classList.add('hidden');
+        }, 2000);
+        
+    } catch (error) {
+        console.error('❌ Error al exportar:', error);
+        alert('Error al exportar datos. Por favor, intenta de nuevo.');
+        statusDiv.classList.add('hidden');
+    }
+}
+
+/**
+ * Exportar datos a formato CSV
+ */
+function exportarCSV(datos, campos) {
+    console.log('📊 Generando archivo CSV...');
+    
+    // Construir encabezados
+    const headers = campos.map(campo => obtenerNombreCampo(campo));
+    
+    // Construir filas
+    const rows = datos.map(item => {
+        return campos.map(campo => {
+            const valor = obtenerValorCampo(item, campo);
+            // Escapar comas y comillas
+            const valorStr = String(valor || '');
+            if (valorStr.includes(',') || valorStr.includes('"') || valorStr.includes('\n')) {
+                return `"${valorStr.replace(/"/g, '""')}"`;
+            }
+            return valorStr;
+        });
+    });
+    
+    // Combinar todo
+    const csvContent = [
+        headers.join(','),
+        ...rows.map(row => row.join(','))
+    ].join('\n');
+    
+    // Descargar archivo
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    descargarArchivo(blob, `SIDI_Export_${obtenerTimestamp()}.csv`);
+    
+    console.log('✅ Archivo CSV generado y descargado');
+}
+
+/**
+ * Exportar datos a formato JSON
+ */
+function exportarJSON(datos, campos) {
+    console.log('📊 Generando archivo JSON...');
+    
+    // Construir objetos solo con campos seleccionados
+    const jsonData = datos.map(item => {
+        const obj = {};
+        campos.forEach(campo => {
+            obj[campo] = obtenerValorCampo(item, campo);
+        });
+        return obj;
+    });
+    
+    // Crear JSON con formato legible
+    const jsonContent = JSON.stringify({
+        metadata: {
+            fecha_exportacion: new Date().toISOString(),
+            total_registros: datos.length,
+            campos_incluidos: campos
+        },
+        datos: jsonData
+    }, null, 2);
+    
+    // Descargar archivo
+    const blob = new Blob([jsonContent], { type: 'application/json;charset=utf-8;' });
+    descargarArchivo(blob, `SIDI_Export_${obtenerTimestamp()}.json`);
+    
+    console.log('✅ Archivo JSON generado y descargado');
+}
+
+/**
+ * Exportar datos a formato Excel (CSV con formato mejorado)
+ */
+function exportarExcel(datos, campos) {
+    console.log('📊 Generando archivo Excel...');
+    
+    // Para Excel usamos formato CSV con separador de punto y coma
+    // y configuración compatible con Excel
+    
+    // Construir encabezados
+    const headers = campos.map(campo => obtenerNombreCampo(campo));
+    
+    // Construir filas
+    const rows = datos.map(item => {
+        return campos.map(campo => {
+            const valor = obtenerValorCampo(item, campo);
+            const valorStr = String(valor || '');
+            // Usar punto y coma como separador para Excel
+            if (valorStr.includes(';') || valorStr.includes('"') || valorStr.includes('\n')) {
+                return `"${valorStr.replace(/"/g, '""')}"`;
+            }
+            return valorStr;
+        });
+    });
+    
+    // Combinar con separador de punto y coma
+    const csvContent = [
+        headers.join(';'),
+        ...rows.map(row => row.join(';'))
+    ].join('\n');
+    
+    // Descargar archivo con extensión .csv (Excel lo abrirá automáticamente)
+    const blob = new Blob(['\ufeff' + csvContent], { type: 'text/csv;charset=utf-8;' });
+    descargarArchivo(blob, `SIDI_Export_Excel_${obtenerTimestamp()}.csv`);
+    
+    console.log('✅ Archivo Excel generado y descargado');
+}
+
+/**
+ * Obtener nombre legible de un campo
+ */
+function obtenerNombreCampo(campo) {
+    const nombres = {
+        // Datos básicos
+        'nombre_completo': 'Nombre Completo',
+        'fecha_nacimiento': 'Fecha de Nacimiento',
+        'edad_meses': 'Edad (meses)',
+        'sexo': 'Sexo',
+        // Mediciones
+        'peso': 'Peso (kg)',
+        'talla': 'Talla (cm)',
+        'imc': 'IMC',
+        'perimetro_cefalico': 'Perímetro Cefálico (cm)',
+        'fecha_medicion': 'Fecha de Medición',
+        // Sociodemográficos
+        'zona': 'Zona',
+        'departamento': 'Departamento',
+        'municipio': 'Municipio',
+        'nivel_educativo_madre': 'Nivel Educativo Madre',
+        // Predicciones
+        'nivel_riesgo': 'Nivel de Riesgo',
+        'probabilidad_riesgo': 'Probabilidad (%)',
+        'tipo_desnutricion': 'Tipo de Desnutrición'
+    };
+    
+    return nombres[campo] || campo;
+}
+
+/**
+ * Obtener valor de un campo desde los datos combinados
+ */
+function obtenerValorCampo(item, campo) {
+    const { nino, medicion, datos_socio, prediccion } = item;
+    
+    // Calcular edad en meses si se solicita
+    if (campo === 'edad_meses' && nino.fecha_nacimiento) {
+        const edad = calcularEdadMeses(nino.fecha_nacimiento);
+        return edad;
+    }
+    
+    // Nombre completo (concatenar nombre y apellido)
+    if (campo === 'nombre_completo') {
+        return `${nino.nombre || ''} ${nino.apellido || ''}`.trim();
+    }
+    
+    // Otros datos básicos del niño
+    if (['fecha_nacimiento', 'sexo'].includes(campo)) {
+        return nino[campo] || '';
+    }
+    
+    // Mediciones antropométricas
+    if (['peso', 'talla', 'imc', 'perimetro_cefalico', 'fecha_medicion'].includes(campo)) {
+        return medicion ? medicion[campo] || '' : '';
+    }
+    
+    // Datos sociodemográficos
+    if (['zona', 'departamento', 'municipio', 'nivel_educativo_madre'].includes(campo)) {
+        return datos_socio ? datos_socio[campo] || '' : '';
+    }
+    
+    // Predicciones
+    if (['nivel_riesgo', 'probabilidad_riesgo', 'tipo_desnutricion'].includes(campo)) {
+        if (!prediccion) return '';
+        if (campo === 'probabilidad_riesgo') {
+            return prediccion.probabilidad_riesgo ? `${(prediccion.probabilidad_riesgo * 100).toFixed(1)}%` : '';
+        }
+        return prediccion[campo] || '';
+    }
+    
+    return '';
+}
+
+/**
+ * Descargar archivo
+ */
+function descargarArchivo(blob, nombreArchivo) {
+    const url = URL.createObjectURL(blob);
+    const link = document.createElement('a');
+    link.href = url;
+    link.download = nombreArchivo;
+    document.body.appendChild(link);
+    link.click();
+    document.body.removeChild(link);
+    URL.revokeObjectURL(url);
+}
+
+/**
+ * Obtener timestamp para nombre de archivo
+ */
+function obtenerTimestamp() {
+    const now = new Date();
+    const year = now.getFullYear();
+    const month = String(now.getMonth() + 1).padStart(2, '0');
+    const day = String(now.getDate()).padStart(2, '0');
+    const hours = String(now.getHours()).padStart(2, '0');
+    const minutes = String(now.getMinutes()).padStart(2, '0');
+    
+    return `${year}${month}${day}_${hours}${minutes}`;
+}
+
+// Exportar funciones al objeto window
+window.cargarExportarDatos = cargarExportarDatos;
+window.aplicarFiltrosExport = aplicarFiltrosExport;
+window.limpiarFiltrosExport = limpiarFiltrosExport;
+window.toggleCamposSeccion = toggleCamposSeccion;
+window.seleccionarTodosCampos = seleccionarTodosCampos;
+window.ejecutarExportacion = ejecutarExportacion;
+
+console.log('✅ Módulo de exportación cargado correctamente');

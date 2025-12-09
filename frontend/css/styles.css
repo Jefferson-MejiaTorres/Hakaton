@@ -467,6 +467,19 @@ select option[value=""] {
     animation: scaleIn 0.3s var(--transition-base);
 }
 
+/* Screen reader only - para accesibilidad */
+.sr-only {
+    position: absolute;
+    width: 1px;
+    height: 1px;
+    padding: 0;
+    margin: -1px;
+    overflow: hidden;
+    clip: rect(0, 0, 0, 0);
+    white-space: nowrap;
+    border-width: 0;
+}
+
 /* Animación para el resultado */
 #resultado {
     animation: slideInUp 0.6s var(--transition-base);

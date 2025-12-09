@@ -14,6 +14,9 @@ Sistema de detección temprana de desnutrición infantil en Norte de Santander m
 ### 🚀 Estado Actual
 
 - ✅ **Frontend:** Desplegado en Vercel
+- ✅ **Sistema de Roles:** Implementado (3 roles diferenciados)
+- ✅ **Autenticación:** Supabase Auth funcionando
+- ✅ **Dashboard:** Con gráficas Chart.js
 - ✅ **Base de Datos:** Supabase (PostgreSQL)
 - ✅ **Predicción SQL:** Función implementada en Supabase
 - 🔄 **Backend Python:** En desarrollo (FastAPI)
@@ -25,12 +28,16 @@ Sistema de detección temprana de desnutrición infantil en Norte de Santander m
 ```
 Hakaton/
 ├── frontend/               # Aplicación web
-│   ├── index.html
+│   ├── index.html         # Landing con selector de rol
+│   ├── login.html         # Autenticación
+│   ├── register.html      # Registro de usuarios
+│   ├── dashboard.html     # Dashboard (protegido)
+│   ├── about.html         # Información
 │   ├── css/styles.css
-│   ├── js/
-│   │   ├── script.js
-│   │   └── supabase-integration.js
-│   └── vercel.json
+│   └── js/
+│       ├── auth.js                    # Módulo de autenticación
+│       ├── dashboard.js               # Lógica del dashboard
+│       └── supabase-integration.js    # Integración BD
 │
 ├── backend/               # Backend y ML
 │   ├── app/              # FastAPI app
@@ -44,6 +51,10 @@ Hakaton/
 │   └── README.md
 │
 └── docs/                 # Documentación académica
+    ├── ROLES_SISTEMA.md          # ⭐ Sistema de roles
+    ├── PROYECTO_COMPLETO.md
+    ├── HOJA_DE_RUTA_COMPLETA.md
+    └── ANALISIS_PROYECTO_ACADEMICO.md
 ```
 
 ---
@@ -112,7 +123,10 @@ uvicorn app.main:app --reload
 
 ### ✅ Completado
 - [x] Frontend completo con diseño responsive
-- [x] Sistema de predicción simulado
+- [x] Sistema de autenticación (Supabase Auth)
+- [x] Sistema de roles dinámico (3 roles)
+- [x] Dashboard con gráficas (Chart.js)
+- [x] Landing page con selector de rol
 - [x] Análisis teórico de datos
 - [x] Selección de algoritmos ML
 - [x] Despliegue en Vercel

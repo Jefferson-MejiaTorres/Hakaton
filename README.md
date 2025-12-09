@@ -19,6 +19,8 @@ Sistema de detección temprana de desnutrición infantil en Norte de Santander m
 - ✅ **Dashboard:** Con gráficas Chart.js
 - ✅ **Base de Datos:** Supabase (PostgreSQL)
 - ✅ **Predicción SQL:** Función implementada en Supabase
+- ✅ **Diagnóstico Automático:** Al registrar pacientes
+- ✅ **CRUD Pacientes:** Completo (crear, leer, actualizar, eliminar)
 - 🔄 **Backend Python:** En desarrollo (FastAPI)
 
 ---

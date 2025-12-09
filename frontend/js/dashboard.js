@@ -769,11 +769,63 @@ if (formRegistrarPaciente) {
                 if (errorSociodem) throw errorSociodem;
             }
             
+            // 6. REALIZAR PREDICCIÓN AUTOMÁTICA
+            loadingModal.querySelector('span').textContent = 'Realizando diagnóstico...';
+            
+            // Calcular edad en meses
+            const fechaNac = new Date(datosNino.fecha_nacimiento);
+            const hoy = new Date();
+            const edadMeses = Math.floor((hoy - fechaNac) / (1000 * 60 * 60 * 24 * 30.44));
+            
+            // Llamar a la función SQL de predicción
+            const { data: prediccionData, error: errorPrediccion } = await supabase
+                .rpc('predecir_simple', {
+                    edad_meses: edadMeses,
+                    peso: peso,
+                    talla: talla,
+                    zona: zona || 'urbana',
+                    educacion_madre: nivelEducativo || 'secundaria'
+                });
+            
+            let nivelRiesgo = 'sin evaluar';
+            let probabilidad = 0;
+            
+            if (!errorPrediccion && prediccionData) {
+                nivelRiesgo = prediccionData.nivel_riesgo;
+                probabilidad = prediccionData.probabilidad;
+                
+                // Guardar predicción en la tabla
+                const { error: errorInsertPred } = await supabase
+                    .from('predicciones')
+                    .insert([{
+                        nino_id: ninoId,
+                        nivel_riesgo: nivelRiesgo,
+                        probabilidad: probabilidad,
+                        modelo_usado: 'SQL_Prediccion_v1',
+                        features_json: {
+                            edad_meses: edadMeses,
+                            peso: peso,
+                            talla: talla,
+                            imc: parseFloat(imc),
+                            zona: zona || 'urbana',
+                            educacion_madre: nivelEducativo || 'secundaria',
+                            factores_riesgo: prediccionData.factores_riesgo || [],
+                            recomendaciones: prediccionData.recomendaciones || []
+                        }
+                    }]);
+                
+                if (errorInsertPred) {
+                    console.error('Error al guardar predicción:', errorInsertPred);
+                }
+            } else {
+                console.error('Error en predicción:', errorPrediccion);
+            }
+            
             // Cerrar loading
             loadingModal.remove();
             
-            // Mostrar modal de éxito
-            mostrarModalExito(ninoCreado, imc);
+            // Mostrar modal de éxito con predicción
+            mostrarModalExitoConPrediccion(ninoCreado, imc, nivelRiesgo, probabilidad, prediccionData);
             
             // Limpiar formulario
             formRegistrarPaciente.reset();
@@ -804,7 +856,146 @@ function mostrarModalLoading(mensaje) {
     return modal;
 }
 
-// Modal de éxito
+// Modal de éxito CON PREDICCIÓN
+function mostrarModalExitoConPrediccion(paciente, imc, nivelRiesgo, probabilidad, prediccionCompleta) {
+    const modal = document.createElement('div');
+    modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
+    modal.style.animation = 'fadeIn 0.3s ease-out';
+    
+    // Determinar color según riesgo
+    const coloresRiesgo = {
+        'alto': { bg: 'from-red-500 to-red-600', text: 'text-red-700', badge: 'bg-red-100 text-red-800', icon: 'fa-exclamation-triangle' },
+        'medio': { bg: 'from-orange-500 to-orange-600', text: 'text-orange-700', badge: 'bg-orange-100 text-orange-800', icon: 'fa-exclamation-circle' },
+        'bajo': { bg: 'from-green-500 to-green-600', text: 'text-green-700', badge: 'bg-green-100 text-green-800', icon: 'fa-check-circle' },
+        'sin evaluar': { bg: 'from-gray-500 to-gray-600', text: 'text-gray-700', badge: 'bg-gray-100 text-gray-800', icon: 'fa-question-circle' }
+    };
+    
+    const color = coloresRiesgo[nivelRiesgo] || coloresRiesgo['sin evaluar'];
+    const probabilidadPorcentaje = (probabilidad * 100).toFixed(1);
+    
+    modal.innerHTML = `
+        <div class="bg-white rounded-2xl shadow-2xl max-w-2xl w-full max-h-[90vh] overflow-y-auto" style="animation: scaleIn 0.3s ease-out">
+            <!-- Header -->
+            <div class="bg-gradient-to-r ${color.bg} text-white p-6 rounded-t-2xl">
+                <div class="flex items-center justify-center mb-3">
+                    <div class="bg-white/20 rounded-full p-4 mr-3">
+                        <i class="fas fa-check-circle text-4xl"></i>
+                    </div>
+                    <div>
+                        <h3 class="text-2xl font-bold">¡Paciente Registrado!</h3>
+                        <p class="text-white/90">Registro y diagnóstico completados</p>
+                    </div>
+                </div>
+            </div>
+            
+            <!-- Body -->
+            <div class="p-6 space-y-4">
+                <!-- Datos del Paciente -->
+                <div class="bg-blue-50 border-l-4 border-blue-600 p-4 rounded">
+                    <h4 class="font-bold text-gray-900 mb-2 flex items-center">
+                        <i class="fas fa-user mr-2 text-blue-600"></i>
+                        Datos del Paciente
+                    </h4>
+                    <div class="grid grid-cols-2 gap-2 text-sm text-gray-700">
+                        <div><strong>Nombre:</strong> ${paciente.nombre} ${paciente.apellido}</div>
+                        <div><strong>Documento:</strong> ${paciente.documento_identidad}</div>
+                        <div><strong>Fecha Nac.:</strong> ${new Date(paciente.fecha_nacimiento).toLocaleDateString('es-ES')}</div>
+                        <div><strong>Sexo:</strong> ${paciente.sexo === 'M' ? 'Masculino' : 'Femenino'}</div>
+                        <div><strong>IMC:</strong> ${imc}</div>
+                    </div>
+                </div>
+                
+                <!-- DIAGNÓSTICO DE RIESGO -->
+                <div class="bg-gradient-to-r ${color.bg} p-6 rounded-xl text-white">
+                    <div class="flex items-center justify-between mb-4">
+                        <h4 class="text-xl font-bold flex items-center">
+                            <i class="fas ${color.icon} mr-2"></i>
+                            Diagnóstico Automático
+                        </h4>
+                        <span class="px-4 py-2 bg-white/20 rounded-full text-lg font-bold">
+                            ${probabilidadPorcentaje}%
+                        </span>
+                    </div>
+                    <div class="text-center">
+                        <p class="text-sm text-white/80 mb-2">Nivel de Riesgo Detectado:</p>
+                        <p class="text-3xl font-bold uppercase">${nivelRiesgo}</p>
+                    </div>
+                </div>
+                
+                ${prediccionCompleta && prediccionCompleta.factores_riesgo && prediccionCompleta.factores_riesgo.length > 0 ? `
+                    <!-- Factores de Riesgo -->
+                    <div class="bg-yellow-50 border-l-4 border-yellow-500 p-4 rounded">
+                        <h4 class="font-bold text-gray-900 mb-2 flex items-center">
+                            <i class="fas fa-list-ul mr-2 text-yellow-600"></i>
+                            Factores Identificados
+                        </h4>
+                        <ul class="space-y-1 text-sm text-gray-700">
+                            ${prediccionCompleta.factores_riesgo.map(factor => `
+                                <li class="flex items-start">
+                                    <i class="fas fa-circle text-yellow-500 text-xs mt-1 mr-2"></i>
+                                    <span>${factor}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+                
+                ${prediccionCompleta && prediccionCompleta.recomendaciones && prediccionCompleta.recomendaciones.length > 0 ? `
+                    <!-- Recomendaciones -->
+                    <div class="bg-green-50 border-l-4 border-green-600 p-4 rounded">
+                        <h4 class="font-bold text-gray-900 mb-2 flex items-center">
+                            <i class="fas fa-clipboard-check mr-2 text-green-600"></i>
+                            Recomendaciones
+                        </h4>
+                        <ul class="space-y-1 text-sm text-gray-700">
+                            ${prediccionCompleta.recomendaciones.slice(0, 4).map(rec => `
+                                <li class="flex items-start">
+                                    <i class="fas fa-check text-green-500 text-xs mt-1 mr-2"></i>
+                                    <span>${rec}</span>
+                                </li>
+                            `).join('')}
+                        </ul>
+                    </div>
+                ` : ''}
+                
+                <div class="bg-blue-50 border-l-4 border-blue-500 p-4 rounded">
+                    <p class="text-sm ${color.text}">
+                        <i class="fas fa-info-circle mr-2"></i>
+                        <strong>Nota:</strong> El diagnóstico se realizó automáticamente usando el modelo de predicción SQL. 
+                        El paciente está disponible en "Gestionar Pacientes".
+                    </p>
+                </div>
+            </div>
+            
+            <!-- Footer -->
+            <div class="flex space-x-3 p-6 bg-gray-50 rounded-b-2xl">
+                <button 
+                    onclick="this.closest('.fixed').remove()" 
+                    class="flex-1 px-6 py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-100 transition-all"
+                >
+                    <i class="fas fa-plus mr-2"></i>Registrar Otro
+                </button>
+                <button 
+                    onclick="this.closest('.fixed').remove(); showView('pacientes');" 
+                    class="flex-1 px-6 py-3 bg-gradient-to-r ${color.bg} text-white rounded-lg font-semibold hover:shadow-lg transition-all"
+                >
+                    <i class="fas fa-users mr-2"></i>Ver Pacientes
+                </button>
+            </div>
+        </div>
+    `;
+    
+    document.body.appendChild(modal);
+    
+    // Cerrar al hacer click fuera
+    modal.addEventListener('click', (e) => {
+        if (e.target === modal) {
+            modal.remove();
+        }
+    });
+}
+
+// Modal de éxito (versión original sin predicción - mantener por compatibilidad)
 function mostrarModalExito(paciente, imc) {
     const modal = document.createElement('div');
     modal.className = 'fixed inset-0 bg-black bg-opacity-50 flex items-center justify-center z-50 p-4';
@@ -992,15 +1183,27 @@ async function cargarPacientes(filtros = {}) {
         
         // Procesar datos
         pacientesData = data.map(paciente => {
-            const ultimaMedicion = Array.isArray(paciente.mediciones_antropometricas) && paciente.mediciones_antropometricas.length > 0 
-                ? paciente.mediciones_antropometricas[0] 
-                : {};
+            // Obtener la medición más reciente (ordenar por fecha)
+            let ultimaMedicion = {};
+            if (Array.isArray(paciente.mediciones_antropometricas) && paciente.mediciones_antropometricas.length > 0) {
+                const medicionesOrdenadas = paciente.mediciones_antropometricas.sort((a, b) => {
+                    return new Date(b.fecha_medicion) - new Date(a.fecha_medicion);
+                });
+                ultimaMedicion = medicionesOrdenadas[0];
+            }
+            
             const datosSocio = Array.isArray(paciente.datos_sociodemograficos) && paciente.datos_sociodemograficos.length > 0 
                 ? paciente.datos_sociodemograficos[0] 
                 : {};
-            const ultimaPrediccion = Array.isArray(paciente.predicciones) && paciente.predicciones.length > 0 
-                ? paciente.predicciones[0] 
-                : {};
+            
+            // Obtener la predicción más reciente (ordenar por fecha)
+            let ultimaPrediccion = {};
+            if (Array.isArray(paciente.predicciones) && paciente.predicciones.length > 0) {
+                const prediccionesOrdenadas = paciente.predicciones.sort((a, b) => {
+                    return new Date(b.fecha_prediccion) - new Date(a.fecha_prediccion);
+                });
+                ultimaPrediccion = prediccionesOrdenadas[0];
+            }
             
             // Calcular edad en meses
             const fechaNac = new Date(paciente.fecha_nacimiento);

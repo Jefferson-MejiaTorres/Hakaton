@@ -6,131 +6,231 @@
     <title>SIDI - Acerca del Proyecto</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
-        body { font-family: 'Inter', sans-serif; }
+        body { 
+            font-family: 'Inter', sans-serif; 
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        .animate-fade-in-up { animation: fadeInUp 0.8s ease-out; }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-scale-in { animation: scaleIn 0.5s ease-out; }
+        .card-hover {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .card-hover:hover {
+            transform: translateY(-8px);
+            box-shadow: 0 20px 40px rgba(0, 0, 0, 0.15);
+        }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
     </style>
 </head>
-<body class="bg-gray-50">
+<body class="bg-gradient-to-br from-indigo-50 via-purple-50 to-pink-50 min-h-screen">
     
     <!-- Navbar -->
-    <nav class="bg-white shadow-lg">
+    <nav class="glass-effect shadow-xl sticky top-0 z-50 border-b-2 border-purple-200">
         <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
-            <div class="flex justify-between h-16 items-center">
-                <a href="index.html" class="flex items-center space-x-3">
-                    <i class="fas fa-heartbeat text-3xl text-blue-600"></i>
-                    <span class="text-2xl font-bold text-gray-900">SIDI</span>
+            <div class="flex justify-between items-center h-16 sm:h-20">
+                <a href="index.html" class="flex items-center space-x-3 group">
+                    <div class="w-10 h-10 sm:w-12 sm:h-12 bg-gradient-to-br from-purple-600 to-pink-600 rounded-xl flex items-center justify-center transform group-hover:scale-110 transition-transform shadow-lg">
+                        <i class="fas fa-heartbeat text-xl sm:text-2xl text-white"></i>
+                    </div>
+                    <span class="text-2xl sm:text-3xl font-black bg-gradient-to-r from-purple-600 to-pink-600 bg-clip-text text-transparent">SIDI</span>
                 </a>
-                <a href="index.html" class="text-blue-600 hover:text-blue-700 font-semibold">
-                    <i class="fas fa-arrow-left mr-2"></i>Volver al inicio
+                <a href="index.html" class="text-sm sm:text-base text-purple-600 hover:text-pink-600 font-bold transition-colors group">
+                    <i class="fas fa-arrow-left mr-2 group-hover:-translate-x-1 transition-transform"></i>
+                    <span class="hidden sm:inline">Volver al inicio</span>
+                    <span class="sm:hidden">Inicio</span>
                 </a>
             </div>
         </div>
     </nav>
 
     <!-- Content -->
-    <main class="max-w-5xl mx-auto px-4 py-12">
+    <main class="max-w-6xl mx-auto px-4 py-8 sm:py-12 lg:py-16">
         
         <!-- Hero -->
-        <div class="text-center mb-16">
-            <h1 class="text-5xl font-bold text-gray-900 mb-4">Acerca de SIDI</h1>
-            <p class="text-xl text-gray-600">Sistema Inteligente de Detección de Desnutrición Infantil</p>
+        <div class="text-center mb-12 sm:mb-16 animate-fade-in-up">
+            <div class="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-purple-500 to-pink-600 rounded-2xl sm:rounded-3xl shadow-2xl mb-6 animate-float">
+                <i class="fas fa-heartbeat text-4xl sm:text-5xl text-white"></i>
+            </div>
+            <h1 class="text-3xl sm:text-4xl lg:text-5xl font-black bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 bg-clip-text text-transparent mb-3 sm:mb-4">
+                Acerca de SIDI
+            </h1>
+            <p class="text-lg sm:text-xl lg:text-2xl text-gray-700 font-semibold max-w-3xl mx-auto">
+                Sistema Inteligente de Detección de Desnutrición Infantil
+            </p>
+            <p class="text-sm sm:text-base text-gray-600 mt-2">Norte de Santander, Colombia</p>
         </div>
 
         <!-- Problema -->
-        <section class="mb-12 bg-white rounded-2xl shadow-lg p-8">
-            <div class="flex items-center mb-6">
-                <i class="fas fa-exclamation-triangle text-4xl text-red-600 mr-4"></i>
-                <h2 class="text-3xl font-bold text-gray-900">El Problema</h2>
-            </div>
-            <p class="text-gray-700 text-lg leading-relaxed mb-4">
-                La desnutrición infantil es un problema crítico de salud pública en Norte de Santander 
-                que afecta el desarrollo físico y cognitivo de miles de niños. La detección tardía 
-                impide acciones preventivas efectivas.
-            </p>
-            <div class="grid md:grid-cols-3 gap-4 mt-6">
-                <div class="border-l-4 border-red-600 pl-4">
-                    <p class="font-bold text-gray-900">Detección Tardía</p>
-                    <p class="text-gray-600 text-sm">Casos identificados con daños irreversibles</p>
+        <section class="mb-8 sm:mb-12 animate-fade-in-up">
+            <div class="card-hover bg-white rounded-2xl sm:rounded-3xl shadow-xl p-6 sm:p-8 lg:p-10 border border-red-100">
+                <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-6">
+                    <div class="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-red-500 to-red-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-exclamation-triangle text-3xl sm:text-4xl text-white"></i>
+                    </div>
+                    <div class="flex-1 text-center sm:text-left">
+                        <h2 class="text-2xl sm:text-3xl font-black text-gray-900 mb-2">El Problema</h2>
+                        <p class="text-sm sm:text-base text-red-600 font-semibold">Una crisis de salud pública</p>
+                    </div>
                 </div>
-                <div class="border-l-4 border-red-600 pl-4">
-                    <p class="font-bold text-gray-900">Datos Dispersos</p>
-                    <p class="text-gray-600 text-sm">Información sin análisis predictivo</p>
-                </div>
-                <div class="border-l-4 border-red-600 pl-4">
-                    <p class="font-bold text-gray-900">Recursos Limitados</p>
-                    <p class="text-gray-600 text-sm">Personal sobrecargado sin herramientas</p>
+                <p class="text-gray-700 text-base sm:text-lg leading-relaxed mb-6">
+                    La desnutrición infantil es un problema crítico de salud pública en Norte de Santander 
+                    que afecta el desarrollo físico y cognitivo de miles de niños. La detección tardía 
+                    impide acciones preventivas efectivas y causa daños irreversibles.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4">
+                    <div class="bg-gradient-to-br from-red-50 to-red-100 border-l-4 border-red-500 p-4 rounded-lg">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-clock text-red-600 text-lg"></i>
+                            <p class="font-black text-gray-900 text-sm sm:text-base">Detección Tardía</p>
+                        </div>
+                        <p class="text-gray-700 text-xs sm:text-sm">Casos identificados con daños irreversibles en el desarrollo</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-red-50 to-red-100 border-l-4 border-red-500 p-4 rounded-lg">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-database text-red-600 text-lg"></i>
+                            <p class="font-black text-gray-900 text-sm sm:text-base">Datos Dispersos</p>
+                        </div>
+                        <p class="text-gray-700 text-xs sm:text-sm">Información fragmentada sin análisis predictivo efectivo</p>
+                    </div>
+                    <div class="bg-gradient-to-br from-red-50 to-red-100 border-l-4 border-red-500 p-4 rounded-lg">
+                        <div class="flex items-center gap-2 mb-2">
+                            <i class="fas fa-hand-holding-medical text-red-600 text-lg"></i>
+                            <p class="font-black text-gray-900 text-sm sm:text-base">Recursos Limitados</p>
+                        </div>
+                        <p class="text-gray-700 text-xs sm:text-sm">Personal médico sobrecargado sin herramientas adecuadas</p>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- Solución -->
-        <section class="mb-12 bg-gradient-to-r from-blue-600 to-green-600 rounded-2xl shadow-lg p-8 text-white">
-            <div class="flex items-center mb-6">
-                <i class="fas fa-lightbulb text-4xl mr-4"></i>
-                <h2 class="text-3xl font-bold">Nuestra Solución</h2>
-            </div>
-            <p class="text-lg leading-relaxed mb-6">
-                SIDI utiliza Inteligencia Artificial y Machine Learning para predecir tempranamente 
-                el riesgo de desnutrición infantil, permitiendo intervenciones oportunas.
-            </p>
-            <div class="grid md:grid-cols-3 gap-6">
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-xl">
-                    <i class="fas fa-database text-3xl mb-3"></i>
-                    <h3 class="font-bold text-lg mb-2">Minería de Datos</h3>
-                    <p class="text-sm">Análisis profundo de patrones sociodemográficos y de salud</p>
+        <section class="mb-8 sm:mb-12 animate-fade-in-up">
+            <div class="card-hover bg-gradient-to-br from-blue-600 via-purple-600 to-pink-600 rounded-2xl sm:rounded-3xl shadow-2xl p-6 sm:p-8 lg:p-10 text-white">
+                <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-6">
+                    <div class="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-white bg-opacity-20 backdrop-blur-sm rounded-2xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-lightbulb text-3xl sm:text-4xl text-white"></i>
+                    </div>
+                    <div class="flex-1 text-center sm:text-left">
+                        <h2 class="text-2xl sm:text-3xl font-black mb-2">Nuestra Solución</h2>
+                        <p class="text-sm sm:text-base text-blue-100 font-semibold">Inteligencia Artificial al servicio de la salud</p>
+                    </div>
                 </div>
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-xl">
-                    <i class="fas fa-brain text-3xl mb-3"></i>
-                    <h3 class="font-bold text-lg mb-2">IA Supervisada</h3>
-                    <p class="text-sm">Modelos SVM, Redes Neuronales y Random Forest</p>
-                </div>
-                <div class="bg-white bg-opacity-20 backdrop-blur p-6 rounded-xl">
-                    <i class="fas fa-chart-line text-3xl mb-3"></i>
-                    <h3 class="font-bold text-lg mb-2">Predicción Temprana</h3>
-                    <p class="text-sm">Anticipación de riesgos en poblaciones vulnerables</p>
+                <p class="text-base sm:text-lg leading-relaxed mb-8 text-white opacity-95">
+                    SIDI utiliza Inteligencia Artificial y Machine Learning para predecir tempranamente 
+                    el riesgo de desnutrición infantil, permitiendo intervenciones oportunas que salvan vidas 
+                    y previenen daños irreversibles en el desarrollo de los niños.
+                </p>
+                <div class="grid grid-cols-1 sm:grid-cols-3 gap-4 sm:gap-6">
+                    <div class="bg-white bg-opacity-10 backdrop-blur-md p-5 sm:p-6 rounded-xl border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-blue-400 bg-opacity-30 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-database text-2xl sm:text-3xl"></i>
+                        </div>
+                        <h3 class="font-black text-base sm:text-lg mb-2">Minería de Datos</h3>
+                        <p class="text-xs sm:text-sm text-blue-100">Análisis profundo de patrones sociodemográficos y de salud para identificar factores de riesgo</p>
+                    </div>
+                    <div class="bg-white bg-opacity-10 backdrop-blur-md p-5 sm:p-6 rounded-xl border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-purple-400 bg-opacity-30 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-brain text-2xl sm:text-3xl"></i>
+                        </div>
+                        <h3 class="font-black text-base sm:text-lg mb-2">IA Supervisada</h3>
+                        <p class="text-xs sm:text-sm text-purple-100">Modelos avanzados: SVM, Redes Neuronales y Random Forest con precisión validada</p>
+                    </div>
+                    <div class="bg-white bg-opacity-10 backdrop-blur-md p-5 sm:p-6 rounded-xl border border-white border-opacity-20 hover:bg-opacity-20 transition-all">
+                        <div class="w-12 h-12 sm:w-14 sm:h-14 bg-pink-400 bg-opacity-30 rounded-xl flex items-center justify-center mb-4">
+                            <i class="fas fa-chart-line text-2xl sm:text-3xl"></i>
+                        </div>
+                        <h3 class="font-black text-base sm:text-lg mb-2">Predicción Temprana</h3>
+                        <p class="text-xs sm:text-sm text-pink-100">Detección de riesgo antes de manifestaciones clínicas graves para intervención oportuna</p>
+                    </div>
                 </div>
             </div>
         </section>
 
         <!-- Tecnología -->
-        <section class="mb-12 bg-white rounded-2xl shadow-lg p-8">
-            <div class="flex items-center mb-6">
-                <i class="fas fa-cogs text-4xl text-purple-600 mr-4"></i>
-                <h2 class="text-3xl font-bold text-gray-900">Tecnología</h2>
-            </div>
-            <div class="grid md:grid-cols-2 gap-6">
-                <div>
-                    <h3 class="font-bold text-xl text-gray-900 mb-3">Algoritmos de ML</h3>
-                    <ul class="space-y-2">
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-green-600 mr-2 mt-1"></i>
-                            <span class="text-gray-700"><strong>SVM:</strong> Clasificación de riesgo con alta precisión</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-green-600 mr-2 mt-1"></i>
-                            <span class="text-gray-700"><strong>Redes Neuronales:</strong> Detección de patrones complejos</span>
-                        </li>
-                        <li class="flex items-start">
-                            <i class="fas fa-check-circle text-green-600 mr-2 mt-1"></i>
-                            <span class="text-gray-700"><strong>Random Forest:</strong> Predicciones robustas y explicables</span>
-                        </li>
-                    </ul>
+        <section class="mb-8 sm:mb-12 animate-fade-in-up">
+            <div class="card-hover bg-white rounded-2xl sm:rounded-3xl shadow-xl p-6 sm:p-8 lg:p-10 border border-purple-100">
+                <div class="flex flex-col sm:flex-row items-center sm:items-start gap-4 mb-6">
+                    <div class="flex-shrink-0 w-16 h-16 sm:w-20 sm:h-20 bg-gradient-to-br from-purple-500 to-indigo-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-cogs text-3xl sm:text-4xl text-white"></i>
+                    </div>
+                    <div class="flex-1 text-center sm:text-left">
+                        <h2 class="text-2xl sm:text-3xl font-black text-gray-900 mb-2">Stack Tecnológico</h2>
+                        <p class="text-sm sm:text-base text-purple-600 font-semibold">Herramientas de última generación</p>
+                    </div>
                 </div>
-                <div>
-                    <h3 class="font-bold text-xl text-gray-900 mb-3">Métricas de Validación</h3>
-                    <div class="space-y-3">
-                        <div class="bg-blue-50 p-4 rounded-lg">
-                            <p class="font-bold text-blue-900">95% Precisión</p>
-                            <p class="text-blue-700 text-sm">Validado con datos reales</p>
+                <div class="grid grid-cols-1 md:grid-cols-2 gap-6 sm:gap-8">
+                    <div class="space-y-4">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-server text-blue-600"></i>Backend & IA
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-3 bg-blue-50 rounded-lg border border-blue-200">
+                                <i class="fab fa-python text-2xl text-blue-600"></i>
+                                <div>
+                                    <p class="font-bold text-gray-900 text-sm">Python</p>
+                                    <p class="text-xs text-gray-600">Core de Machine Learning</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-green-50 rounded-lg border border-green-200">
+                                <i class="fas fa-brain text-2xl text-green-600"></i>
+                                <div>
+                                    <p class="font-bold text-gray-900 text-sm">Scikit-learn & TensorFlow</p>
+                                    <p class="text-xs text-gray-600">Modelos de IA</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-purple-50 rounded-lg border border-purple-200">
+                                <i class="fas fa-table text-2xl text-purple-600"></i>
+                                <div>
+                                    <p class="font-bold text-gray-900 text-sm">Pandas & NumPy</p>
+                                    <p class="text-xs text-gray-600">Análisis de datos</p>
+                                </div>
+                            </div>
                         </div>
-                        <div class="bg-green-50 p-4 rounded-lg">
-                            <p class="font-bold text-green-900">93% Sensibilidad</p>
-                            <p class="text-green-700 text-sm">Detección de casos positivos</p>
-                        </div>
-                        <div class="bg-purple-50 p-4 rounded-lg">
-                            <p class="font-bold text-purple-900">0.96 AUC-ROC</p>
-                            <p class="text-purple-700 text-sm">Capacidad discriminatoria</p>
+                    </div>
+                    <div class="space-y-4">
+                        <h3 class="text-lg sm:text-xl font-bold text-gray-900 flex items-center gap-2">
+                            <i class="fas fa-desktop text-pink-600"></i>Frontend & Base de Datos
+                        </h3>
+                        <div class="space-y-3">
+                            <div class="flex items-center gap-3 p-3 bg-orange-50 rounded-lg border border-orange-200">
+                                <i class="fab fa-html5 text-2xl text-orange-600"></i>
+                                <div>
+                                    <p class="font-bold text-gray-900 text-sm">HTML5, CSS3 & JavaScript</p>
+                                    <p class="text-xs text-gray-600">Interfaz moderna</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-cyan-50 rounded-lg border border-cyan-200">
+                                <i class="fas fa-wind text-2xl text-cyan-600"></i>
+                                <div>
+                                    <p class="font-bold text-gray-900 text-sm">Tailwind CSS</p>
+                                    <p class="text-xs text-gray-600">Diseño responsive</p>
+                                </div>
+                            </div>
+                            <div class="flex items-center gap-3 p-3 bg-emerald-50 rounded-lg border border-emerald-200">
+                                <i class="fas fa-database text-2xl text-emerald-600"></i>
+                                <div>
+                                    <p class="font-bold text-gray-900 text-sm">Supabase (PostgreSQL)</p>
+                                    <p class="text-xs text-gray-600">Base de datos en la nube</p>
+                                </div>
+                            </div>
                         </div>
                     </div>
                 </div>
@@ -138,47 +238,194 @@
         </section>
 
         <!-- Equipo -->
-        <section class="mb-12 bg-white rounded-2xl shadow-lg p-8">
-            <div class="flex items-center mb-6">
-                <i class="fas fa-users text-4xl text-blue-600 mr-4"></i>
-                <h2 class="text-3xl font-bold text-gray-900">Equipo</h2>
+        <section class="mb-8 sm:mb-12 animate-fade-in-up">
+            <div class="text-center mb-8">
+                <h2 class="text-2xl sm:text-3xl font-black bg-gradient-to-r from-blue-600 to-purple-600 bg-clip-text text-transparent mb-2">
+                    Equipo de Desarrollo
+                </h2>
+                <p class="text-sm sm:text-base text-gray-600">Estudiantes de Sistemas Inteligentes - Universidad de Pamplona</p>
             </div>
-            <div class="grid md:grid-cols-2 gap-6">
-                <div class="text-center">
-                    <div class="bg-blue-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i class="fas fa-user-graduate text-3xl text-blue-600"></i>
+            
+            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 mb-6">
+                <!-- Jefferson - Desarrollador Principal -->
+                <div class="card-hover bg-gradient-to-br from-blue-500 to-blue-600 rounded-2xl shadow-xl p-6 sm:p-8 text-white transform md:scale-105">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-24 h-24 sm:w-28 sm:h-28 bg-white bg-opacity-20 backdrop-blur-sm rounded-full flex items-center justify-center mb-4 ring-4 ring-white ring-opacity-50">
+                            <i class="fas fa-code text-4xl sm:text-5xl"></i>
+                        </div>
+                        <div class="mb-2">
+                            <span class="inline-block px-3 py-1 bg-yellow-400 text-yellow-900 rounded-full text-xs font-bold mb-2">
+                                <i class="fas fa-star mr-1"></i>DESARROLLADOR PRINCIPAL
+                            </span>
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-black mb-2">Jefferson David Mejía Torres</h3>
+                        <p class="text-blue-100 text-sm sm:text-base font-semibold mb-4">Desarrollo Full-Stack & Machine Learning</p>
+                        <div class="space-y-2 text-sm w-full">
+                            <div class="bg-white bg-opacity-10 backdrop-blur-sm p-3 rounded-lg">
+                                <p class="flex items-center justify-center gap-2">
+                                    <i class="fas fa-laptop-code text-yellow-300"></i>
+                                    <span>Arquitectura del sistema completo</span>
+                                </p>
+                            </div>
+                            <div class="bg-white bg-opacity-10 backdrop-blur-sm p-3 rounded-lg">
+                                <p class="flex items-center justify-center gap-2">
+                                    <i class="fas fa-brain text-yellow-300"></i>
+                                    <span>Implementación de modelos de IA</span>
+                                </p>
+                            </div>
+                            <div class="bg-white bg-opacity-10 backdrop-blur-sm p-3 rounded-lg">
+                                <p class="flex items-center justify-center gap-2">
+                                    <i class="fas fa-database text-yellow-300"></i>
+                                    <span>Backend, Frontend y Base de datos</span>
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    <h3 class="font-bold text-lg text-gray-900">Daniel Felipe Contreras Caballero</h3>
-                    <p class="text-gray-600">Desarrollador</p>
                 </div>
-                <div class="text-center">
-                    <div class="bg-green-100 w-20 h-20 rounded-full flex items-center justify-center mx-auto mb-3">
-                        <i class="fas fa-user-graduate text-3xl text-green-600"></i>
+
+                <!-- Daniel - Documentación -->
+                <div class="card-hover bg-gradient-to-br from-purple-500 to-purple-600 rounded-2xl shadow-xl p-6 sm:p-8 text-white">
+                    <div class="flex flex-col items-center text-center">
+                        <div class="w-24 h-24 sm:w-28 sm:h-28 bg-white bg-opacity-20 backdrop-blur-sm rounded-full flex items-center justify-center mb-4 ring-4 ring-white ring-opacity-50">
+                            <i class="fas fa-file-alt text-4xl sm:text-5xl"></i>
+                        </div>
+                        <div class="mb-2">
+                            <span class="inline-block px-3 py-1 bg-purple-200 text-purple-900 rounded-full text-xs font-bold mb-2">
+                                DOCUMENTACIÓN & ARTÍCULO
+                            </span>
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-black mb-2">Daniel Felipe Contreras</h3>
+                        <p class="text-purple-100 text-sm sm:text-base font-semibold mb-4">Investigación & Documentación Técnica</p>
+                        <div class="space-y-2 text-sm w-full">
+                            <div class="bg-white bg-opacity-10 backdrop-blur-sm p-3 rounded-lg">
+                                <p class="flex items-center justify-center gap-2">
+                                    <i class="fas fa-book text-purple-200"></i>
+                                    <span>Documentación del proyecto</span>
+                                </p>
+                            </div>
+                            <div class="bg-white bg-opacity-10 backdrop-blur-sm p-3 rounded-lg">
+                                <p class="flex items-center justify-center gap-2">
+                                    <i class="fas fa-newspaper text-purple-200"></i>
+                                    <span>Artículo científico</span>
+                                </p>
+                            </div>
+                            <div class="bg-white bg-opacity-10 backdrop-blur-sm p-3 rounded-lg">
+                                <p class="flex items-center justify-center gap-2">
+                                    <i class="fas fa-search text-purple-200"></i>
+                                    <span>Investigación y análisis</span>
+                                </p>
+                            </div>
+                        </div>
                     </div>
-                    <h3 class="font-bold text-lg text-gray-900">Jefferson David Mejía Torres</h3>
-                    <p class="text-gray-600">Desarrollador</p>
                 </div>
             </div>
-            <div class="text-center mt-6">
-                <p class="text-gray-700"><strong>Asesor:</strong> José Gerardo Chacón Rangel</p>
-                <p class="text-gray-600">Universidad de Pamplona - Sistemas Inteligentes</p>
+
+            <!-- Asesor -->
+            <div class="card-hover bg-white rounded-2xl shadow-xl p-6 sm:p-8 border-2 border-indigo-200 max-w-2xl mx-auto">
+                <div class="flex flex-col sm:flex-row items-center sm:items-start gap-6">
+                    <div class="flex-shrink-0 w-20 h-20 sm:w-24 sm:h-24 bg-gradient-to-br from-indigo-500 to-purple-600 rounded-2xl flex items-center justify-center shadow-lg">
+                        <i class="fas fa-chalkboard-teacher text-3xl sm:text-4xl text-white"></i>
+                    </div>
+                    <div class="flex-1 text-center sm:text-left">
+                        <div class="mb-2">
+                            <span class="inline-block px-3 py-1 bg-indigo-100 text-indigo-800 rounded-full text-xs font-bold">
+                                <i class="fas fa-graduation-cap mr-1"></i>DIRECTOR DE PROYECTO
+                            </span>
+                        </div>
+                        <h3 class="text-xl sm:text-2xl font-black text-gray-900 mb-2">José Gerardo Chacón Rangel</h3>
+                        <p class="text-indigo-600 font-semibold text-sm sm:text-base mb-3">Director & Asesor Académico</p>
+                        <p class="text-gray-700 text-sm sm:text-base leading-relaxed">
+                            Docente de la Universidad de Pamplona, experto en Sistemas Inteligentes. 
+                            Guía metodológica y supervisión técnica del proyecto de investigación.
+                        </p>
+                    </div>
+                </div>
             </div>
         </section>
 
         <!-- CTA -->
-        <div class="text-center">
-            <a href="index.html" class="inline-block bg-gradient-to-r from-blue-600 to-green-600 text-white px-8 py-4 rounded-lg font-bold text-lg hover:shadow-lg transform hover:scale-105 transition-all">
-                <i class="fas fa-rocket mr-2"></i>Empezar a Usar SIDI
+        <div class="text-center animate-scale-in">
+            <a href="index.html" class="inline-block bg-gradient-to-r from-blue-600 via-purple-600 to-pink-600 text-white px-6 sm:px-8 py-3 sm:py-4 rounded-xl sm:rounded-2xl font-bold text-base sm:text-lg hover:shadow-2xl transform hover:scale-105 transition-all">
+                <i class="fas fa-rocket mr-2"></i>Comenzar a Usar SIDI
             </a>
+            <p class="text-xs sm:text-sm text-gray-600 mt-4">
+                Únete a la revolución de la salud infantil con Inteligencia Artificial
+            </p>
         </div>
 
     </main>
 
     <!-- Footer -->
-    <footer class="bg-gray-900 text-white py-8 mt-16">
-        <div class="max-w-7xl mx-auto px-4 text-center">
-            <p>&copy; 2025 SIDI - Universidad de Pamplona</p>
-            <p class="text-gray-400 mt-2">Desarrollado para el bienestar de los niños de Norte de Santander</p>
+    <footer class="bg-gradient-to-r from-indigo-900 via-purple-900 to-pink-900 text-white py-12 mt-16 border-t-4 border-purple-400">
+        <div class="max-w-7xl mx-auto px-4">
+            
+            <!-- Contenido Principal del Footer -->
+            <div class="grid grid-cols-1 md:grid-cols-3 gap-8 mb-8">
+                
+                <!-- Columna 1: Información -->
+                <div class="text-center md:text-left">
+                    <div class="flex items-center justify-center md:justify-start mb-4">
+                        <div class="w-12 h-12 bg-white rounded-xl flex items-center justify-center mr-3 shadow-lg">
+                            <i class="fas fa-heartbeat text-2xl text-purple-600"></i>
+                        </div>
+                        <h3 class="text-2xl font-bold">SIDI</h3>
+                    </div>
+                    <p class="text-purple-200 text-sm leading-relaxed">
+                        Sistema Inteligente de Detección de Desnutrición Infantil
+                    </p>
+                    <p class="text-purple-300 text-xs mt-2">
+                        Norte de Santander, Colombia
+                    </p>
+                </div>
+
+                <!-- Columna 2: Universidad -->
+                <div class="text-center">
+                    <h4 class="text-lg font-bold mb-3 text-purple-200">
+                        <i class="fas fa-university mr-2"></i>Universidad de Pamplona
+                    </h4>
+                    <p class="text-purple-300 text-sm mb-2">Proyecto Académico 2025</p>
+                    <p class="text-purple-300 text-sm">Detección Temprana de</p>
+                    <p class="text-purple-300 text-sm">Desnutrición Infantil</p>
+                </div>
+
+                <!-- Columna 3: Desarrollador -->
+                <div class="text-center md:text-right">
+                    <h4 class="text-lg font-bold mb-3 text-purple-200">
+                        <i class="fas fa-code mr-2"></i>Desarrollado por
+                    </h4>
+                    <p class="text-white font-semibold mb-2">Jefferson David Mejía Torres</p>
+                    <p class="text-purple-300 text-sm mb-4">Ingeniería de Sistemas</p>
+                    
+                    <!-- Redes Sociales -->
+                    <div class="flex items-center justify-center md:justify-end gap-3">
+                        <a href="https://www.facebook.com/jefferson.mejia.torres" target="_blank" rel="noopener noreferrer" 
+                           class="w-10 h-10 bg-blue-600 hover:bg-blue-700 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-xl"
+                           aria-label="Facebook">
+                            <i class="fab fa-facebook-f text-white text-lg"></i>
+                        </a>
+                        <a href="https://wa.me/573175408291" target="_blank" rel="noopener noreferrer"
+                           class="w-10 h-10 bg-green-600 hover:bg-green-700 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-xl"
+                           aria-label="WhatsApp">
+                            <i class="fab fa-whatsapp text-white text-lg"></i>
+                        </a>
+                        <a href="https://github.com/Jefferson-MejiaTorres" target="_blank" rel="noopener noreferrer"
+                           class="w-10 h-10 bg-gray-800 hover:bg-gray-900 rounded-lg flex items-center justify-center transition-all duration-300 hover:scale-110 hover:shadow-xl"
+                           aria-label="GitHub">
+                            <i class="fab fa-github text-white text-lg"></i>
+                        </a>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Divider -->
+            <div class="border-t border-purple-700 my-6"></div>
+
+            <!-- Copyright -->
+            <div class="text-center text-purple-300 text-sm">
+                <p>&copy; 2025 SIDI - Sistema Inteligente de Detección de Desnutrición Infantil</p>
+                <p class="mt-2 text-xs">Todos los derechos reservados • Universidad de Pamplona</p>
+            </div>
+
         </div>
     </footer>
 

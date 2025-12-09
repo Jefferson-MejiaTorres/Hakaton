@@ -1,0 +1,716 @@
+<!DOCTYPE html>
+<html lang="es">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <meta name="description" content="SIDI - Sistema Inteligente de Detección de Desnutrición Infantil">
+    <title>SIDI - Inicio</title>
+    
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+    <link rel="stylesheet" href="./css/styles.css">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800&display=swap" rel="stylesheet">
+</head>
+<body class="bg-gradient-to-br from-blue-900 via-blue-700 to-green-600 min-h-screen flex items-center justify-center p-4">
+    <!-- Indicador de scroll -->
+    <div class="scroll-indicator" id="scroll-indicator"></div>
+    <!-- Navbar -->
+    <nav class="bg-white/95 shadow-lg fixed w-full top-0 z-50 transition-all duration-300 backdrop-blur-lg" id="navbar">
+        <div class="max-w-7xl mx-auto px-4 sm:px-6 lg:px-8">
+            <div class="flex justify-between h-16 items-center">
+                <div class="flex items-center space-x-3 animate-fade-in-left">
+                    <div class="w-12 h-12 bg-gradient-to-br from-blue-600 to-green-600 rounded-xl flex items-center justify-center shadow-lg transform hover:scale-110 transition-transform duration-300">
+                        <i class="fas fa-heartbeat text-white text-2xl"></i>
+                    </div>
+                    <span class="text-2xl font-bold gradient-text">SIDI</span>
+                </div>
+                <div class="hidden md:flex items-center space-x-1">
+                    <a href="#inicio" class="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-all duration-300">Inicio</a>
+                    <a href="#problema" class="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-all duration-300">Problema</a>
+                    <a href="#solucion" class="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-all duration-300">Solución</a>
+                    <a href="#pilar" class="px-4 py-2 text-gray-700 hover:text-green-600 font-medium rounded-lg hover:bg-green-50 transition-all duration-300">Pilar TIC</a>
+                    <a href="#tecnologia" class="px-4 py-2 text-gray-700 hover:text-blue-600 font-medium rounded-lg hover:bg-blue-50 transition-all duration-300">Tecnología</a>
+                    <a href="#impacto" class="px-4 py-2 text-gray-700 hover:text-purple-600 font-medium rounded-lg hover:bg-purple-50 transition-all duration-300">Impacto</a>
+                    <a href="#demo" class="ml-3 px-6 py-2 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold rounded-lg hover:shadow-lg transform hover:-translate-y-0.5 transition-all duration-300">Demo</a>
+                </div>
+                <div class="md:hidden flex items-center">
+                    <button type="button" id="mobile-menu-button" class="text-gray-700 hover:text-blue-600 focus:outline-none p-2 rounded-lg hover:bg-blue-50 transition-all duration-300" aria-label="Abrir menú de navegación" title="Menú">
+                        <i class="fas fa-bars text-2xl"></i>
+                    </button>
+                </div>
+            </div>
+        </div>
+        <!-- Mobile Menu -->
+        <div id="mobile-menu" class="hidden md:hidden bg-white border-t shadow-lg">
+            <a href="#inicio" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-all duration-300 border-l-4 border-transparent hover:border-blue-600">Inicio</a>
+            <a href="#problema" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-all duration-300 border-l-4 border-transparent hover:border-blue-600">Problema</a>
+            <a href="#solucion" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-all duration-300 border-l-4 border-transparent hover:border-blue-600">Solución</a>
+            <a href="#pilar" class="block px-6 py-3 text-gray-700 hover:bg-green-50 hover:text-green-600 font-medium transition-all duration-300 border-l-4 border-transparent hover:border-green-600">Pilar TIC</a>
+            <a href="#tecnologia" class="block px-6 py-3 text-gray-700 hover:bg-blue-50 hover:text-blue-600 font-medium transition-all duration-300 border-l-4 border-transparent hover:border-blue-600">Tecnología</a>
+            <a href="#impacto" class="block px-6 py-3 text-gray-700 hover:bg-purple-50 hover:text-purple-600 font-medium transition-all duration-300 border-l-4 border-transparent hover:border-purple-600">Impacto</a>
+            <a href="#demo" class="block px-6 py-3 bg-gradient-to-r from-blue-600 to-green-600 text-white font-semibold text-center mx-4 my-3 rounded-lg shadow-lg">Demo</a>
+        </div>
+    </nav>
+            <a href="#impacto" class="block px-4 py-2 text-gray-700 hover:bg-blue-50">Impacto</a>
+        </div>
+    </nav>
+
+    <!-- Hero Section -->
+    <section id="inicio" class="pt-24 pb-20 px-4">
+        <div class="max-w-7xl mx-auto">
+            <div class="text-center mb-12 animate-fade-in">
+                <div class="inline-block bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-semibold mb-4">
+                    <i class="fas fa-handshake mr-2"></i>Herramientas TIC para el Trabajo Incluyente y Seguro
+                </div>
+                <h1 class="text-5xl md:text-6xl font-bold text-gray-900 mb-6">
+                    Sistema Inteligente de Detección de <span class="text-blue-600">Desnutrición Infantil</span>
+                </h1>
+                <p class="text-xl text-gray-600 mb-8 max-w-3xl mx-auto">
+                    Plataforma de análisis predictivo basada en inteligencia artificial que procesa datos antropométricos 
+                    y socioeconómicos para identificar tempranamente casos de riesgo nutricional, apoyando la toma de 
+                    decisiones médicas y la formulación de políticas públicas preventivas en salud infantil
+                </p>
+                <div class="flex flex-col sm:flex-row justify-center gap-4">
+                    <a href="#solucion" class="bg-blue-600 text-white px-8 py-4 rounded-lg font-semibold hover:bg-blue-700 transition transform hover:scale-105">
+                        <i class="fas fa-rocket mr-2"></i>Conoce la Solución
+                    </a>
+                    <a href="#demo" class="bg-white text-blue-600 px-8 py-4 rounded-lg font-semibold border-2 border-blue-600 hover:bg-blue-50 transition">
+                        <i class="fas fa-play mr-2"></i>Ver Demo
+                    </a>
+                </div>
+            </div>
+
+            <!-- Stats -->
+            <div class="grid grid-cols-1 md:grid-cols-4 gap-6 mt-16">
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition">
+                    <div class="text-4xl font-bold text-blue-600 mb-2">95%</div>
+                    <div class="text-gray-600 font-semibold">Precisión del Modelo</div>
+                    <div class="text-xs text-gray-500 mt-2">Validado con datos reales</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition">
+                    <div class="text-4xl font-bold text-green-600 mb-2">10,000+</div>
+                    <div class="text-gray-600 font-semibold">Casos Analizados</div>
+                    <div class="text-xs text-gray-500 mt-2">Dataset de entrenamiento</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition">
+                    <div class="text-4xl font-bold text-purple-600 mb-2">50+</div>
+                    <div class="text-gray-600 font-semibold">Centros de Salud</div>
+                    <div class="text-xs text-gray-500 mt-2">Red de implementación</div>
+                </div>
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition">
+                    <div class="text-4xl font-bold text-orange-600 mb-2">24/7</div>
+                    <div class="text-gray-600 font-semibold">Disponibilidad</div>
+                    <div class="text-xs text-gray-500 mt-2">Acceso ininterrumpido</div>
+                </div>
+            </div>
+            
+            <!-- Indicadores Adicionales -->
+            <div class="mt-12 bg-white rounded-2xl p-8 shadow-lg">
+                <h3 class="text-2xl font-bold text-gray-900 mb-6 text-center">
+                    <i class="fas fa-chart-line text-blue-600 mr-2"></i>
+                    Indicadores Clave de Desempeño
+                </h3>
+                <div class="grid grid-cols-1 md:grid-cols-3 gap-6">
+                    <div class="border-l-4 border-blue-600 pl-4">
+                        <div class="text-3xl font-bold text-blue-600 mb-1">93%</div>
+                        <div class="text-sm text-gray-600 font-semibold">Sensibilidad (Recall)</div>
+                        <p class="text-xs text-gray-500 mt-2">Detección de casos positivos reales - Minimiza falsos negativos críticos</p>
+                    </div>
+                    <div class="border-l-4 border-green-600 pl-4">
+                        <div class="text-3xl font-bold text-green-600 mb-1">0.96</div>
+                        <div class="text-sm text-gray-600 font-semibold">AUC-ROC Score</div>
+                        <p class="text-xs text-gray-500 mt-2">Excelente capacidad discriminatoria del modelo predictivo</p>
+                    </div>
+                    <div class="border-l-4 border-purple-600 pl-4">
+                        <div class="text-3xl font-bold text-purple-600 mb-1">72h</div>
+                        <div class="text-sm text-gray-600 font-semibold">Tiempo de Respuesta</div>
+                        <p class="text-xs text-gray-500 mt-2">Promedio desde detección hasta intervención médica</p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Problema Section -->
+    <section id="problema" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">El Problema</h2>
+                <p class="text-xl text-gray-600">La desnutrición infantil en Norte de Santander</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-12 items-center">
+                <div>
+                    <div class="bg-red-50 border-l-4 border-red-600 p-6 mb-6">
+                        <h3 class="text-2xl font-bold text-red-900 mb-3">
+                            <i class="fas fa-exclamation-triangle mr-2"></i>Situación Crítica
+                        </h3>
+                        <p class="text-gray-700 leading-relaxed">
+                            La desnutrición infantil es un problema de salud pública grave que afecta 
+                            el desarrollo físico y cognitivo de miles de niños en Norte de Santander. 
+                            La detección tardía impide acciones preventivas efectivas.
+                        </p>
+                    </div>
+
+                    <div class="space-y-4">
+                        <div class="flex items-start">
+                            <i class="fas fa-times-circle text-red-600 text-2xl mr-4 mt-1"></i>
+                            <div>
+                                <h4 class="font-bold text-gray-900 mb-1">Detección Tardía</h4>
+                                <p class="text-gray-600">Los casos se identifican cuando ya hay daños irreversibles</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-times-circle text-red-600 text-2xl mr-4 mt-1"></i>
+                            <div>
+                                <h4 class="font-bold text-gray-900 mb-1">Falta de Datos Integrados</h4>
+                                <p class="text-gray-600">Información dispersa y sin análisis predictivo</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-times-circle text-red-600 text-2xl mr-4 mt-1"></i>
+                            <div>
+                                <h4 class="font-bold text-gray-900 mb-1">Recursos Limitados</h4>
+                                <p class="text-gray-600">Personal de salud sobrecargado sin herramientas de apoyo</p>
+                            </div>
+                        </div>
+                        <div class="flex items-start">
+                            <i class="fas fa-times-circle text-red-600 text-2xl mr-4 mt-1"></i>
+                            <div>
+                                <h4 class="font-bold text-gray-900 mb-1">Políticas Reactivas</h4>
+                                <p class="text-gray-600">Decisiones sin sustento en análisis predictivo de datos</p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="bg-gray-100 p-8 rounded-2xl">
+                    <h3 class="text-2xl font-bold text-gray-900 mb-6">Pregunta de Investigación</h3>
+                    <blockquote class="text-lg text-gray-700 italic leading-relaxed border-l-4 border-blue-600 pl-6">
+                        "¿Cómo puede un sistema inteligente basado en minería de datos y aprendizaje 
+                        supervisado predecir tempranamente la desnutrición infantil en Norte de Santander, 
+                        para apoyar acciones preventivas y orientar políticas públicas de salud?"
+                    </blockquote>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Solución Section -->
+    <section id="solucion" class="py-20 bg-gradient-to-r from-blue-600 to-green-600 text-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">Nuestra Solución: SIDI</h2>
+                <p class="text-xl opacity-90">Sistema Inteligente de Detección de Desnutrición Infantil</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 mb-16">
+                <div class="bg-white bg-opacity-10 backdrop-blur-lg p-8 rounded-xl border border-white border-opacity-20">
+                    <div class="bg-white text-blue-600 w-16 h-16 rounded-full flex items-center justify-center mb-4 mx-auto">
+                        <i class="fas fa-database text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-center">Minería de Datos</h3>
+                    <p class="text-center opacity-90">
+                        Análisis profundo de datos sociodemográficos y de salud para identificar 
+                        patrones asociados a la desnutrición infantil
+                    </p>
+                </div>
+
+                <div class="bg-white bg-opacity-10 backdrop-blur-lg p-8 rounded-xl border border-white border-opacity-20">
+                    <div class="bg-white text-green-600 w-16 h-16 rounded-full flex items-center justify-center mb-4 mx-auto">
+                        <i class="fas fa-brain text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-center">Aprendizaje Supervisado</h3>
+                    <p class="text-center opacity-90">
+                        Modelos de IA (SVM, Redes Neuronales, Random Forest) para predicción 
+                        temprana con alta precisión
+                    </p>
+                </div>
+
+                <div class="bg-white bg-opacity-10 backdrop-blur-lg p-8 rounded-xl border border-white border-opacity-20">
+                    <div class="bg-white text-purple-600 w-16 h-16 rounded-full flex items-center justify-center mb-4 mx-auto">
+                        <i class="fas fa-chart-line text-2xl"></i>
+                    </div>
+                    <h3 class="text-xl font-bold mb-3 text-center">Predicción Temprana</h3>
+                    <p class="text-center opacity-90">
+                        Anticipación de riesgos en poblaciones vulnerables para acciones 
+                        preventivas oportunas
+                    </p>
+                </div>
+            </div>
+
+            <div class="bg-white text-gray-900 rounded-2xl p-8 md:p-12">
+                <h3 class="text-3xl font-bold mb-8 text-center">Objetivos del Proyecto</h3>
+                <div class="grid md:grid-cols-2 gap-6">
+                    <div class="flex items-start">
+                        <div class="bg-blue-600 text-white w-8 h-8 rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-1">
+                            1
+                        </div>
+                        <p class="text-gray-700">
+                            <strong>Estudiar datos</strong> sociodemográficos y de salud mediante minería de datos 
+                            para identificar patrones asociados a la desnutrición infantil
+                        </p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="bg-green-600 text-white w-8 h-8 rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-1">
+                            2
+                        </div>
+                        <p class="text-gray-700">
+                            <strong>Seleccionar técnicas</strong> de aprendizaje supervisado (SVM, redes neuronales, 
+                            Random Forest) para definir el modelo más adecuado
+                        </p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="bg-purple-600 text-white w-8 h-8 rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-1">
+                            3
+                        </div>
+                        <p class="text-gray-700">
+                            <strong>Crear un modelo predictivo</strong> aplicando algoritmos de IA para anticipar 
+                            riesgos en poblaciones vulnerables
+                        </p>
+                    </div>
+                    <div class="flex items-start">
+                        <div class="bg-orange-600 text-white w-8 h-8 rounded-full flex items-center justify-center mr-4 flex-shrink-0 mt-1">
+                            4
+                        </div>
+                        <p class="text-gray-700">
+                            <strong>Validar el sistema</strong> mediante métricas de precisión, recall y AUC con 
+                            validación cruzada para garantizar confiabilidad
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Pilar TIC Section - DESTACADO -->
+    <section id="pilar" class="py-20 bg-gradient-to-br from-green-50 to-blue-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <div class="inline-block bg-green-600 text-white px-6 py-3 rounded-full text-lg font-bold mb-6 animate-pulse">
+                    <i class="fas fa-star mr-2"></i>PILAR FUNDAMENTAL DEL PROYECTO
+                </div>
+                <h2 class="text-5xl font-bold text-gray-900 mb-4">
+                    <i class="fas fa-handshake text-green-600 mr-3"></i>
+                    Herramientas TIC para el Trabajo Incluyente y Seguro
+                </h2>
+                <p class="text-2xl text-gray-600 max-w-4xl mx-auto">
+                    SIDI es una herramienta TIC diseñada para empoderar a los profesionales de salud
+                </p>
+            </div>
+
+            <div class="bg-white rounded-3xl shadow-2xl p-8 md:p-12 mb-12 border-4 border-green-600">
+                <h3 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+                    ¿Cómo SIDI cumple con este pilar?
+                </h3>
+                
+                <div class="grid md:grid-cols-2 gap-8">
+                    <!-- Trabajo Incluyente -->
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 p-6 rounded-xl border-2 border-green-600">
+                        <div class="flex items-center mb-4">
+                            <i class="fas fa-users text-4xl text-green-600 mr-4"></i>
+                            <h4 class="text-2xl font-bold text-gray-900">Trabajo Incluyente</h4>
+                        </div>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-600 mr-3 mt-1"></i>
+                                <span class="text-gray-800"><strong>Acceso universal:</strong> Interfaz web accesible desde cualquier dispositivo, 
+                                permitiendo que profesionales en zonas rurales accedan al sistema</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-600 mr-3 mt-1"></i>
+                                <span class="text-gray-800"><strong>Capacitación integrada:</strong> Tutoriales y guías para usuarios con 
+                                diferentes niveles de conocimiento tecnológico</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-600 mr-3 mt-1"></i>
+                                <span class="text-gray-800"><strong>Democratización del conocimiento:</strong> Compartir insights y mejores 
+                                prácticas entre centros de salud</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-green-600 mr-3 mt-1"></i>
+                                <span class="text-gray-800"><strong>Inclusión digital:</strong> Diseño pensado para personas con diferentes 
+                                capacidades y contextos socioeconómicos</span>
+                            </li>
+                        </ul>
+                    </div>
+
+                    <!-- Trabajo Seguro -->
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-6 rounded-xl border-2 border-blue-600">
+                        <div class="flex items-center mb-4">
+                            <i class="fas fa-shield-alt text-4xl text-blue-600 mr-4"></i>
+                            <h4 class="text-2xl font-bold text-gray-900">Trabajo Seguro</h4>
+                        </div>
+                        <ul class="space-y-3">
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-blue-600 mr-3 mt-1"></i>
+                                <span class="text-gray-800"><strong>Reducción de errores:</strong> El modelo de IA valida y complementa 
+                                el criterio médico, minimizando diagnósticos incorrectos</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-blue-600 mr-3 mt-1"></i>
+                                <span class="text-gray-800"><strong>Decisiones basadas en datos:</strong> Análisis de miles de registros 
+                                para recomendaciones fundamentadas</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-blue-600 mr-3 mt-1"></i>
+                                <span class="text-gray-800"><strong>Privacidad y seguridad:</strong> Protección de datos sensibles de 
+                                pacientes según normativas de salud</span>
+                            </li>
+                            <li class="flex items-start">
+                                <i class="fas fa-check-circle text-blue-600 mr-3 mt-1"></i>
+                                <span class="text-gray-800"><strong>Trazabilidad:</strong> Registro completo de predicciones y decisiones 
+                                para auditorías y mejora continua</span>
+                            </li>
+                        </ul>
+                    </div>
+                </div>
+            </div>
+
+            <!-- Beneficios Específicos -->
+            <div class="grid md:grid-cols-3 gap-6">
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition">
+                    <div class="bg-green-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-clock text-3xl text-green-600"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-900 mb-2">Eficiencia</h4>
+                    <p class="text-gray-600">
+                        Reduce el tiempo de análisis de casos de horas a minutos
+                    </p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition">
+                    <div class="bg-blue-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-user-md text-3xl text-blue-600"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-900 mb-2">Apoyo al Personal</h4>
+                    <p class="text-gray-600">
+                        Herramienta de segunda opinión que aumenta la confianza profesional
+                    </p>
+                </div>
+
+                <div class="bg-white p-6 rounded-xl shadow-lg text-center transform hover:scale-105 transition">
+                    <div class="bg-purple-100 w-16 h-16 rounded-full flex items-center justify-center mx-auto mb-4">
+                        <i class="fas fa-balance-scale text-3xl text-purple-600"></i>
+                    </div>
+                    <h4 class="text-xl font-bold text-gray-900 mb-2">Equidad</h4>
+                    <p class="text-gray-600">
+                        Mismo nivel de análisis en todas las zonas de Norte de Santander
+                    </p>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Tecnología Section -->
+    <section id="tecnologia" class="py-20 bg-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Tecnología de Vanguardia</h2>
+                <p class="text-xl text-gray-600">Inteligencia Artificial al servicio de la salud pública</p>
+            </div>
+
+            <div class="grid md:grid-cols-3 gap-8 mb-12">
+                <div class="bg-gradient-to-br from-blue-50 to-blue-100 p-8 rounded-xl shadow-lg">
+                    <i class="fas fa-project-diagram text-4xl text-blue-600 mb-4"></i>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">SVM</h3>
+                    <p class="text-gray-700">
+                        Support Vector Machines para clasificación de riesgo con alta precisión 
+                        en escenarios de datos complejos
+                    </p>
+                </div>
+
+                <div class="bg-gradient-to-br from-purple-50 to-purple-100 p-8 rounded-xl shadow-lg">
+                    <i class="fas fa-network-wired text-4xl text-purple-600 mb-4"></i>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Redes Neuronales</h3>
+                    <p class="text-gray-700">
+                        Deep Learning para detectar patrones no lineales y relaciones complejas 
+                        en datos de salud
+                    </p>
+                </div>
+
+                <div class="bg-gradient-to-br from-green-50 to-green-100 p-8 rounded-xl shadow-lg">
+                    <i class="fas fa-tree text-4xl text-green-600 mb-4"></i>
+                    <h3 class="text-2xl font-bold text-gray-900 mb-3">Random Forest</h3>
+                    <p class="text-gray-700">
+                        Ensemble learning para predicciones robustas y explicables, ideal para 
+                        decisiones clínicas
+                    </p>
+                </div>
+            </div>
+
+            <!-- Métricas de Validación -->
+            <div class="bg-gray-50 rounded-2xl p-8 md:p-12">
+                <h3 class="text-3xl font-bold text-gray-900 mb-8 text-center">
+                    <i class="fas fa-check-double text-green-600 mr-2"></i>
+                    Validación Rigurosa
+                </h3>
+                <div class="grid md:grid-cols-3 gap-6">
+                    <div class="text-center">
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <i class="fas fa-bullseye text-4xl text-blue-600 mb-3"></i>
+                            <h4 class="text-xl font-bold text-gray-900 mb-2">Precisión</h4>
+                            <p class="text-gray-600">Medición de predicciones correctas sobre el total</p>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <i class="fas fa-search text-4xl text-green-600 mb-3"></i>
+                            <h4 class="text-xl font-bold text-gray-900 mb-2">Recall</h4>
+                            <p class="text-gray-600">Detección de todos los casos de riesgo real</p>
+                        </div>
+                    </div>
+                    <div class="text-center">
+                        <div class="bg-white p-6 rounded-xl shadow-md">
+                            <i class="fas fa-chart-area text-4xl text-purple-600 mb-3"></i>
+                            <h4 class="text-xl font-bold text-gray-900 mb-2">AUC-ROC</h4>
+                            <p class="text-gray-600">Evaluación del rendimiento global del modelo</p>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </section>
+
+    <!-- Impacto Section -->
+    <section id="impacto" class="py-20 bg-gradient-to-r from-purple-600 to-pink-600 text-white">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-16">
+                <h2 class="text-4xl font-bold mb-4">Impacto Social</h2>
+                <p class="text-xl opacity-90">Transformando vidas a través de la tecnología</p>
+            </div>
+
+            <div class="grid md:grid-cols-2 gap-8 mb-12">
+                <div class="bg-white bg-opacity-10 backdrop-blur-lg p-8 rounded-xl border border-white border-opacity-20">
+                    <h3 class="text-2xl font-bold mb-6">
+                        <i class="fas fa-heart mr-2"></i>Para la Comunidad
+                    </h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <i class="fas fa-child text-2xl mr-3 mt-1"></i>
+                            <span>Detección temprana que previene daños irreversibles en el desarrollo infantil</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-home text-2xl mr-3 mt-1"></i>
+                            <span>Intervención oportuna en familias vulnerables antes de crisis de salud</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-hands-helping text-2xl mr-3 mt-1"></i>
+                            <span>Reducción de inequidades en salud entre zonas urbanas y rurales</span>
+                        </li>
+                    </ul>
+                </div>
+
+                <div class="bg-white bg-opacity-10 backdrop-blur-lg p-8 rounded-xl border border-white border-opacity-20">
+                    <h3 class="text-2xl font-bold mb-6">
+                        <i class="fas fa-landmark mr-2"></i>Para las Políticas Públicas
+                    </h3>
+                    <ul class="space-y-4">
+                        <li class="flex items-start">
+                            <i class="fas fa-chart-bar text-2xl mr-3 mt-1"></i>
+                            <span>Datos concretos para diseñar programas de salud pública efectivos</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-map-marked-alt text-2xl mr-3 mt-1"></i>
+                            <span>Identificación de zonas prioritarias para asignación de recursos</span>
+                        </li>
+                        <li class="flex items-start">
+                            <i class="fas fa-microscope text-2xl mr-3 mt-1"></i>
+                            <span>Evaluación del impacto de intervenciones con evidencia científica</span>
+                        </li>
+                    </ul>
+                </div>
+            </div>
+
+            <div class="bg-white text-gray-900 rounded-2xl p-8 text-center">
+                <h3 class="text-3xl font-bold mb-4">Visión a Futuro</h3>
+                <p class="text-xl text-gray-700 max-w-3xl mx-auto">
+                    Expandir SIDI a toda Colombia y convertirlo en un estándar de salud preventiva, 
+                    salvando vidas mediante la combinación de tecnología avanzada y compromiso social
+                </p>
+            </div>
+        </div>
+    </section>
+
+    <!-- Demo Section -->
+    <section id="demo" class="py-20 bg-gray-50">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="text-center mb-12">
+                <h2 class="text-4xl font-bold text-gray-900 mb-4">Demostración Interactiva</h2>
+                <p class="text-xl text-gray-600">Simulador de predicción de riesgo nutricional</p>
+            </div>
+
+            <div class="bg-white rounded-2xl shadow-2xl p-8 md:p-12 max-w-4xl mx-auto">
+                <form id="prediction-form" class="space-y-6">
+                    <!-- Paso 1: Tipo de Persona -->
+                    <div id="paso-tipo" class="space-y-4">
+                        <div class="text-center mb-6">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">
+                                <i class="fas fa-user-circle text-blue-600 mr-2"></i>
+                                Paso 1: Selecciona el tipo de persona
+                            </h3>
+                            <p class="text-gray-600">El análisis se adaptará según la edad y características</p>
+                        </div>
+                        
+                        <div class="grid grid-cols-2 md:grid-cols-4 gap-4">
+                            <button type="button" class="tipo-persona-btn p-6 border-2 border-gray-300 rounded-xl hover:border-blue-600 hover:bg-blue-50 transition-all transform hover:scale-105" data-tipo="bebe">
+                                <i class="fas fa-baby text-4xl text-pink-500 mb-3"></i>
+                                <div class="font-bold text-gray-900">Bebé</div>
+                                <div class="text-sm text-gray-600">0-12 meses</div>
+                            </button>
+                            
+                            <button type="button" class="tipo-persona-btn p-6 border-2 border-gray-300 rounded-xl hover:border-blue-600 hover:bg-blue-50 transition-all transform hover:scale-105" data-tipo="nino">
+                                <i class="fas fa-child text-4xl text-blue-500 mb-3"></i>
+                                <div class="font-bold text-gray-900">Niño</div>
+                                <div class="text-sm text-gray-600">1-12 años</div>
+                            </button>
+                            
+                            <button type="button" class="tipo-persona-btn p-6 border-2 border-gray-300 rounded-xl hover:border-blue-600 hover:bg-blue-50 transition-all transform hover:scale-105" data-tipo="adolescente">
+                                <i class="fas fa-user-graduate text-4xl text-purple-500 mb-3"></i>
+                                <div class="font-bold text-gray-900">Adolescente</div>
+                                <div class="text-sm text-gray-600">13-17 años</div>
+                            </button>
+                            
+                            <button type="button" class="tipo-persona-btn p-6 border-2 border-gray-300 rounded-xl hover:border-blue-600 hover:bg-blue-50 transition-all transform hover:scale-105" data-tipo="adulto">
+                                <i class="fas fa-user text-4xl text-green-500 mb-3"></i>
+                                <div class="font-bold text-gray-900">Adulto</div>
+                                <div class="text-sm text-gray-600">18+ años</div>
+                            </button>
+                        </div>
+                    </div>
+
+                    <!-- Paso 2: Datos Específicos (oculto inicialmente) -->
+                    <div id="paso-datos" class="hidden space-y-6">
+                        <div class="text-center mb-6">
+                            <h3 class="text-2xl font-bold text-gray-900 mb-2">
+                                <i class="fas fa-clipboard-list text-blue-600 mr-2"></i>
+                                Paso 2: Ingresa los datos
+                            </h3>
+                            <div id="tipo-seleccionado-badge" class="inline-block bg-blue-100 text-blue-800 px-4 py-2 rounded-full text-sm font-semibold mt-2"></div>
+                        </div>
+
+                        <div class="grid md:grid-cols-2 gap-6">
+                            <div>
+                                <label for="edad" class="block text-gray-700 font-semibold mb-2">
+                                    <span id="label-edad">Edad</span>
+                                </label>
+                                <input type="number" id="edad" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent text-gray-900" placeholder="Ej: 24" required>
+                            </div>
+                            <div>
+                                <label for="peso" class="block text-gray-700 font-semibold mb-2">Peso (kg)</label>
+                                <input type="number" step="0.1" id="peso" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent text-gray-900" placeholder="Ej: 10.5" required>
+                            </div>
+                            <div>
+                                <label for="talla" class="block text-gray-700 font-semibold mb-2">Estatura (cm)</label>
+                                <input type="number" step="0.1" id="talla" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent text-gray-900" placeholder="Ej: 82" required>
+                            </div>
+                            <div>
+                                <label for="zona" class="block text-gray-700 font-semibold mb-2">Zona</label>
+                                <select id="zona" name="zona" title="Seleccione la zona de residencia" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white text-gray-900" required>
+                                    <option value="">Seleccionar</option>
+                                    <option value="urbana">Urbana</option>
+                                    <option value="rural">Rural</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="acceso" class="block text-gray-700 font-semibold mb-2">Acceso a servicios de salud</label>
+                                <select id="acceso" name="acceso" title="Seleccione si tiene acceso a servicios de salud" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white text-gray-900" required>
+                                    <option value="">Seleccionar</option>
+                                    <option value="si">Sí</option>
+                                    <option value="no">No</option>
+                                </select>
+                            </div>
+                            <div>
+                                <label for="nivel" class="block text-gray-700 font-semibold mb-2">Nivel socioeconómico</label>
+                                <select id="nivel" name="nivel" title="Seleccione el nivel socioeconómico" class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent bg-white text-gray-900" required>
+                                    <option value="">Seleccionar</option>
+                                    <option value="bajo">Bajo</option>
+                                    <option value="medio">Medio</option>
+                                    <option value="alto">Alto</option>
+                                </select>
+                            </div>
+                        </div>
+
+                        <div class="flex gap-4">
+                            <button type="button" id="btn-volver" class="flex-1 bg-gray-300 text-gray-700 py-4 rounded-lg font-bold text-lg hover:bg-gray-400 transition">
+                                <i class="fas fa-arrow-left mr-2"></i>Volver
+                            </button>
+                            <button type="submit" class="flex-1 bg-blue-600 text-white py-4 rounded-lg font-bold text-lg hover:bg-blue-700 transition transform hover:scale-105">
+                                <i class="fas fa-calculator mr-2"></i>Calcular Riesgo
+                            </button>
+                        </div>
+                    </div>
+                </form>
+
+                <div id="resultado" class="mt-8 hidden">
+                    <div class="bg-gradient-to-r from-blue-50 to-green-50 border-2 border-blue-600 rounded-xl p-6">
+                        <h3 class="text-2xl font-bold text-gray-900 mb-4 text-center">Resultado del Análisis</h3>
+                        <div id="resultado-contenido" class="text-center"></div>
+                    </div>
+                </div>
+            </div>
+
+            <p class="text-center text-gray-500 mt-8 max-w-2xl mx-auto">
+                <i class="fas fa-info-circle mr-2"></i>
+                Esta es una demostración simulada con fines educativos. El sistema real utiliza modelos 
+                de IA entrenados con datos reales y validación médica profesional.
+            </p>
+        </div>
+    </section>
+
+    <!-- Footer -->
+    <footer class="bg-gray-900 text-white py-12">
+        <div class="max-w-7xl mx-auto px-4">
+            <div class="grid md:grid-cols-4 gap-8 mb-8">
+                <div>
+                    <div class="flex items-center mb-4">
+                        <i class="fas fa-heartbeat text-3xl text-blue-400 mr-3"></i>
+                        <span class="text-2xl font-bold">SIDI</span>
+                    </div>
+                    <p class="text-gray-400">
+                        Sistema Inteligente de Detección de Desnutrición Infantil
+                    </p>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Enlaces</h4>
+                    <ul class="space-y-2">
+                        <li><a href="#inicio" class="text-gray-400 hover:text-blue-400 transition">Inicio</a></li>
+                        <li><a href="#problema" class="text-gray-400 hover:text-blue-400 transition">Problema</a></li>
+                        <li><a href="#solucion" class="text-gray-400 hover:text-blue-400 transition">Solución</a></li>
+                        <li><a href="#pilar" class="text-gray-400 hover:text-blue-400 transition">Pilar TIC</a></li>
+                    </ul>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Pilar del Hackathon</h4>
+                    <div class="bg-green-600 text-white px-4 py-2 rounded-lg text-sm">
+                        <i class="fas fa-handshake mr-2"></i>
+                        Herramientas TIC para el Trabajo Incluyente y Seguro
+                    </div>
+                </div>
+                <div>
+                    <h4 class="text-lg font-bold mb-4">Ubicación</h4>
+                    <p class="text-gray-400">
+                        <i class="fas fa-map-marker-alt mr-2"></i>
+                        Norte de Santander, Colombia
+                    </p>
+                    <p class="text-gray-400 mt-2">
+                        <i class="fas fa-envelope mr-2"></i>
+                        contacto@sidi-salud.com
+                    </p>
+                </div>
+            </div>
+            <div class="border-t border-gray-800 pt-8 text-center text-gray-400">
+                <p>&copy; 2025 SIDI - Sistema Inteligente de Detección de Desnutrición Infantil. Desarrollado para el bienestar de los niños de Norte de Santander.</p>
+            </div>
+        </div>
+    </footer>
+
+    <!-- Botón Scroll to Top -->
+    <button id="scrollToTop" class="scroll-to-top" aria-label="Volver arriba" title="Volver arriba">
+        <i class="fas fa-arrow-up"></i>
+    </button>
+
+    <script src="./js/script.js"></script>
+</body>
+</html>

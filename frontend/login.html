@@ -7,63 +7,112 @@
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&display=swap" rel="stylesheet">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700;800;900&display=swap" rel="stylesheet">
     <style>
         body {
             font-family: 'Inter', sans-serif;
         }
+        @keyframes float {
+            0%, 100% { transform: translateY(0px); }
+            50% { transform: translateY(-20px); }
+        }
+        @keyframes fadeInUp {
+            from { opacity: 0; transform: translateY(30px); }
+            to { opacity: 1; transform: translateY(0); }
+        }
+        @keyframes scaleIn {
+            from { opacity: 0; transform: scale(0.9); }
+            to { opacity: 1; transform: scale(1); }
+        }
+        @keyframes pulse {
+            0%, 100% { opacity: 1; }
+            50% { opacity: 0.8; }
+        }
+        .animate-float { animation: float 3s ease-in-out infinite; }
+        .animate-fade-in-up { animation: fadeInUp 0.8s ease-out forwards; }
+        .animate-scale-in { animation: scaleIn 0.5s ease-out forwards; }
+        .animate-pulse { animation: pulse 2s ease-in-out infinite; }
+        .animate-delay-1 { animation-delay: 0.5s; }
+        .animate-delay-2 { animation-delay: 1s; }
+        .animate-delay-particle-2 { animation-delay: 2s; }
+        .animate-delay-particle-4 { animation-delay: 4s; }
+        .glass-effect {
+            background: rgba(255, 255, 255, 0.95);
+            -webkit-backdrop-filter: blur(10px);
+            backdrop-filter: blur(10px);
+        }
+        .input-focus {
+            transition: all 0.3s ease;
+        }
+        .input-focus:focus {
+            transform: translateY(-2px);
+            box-shadow: 0 8px 16px rgba(139, 92, 246, 0.2);
+        }
     </style>
 </head>
-<body class="bg-gradient-to-br from-blue-900 via-blue-700 to-green-600 min-h-screen flex items-center justify-center p-4">
+<body class="min-h-screen bg-gradient-to-br from-indigo-900 via-purple-900 to-pink-800 overflow-x-hidden flex items-center justify-center p-4">
     
-    <div class="w-full max-w-md">
+    <!-- Partículas flotantes de fondo -->
+    <div class="fixed inset-0 overflow-hidden pointer-events-none">
+        <div class="absolute top-20 left-10 w-72 h-72 bg-purple-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float"></div>
+        <div class="absolute top-40 right-10 w-72 h-72 bg-blue-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float animate-delay-particle-2"></div>
+        <div class="absolute bottom-20 left-1/2 w-72 h-72 bg-pink-500 rounded-full mix-blend-multiply filter blur-xl opacity-20 animate-float animate-delay-particle-4"></div>
+    </div>
+
+    <div class="w-full max-w-md relative z-10">
         
         <!-- Header -->
-        <div class="text-center mb-8">
-            <a href="index.html" aria-label="Volver al inicio" title="Volver al inicio" class="inline-flex items-center justify-center w-20 h-20 bg-white rounded-full shadow-2xl mb-4">
-                <i class="fas fa-heartbeat text-4xl text-blue-600"></i>
+        <div class="text-center mb-8 animate-fade-in-up">
+            <a href="index.html" aria-label="Volver al inicio" title="Volver al inicio" class="inline-flex items-center justify-center w-20 h-20 sm:w-24 sm:h-24 bg-white rounded-full shadow-2xl mb-6 animate-float hover:scale-110 transition-transform duration-300">
+                <i class="fas fa-heartbeat text-4xl sm:text-5xl text-purple-600"></i>
             </a>
-            <h1 class="text-4xl font-bold text-white mb-2">Iniciar Sesión</h1>
-            <p class="text-blue-100" id="role-display">Cargando...</p>
+            <h1 class="text-4xl sm:text-5xl font-black text-white mb-3 tracking-tight">Iniciar Sesión</h1>
+            <p class="text-purple-200 text-base sm:text-lg" id="role-display">
+                <i class="fas fa-circle-notch fa-spin mr-2"></i>Cargando...
+            </p>
         </div>
 
         <!-- Card de Login -->
-        <div class="bg-white rounded-3xl shadow-2xl p-8">
+        <div class="glass-effect rounded-3xl shadow-2xl p-6 sm:p-8 animate-scale-in">
             
             <!-- Alerta de Error -->
-            <div id="error-alert" class="hidden mb-6 bg-red-50 border-l-4 border-red-500 p-4 rounded">
-                <div class="flex">
-                    <i class="fas fa-exclamation-circle text-red-500 mt-1 mr-3"></i>
-                    <p class="text-red-700" id="error-message"></p>
+            <div id="error-alert" class="hidden mb-6 bg-gradient-to-r from-red-50 to-red-100 border-l-4 border-red-500 p-4 rounded-xl shadow-md animate-scale-in">
+                <div class="flex items-start">
+                    <div class="flex-shrink-0">
+                        <i class="fas fa-exclamation-circle text-red-500 text-xl"></i>
+                    </div>
+                    <div class="ml-3">
+                        <p class="text-sm font-medium text-red-800" id="error-message"></p>
+                    </div>
                 </div>
             </div>
 
             <!-- Formulario -->
-            <form id="login-form" class="space-y-6">
+            <form id="login-form" class="space-y-5">
                 
-                <div>
-                    <label for="email" class="block text-gray-700 font-semibold mb-2">
-                        <i class="fas fa-envelope mr-2 text-blue-600"></i>Correo Electrónico
+                <div class="animate-fade-in-up">
+                    <label for="email" class="block text-gray-800 font-semibold mb-2 text-sm">
+                        <i class="fas fa-envelope mr-2 text-purple-600"></i>Correo Electrónico
                     </label>
                     <input 
                         type="email" 
                         id="email" 
                         required
-                        class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent"
+                        class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all input-focus bg-white"
                         placeholder="tu@email.com"
                     >
                 </div>
 
-                <div>
-                    <label for="password" class="block text-gray-700 font-semibold mb-2">
-                        <i class="fas fa-lock mr-2 text-blue-600"></i>Contraseña
+                <div class="animate-fade-in-up animate-delay-1">
+                    <label for="password" class="block text-gray-800 font-semibold mb-2 text-sm">
+                        <i class="fas fa-lock mr-2 text-purple-600"></i>Contraseña
                     </label>
                     <div class="relative">
                         <input 
                             type="password" 
                             id="password" 
                             required
-                            class="w-full px-4 py-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent pr-12"
+                            class="w-full px-4 py-3 border-2 border-gray-200 rounded-xl focus:ring-2 focus:ring-purple-500 focus:border-purple-500 transition-all input-focus bg-white pr-12"
                             placeholder="••••••••"
                         >
                         <button 
@@ -71,7 +120,7 @@
                             id="toggle-password"
                             aria-label="Mostrar u ocultar contraseña"
                             title="Mostrar u ocultar contraseña"
-                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-500 hover:text-gray-700"
+                            class="absolute right-3 top-1/2 -translate-y-1/2 text-gray-400 hover:text-purple-600 transition-colors"
                         >
                             <i class="fas fa-eye" id="eye-icon" aria-hidden="true"></i>
                             <span class="sr-only">Mostrar contraseña</span>
@@ -82,9 +131,9 @@
                 <button 
                     type="submit" 
                     id="login-btn"
-                    class="w-full bg-gradient-to-r from-blue-600 to-green-600 text-white py-4 rounded-lg font-bold text-lg hover:shadow-lg transform hover:scale-105 transition-all"
+                    class="w-full bg-gradient-to-r from-purple-600 to-pink-600 text-white py-4 rounded-xl font-bold text-base hover:shadow-2xl transform hover:scale-105 transition-all duration-300 mt-6 animate-fade-in-up animate-delay-2"
                 >
-                    <i class="fas fa-sign-in-alt mr-2"></i>Ingresar
+                    <i class="fas fa-sign-in-alt mr-2"></i>Ingresar al Sistema
                 </button>
 
             </form>
@@ -92,10 +141,10 @@
             <!-- Divider -->
             <div class="relative my-6">
                 <div class="absolute inset-0 flex items-center">
-                    <div class="w-full border-t border-gray-300"></div>
+                    <div class="w-full border-t border-gray-200"></div>
                 </div>
                 <div class="relative flex justify-center text-sm">
-                    <span class="px-4 bg-white text-gray-500">¿No tienes cuenta?</span>
+                    <span class="px-4 bg-white text-gray-500 font-medium">¿No tienes cuenta?</span>
                 </div>
             </div>
 
@@ -103,16 +152,16 @@
             <a 
                 href="register.html" 
                 id="register-link"
-                class="block w-full text-center border-2 border-blue-600 text-blue-600 py-3 rounded-lg font-bold hover:bg-blue-50 transition-all"
+                class="block w-full text-center border-2 border-purple-600 text-purple-600 py-3 rounded-xl font-bold hover:bg-purple-50 transition-all duration-300 hover:scale-105 hover:shadow-lg"
             >
-                <i class="fas fa-user-plus mr-2"></i>Crear Cuenta
+                <i class="fas fa-user-plus mr-2"></i>Crear Cuenta Nueva
             </a>
 
         </div>
 
         <!-- Volver -->
-        <div class="text-center mt-6">
-            <a href="index.html" class="inline-flex items-center text-white hover:text-blue-200 transition-colors">
+        <div class="text-center mt-8 animate-fade-in-up">
+            <a href="index.html" class="inline-flex items-center text-white hover:text-purple-200 transition-colors duration-300 font-medium">
                 <i class="fas fa-arrow-left mr-2"></i>
                 <span>Volver a selección de rol</span>
             </a>

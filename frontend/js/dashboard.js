@@ -391,9 +391,11 @@ function loadCharts(stats) {
 // ==========================================
 async function loadRecentCases() {
     const tbody = document.getElementById('tabla-recientes');
-    if (!tbody) return;
+    const cardsContainer = document.getElementById('cards-recientes');
+    if (!tbody && !cardsContainer) return;
     
-    tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Cargando casos recientes...</td></tr>';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Cargando casos recientes...</td></tr>';
+    if (cardsContainer) cardsContainer.innerHTML = '<div class="text-center py-8 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Cargando casos recientes...</div>';
     
     try {
         // Obtener últimos 10 niños con sus mediciones y predicciones
@@ -412,7 +414,8 @@ async function loadRecentCases() {
         if (errorNinos) throw errorNinos;
         
         if (!ninos || ninos.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-500">No hay pacientes registrados aún</td></tr>';
+            if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-gray-500">No hay pacientes registrados aún</td></tr>';
+            if (cardsContainer) cardsContainer.innerHTML = '<div class="text-center py-8 text-gray-500">No hay pacientes registrados aún</div>';
             return;
         }
         
@@ -445,7 +448,8 @@ async function loadRecentCases() {
             }
         });
         
-        // Generar filas de la tabla
+        // Generar filas de la tabla desktop
+        if (tbody) {
         tbody.innerHTML = ninos.map(nino => {
             const medicion = medicionesPorNino[nino.id];
             const riesgo = prediccionesPorNino[nino.id] || 'sin_evaluar';
@@ -498,10 +502,77 @@ async function loadRecentCases() {
                 </tr>
             `;
         }).join('');
+        }
+        
+        // Generar cards móvil
+        if (cardsContainer) {
+        cardsContainer.innerHTML = ninos.map(nino => {
+            const medicion = medicionesPorNino[nino.id];
+            const riesgo = prediccionesPorNino[nino.id] || 'sin_evaluar';
+            
+            // Calcular edad en meses
+            const fechaNac = new Date(nino.fecha_nacimiento);
+            const hoy = new Date();
+            const meses = Math.floor((hoy - fechaNac) / (1000 * 60 * 60 * 24 * 30.44));
+            
+            // Formatear fecha de registro
+            const fechaReg = new Date(nino.fecha_registro);
+            const fechaFormateada = fechaReg.toLocaleDateString('es-CO', { 
+                day: 'numeric',
+                month: 'short'
+            });
+            
+            // Obtener inicial para avatar
+            const inicial = nino.nombre.charAt(0).toUpperCase();
+            
+            return `
+                <div class="bg-white rounded-xl shadow-md border border-gray-100 p-4 hover:shadow-lg transition-all duration-300">
+                    <!-- Header -->
+                    <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
+                        <div class="flex items-center gap-3 flex-1 min-w-0">
+                            <div class="flex-shrink-0 w-12 h-12 rounded-full bg-gradient-to-br from-blue-500 to-blue-600 flex items-center justify-center text-white font-bold text-lg shadow-lg">
+                                ${inicial}
+                            </div>
+                            <div class="flex-1 min-w-0">
+                                <h3 class="text-base font-bold text-gray-900 truncate">${nino.nombre} ${nino.apellido}</h3>
+                                <p class="text-xs text-gray-500"><i class="fas fa-calendar-alt mr-1"></i>${fechaFormateada}</p>
+                            </div>
+                        </div>
+                        ${getRiesgoBadge(riesgo)}
+                    </div>
+                    
+                    <!-- Info Grid -->
+                    <div class="grid grid-cols-3 gap-2 mb-3">
+                        <div class="bg-purple-50 rounded-lg p-2 text-center">
+                            <p class="text-xs text-gray-600"><i class="fas fa-birthday-cake"></i></p>
+                            <p class="text-sm font-bold text-purple-700">${meses}m</p>
+                        </div>
+                        <div class="bg-blue-50 rounded-lg p-2 text-center">
+                            <p class="text-xs text-gray-600"><i class="fas fa-weight"></i></p>
+                            <p class="text-sm font-bold text-blue-700">${medicion?.peso ? medicion.peso + 'kg' : '-'}</p>
+                        </div>
+                        <div class="bg-green-50 rounded-lg p-2 text-center">
+                            <p class="text-xs text-gray-600"><i class="fas fa-arrows-alt-v"></i></p>
+                            <p class="text-sm font-bold text-green-700">${medicion?.talla ? medicion.talla + 'cm' : '-'}</p>
+                        </div>
+                    </div>
+                    
+                    <!-- Acción -->
+                    <button 
+                        onclick="verDetallePaciente(${nino.id})"
+                        class="w-full bg-blue-600 text-white py-2 px-4 rounded-lg hover:bg-blue-700 transition-colors text-sm font-medium"
+                    >
+                        <i class="fas fa-eye mr-1"></i>Ver Detalles
+                    </button>
+                </div>
+            `;
+        }).join('');
+        }
         
     } catch (error) {
         console.error('Error al cargar casos recientes:', error);
-        tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>Error al cargar datos</td></tr>';
+        if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="px-4 py-8 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>Error al cargar datos</td></tr>';
+        if (cardsContainer) cardsContainer.innerHTML = '<div class="text-center py-8 text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>Error al cargar datos</div>';
     }
 }
 
@@ -1158,9 +1229,11 @@ let filtrosActivos = {};
 // Cargar pacientes desde Supabase
 async function cargarPacientes(filtros = {}) {
     const tbody = document.getElementById('tabla-pacientes');
-    if (!tbody) return;
+    const cardsContainer = document.getElementById('cards-pacientes');
+    if (!tbody && !cardsContainer) return;
     
-    tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Cargando pacientes...</td></tr>';
+    if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Cargando pacientes...</td></tr>';
+    if (cardsContainer) cardsContainer.innerHTML = '<div class="text-center py-8 text-gray-500"><i class="fas fa-spinner fa-spin mr-2"></i>Cargando pacientes...</div>';
     
     try {
         // Construir query con filtros
@@ -1198,7 +1271,8 @@ async function cargarPacientes(filtros = {}) {
         if (error) throw error;
         
         if (!data || data.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-gray-500">No se encontraron pacientes</td></tr>';
+            if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-gray-500">No se encontraron pacientes</td></tr>';
+            if (cardsContainer) cardsContainer.innerHTML = '<div class="text-center py-8 text-gray-500">No se encontraron pacientes</div>';
             return;
         }
         
@@ -1258,12 +1332,15 @@ async function cargarPacientes(filtros = {}) {
             );
         }
         
-        // Renderizar tabla
+        // Renderizar tabla y cards
         if (pacientesFiltrados.length === 0) {
-            tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-gray-500">No hay pacientes que coincidan con los filtros</td></tr>';
+            if (tbody) tbody.innerHTML = '<tr><td colspan="7" class="px-6 py-8 text-center text-gray-500">No hay pacientes que coincidan con los filtros</td></tr>';
+            if (cardsContainer) cardsContainer.innerHTML = '<div class="text-center py-8 text-gray-500">No hay pacientes que coincidan con los filtros</div>';
             return;
         }
         
+        // Renderizar tabla desktop
+        if (tbody) {
         tbody.innerHTML = pacientesFiltrados.map(p => `
             <tr class="hover:bg-gray-50 transition-colors">
                 <td class="px-6 py-4 whitespace-nowrap">
@@ -1303,10 +1380,66 @@ async function cargarPacientes(filtros = {}) {
                 </td>
             </tr>
         `).join('');
+        }
+        
+        // Renderizar cards móvil
+        if (cardsContainer) {
+        cardsContainer.innerHTML = pacientesFiltrados.map(p => `
+            <div class="bg-white rounded-xl shadow-lg border border-gray-100 p-4 hover:shadow-xl transition-all duration-300">
+                <!-- Header Card -->
+                <div class="flex items-center justify-between mb-3 pb-3 border-b border-gray-100">
+                    <div class="flex items-center gap-3 flex-1 min-w-0">
+                        <div class="flex-shrink-0 w-12 h-12 bg-gradient-to-br from-blue-500 to-green-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
+                            ${p.nombre.charAt(0)}
+                        </div>
+                        <div class="flex-1 min-w-0">
+                            <h3 class="text-base font-bold text-gray-900 truncate">${p.nombre}</h3>
+                            <p class="text-xs text-gray-500">${p.sexo === 'M' ? 'Masculino' : 'Femenino'}</p>
+                        </div>
+                    </div>
+                    ${getRiesgoBadge(p.riesgo.toLowerCase())}
+                </div>
+                
+                <!-- Datos Grid -->
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div class="bg-blue-50 rounded-lg p-2">
+                        <p class="text-xs text-gray-600 mb-0.5"><i class="fas fa-birthday-cake mr-1"></i>Edad</p>
+                        <p class="text-sm font-bold text-blue-700">${p.edadMeses} meses</p>
+                    </div>
+                    <div class="bg-purple-50 rounded-lg p-2">
+                        <p class="text-xs text-gray-600 mb-0.5"><i class="fas fa-weight mr-1"></i>Peso</p>
+                        <p class="text-sm font-bold text-purple-700">${p.peso} kg</p>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-2">
+                        <p class="text-xs text-gray-600 mb-0.5"><i class="fas fa-arrows-alt-v mr-1"></i>Talla</p>
+                        <p class="text-sm font-bold text-green-700">${p.talla} cm</p>
+                    </div>
+                    <div class="bg-indigo-50 rounded-lg p-2">
+                        <p class="text-xs text-gray-600 mb-0.5"><i class="fas fa-map-marker-alt mr-1"></i>Zona</p>
+                        <p class="text-sm font-bold text-indigo-700 truncate">${p.zona}</p>
+                    </div>
+                </div>
+                
+                <!-- Acciones -->
+                <div class="flex gap-2 pt-3 border-t border-gray-100">
+                    <button onclick="verDetallePaciente(${p.id})" class="flex-1 bg-blue-600 text-white py-2 px-3 rounded-lg hover:bg-blue-700 transition-colors text-xs font-medium">
+                        <i class="fas fa-eye mr-1"></i>Ver
+                    </button>
+                    <button onclick="editarPaciente(${p.id})" class="flex-1 bg-green-600 text-white py-2 px-3 rounded-lg hover:bg-green-700 transition-colors text-xs font-medium">
+                        <i class="fas fa-edit mr-1"></i>Editar
+                    </button>
+                    <button onclick="confirmarEliminar(${p.id}, '${p.nombre}')" class="flex-1 bg-red-600 text-white py-2 px-3 rounded-lg hover:bg-red-700 transition-colors text-xs font-medium">
+                        <i class="fas fa-trash mr-1"></i>Eliminar
+                    </button>
+                </div>
+            </div>
+        `).join('');
+        }
         
     } catch (error) {
         console.error('Error al cargar pacientes:', error);
-        tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>Error: ${error.message}</td></tr>`;
+        if (tbody) tbody.innerHTML = `<tr><td colspan="7" class="px-6 py-8 text-center text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>Error: ${error.message}</td></tr>`;
+        if (cardsContainer) cardsContainer.innerHTML = `<div class="text-center py-8 text-red-500"><i class="fas fa-exclamation-triangle mr-2"></i>Error: ${error.message}</div>`;
     }
 }
 
@@ -1672,30 +1805,72 @@ function mostrarModalDetalle(paciente) {
                 <!-- Historial de Mediciones -->
                 ${mediciones.length > 1 ? `
                     <div class="border-t pt-6">
-                        <h4 class="text-lg font-bold text-gray-900 mb-4">
+                        <h4 class="text-base sm:text-lg font-bold text-gray-900 mb-4">
                             <i class="fas fa-chart-line mr-2 text-green-600"></i>Historial de Mediciones (${mediciones.length})
                         </h4>
-                        <div class="overflow-x-auto">
+                        
+                        <!-- Vista Desktop: Tabla -->
+                        <div class="hidden lg:block overflow-x-auto">
                             <table class="min-w-full divide-y divide-gray-200">
-                                <thead class="bg-gray-50">
+                                <thead class="bg-gradient-to-r from-gray-50 to-gray-100">
                                     <tr>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Fecha</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Peso</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">Talla</th>
-                                        <th class="px-4 py-2 text-left text-xs font-medium text-gray-500 uppercase">IMC</th>
+                                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">Fecha</th>
+                                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">Peso</th>
+                                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">Talla</th>
+                                        <th class="px-4 py-3 text-left text-xs font-bold text-gray-700 uppercase">IMC</th>
                                     </tr>
                                 </thead>
                                 <tbody class="bg-white divide-y divide-gray-200">
                                     ${mediciones.map(med => `
-                                        <tr class="hover:bg-gray-50">
-                                            <td class="px-4 py-2 text-sm text-gray-900">${new Date(med.fecha_medicion).toLocaleDateString('es-ES')}</td>
-                                            <td class="px-4 py-2 text-sm text-gray-900">${med.peso} kg</td>
-                                            <td class="px-4 py-2 text-sm text-gray-900">${med.talla} cm</td>
-                                            <td class="px-4 py-2 text-sm text-gray-900">${med.imc || 'N/A'}</td>
+                                        <tr class="hover:bg-gray-50 transition-colors">
+                                            <td class="px-4 py-3 text-sm font-semibold text-gray-900">${new Date(med.fecha_medicion).toLocaleDateString('es-ES')}</td>
+                                            <td class="px-4 py-3 text-sm text-blue-600 font-semibold">${med.peso} kg</td>
+                                            <td class="px-4 py-3 text-sm text-green-600 font-semibold">${med.talla} cm</td>
+                                            <td class="px-4 py-3 text-sm text-purple-600 font-semibold">${med.imc || 'N/A'}</td>
                                         </tr>
                                     `).join('')}
                                 </tbody>
                             </table>
+                        </div>
+                        
+                        <!-- Vista Móvil: Cards -->
+                        <div class="lg:hidden space-y-3">
+                            ${mediciones.map((med, index) => `
+                                <div class="bg-gradient-to-r from-gray-50 to-gray-100 rounded-xl p-4 border border-gray-200 shadow-sm hover:shadow-md transition-all">
+                                    <!-- Header Card -->
+                                    <div class="flex items-center justify-between mb-3 pb-2 border-b border-gray-300">
+                                        <div class="flex items-center gap-2">
+                                            <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                                                <i class="fas fa-calendar-check text-white text-sm"></i>
+                                            </div>
+                                            <div>
+                                                <p class="text-sm font-bold text-gray-900">${new Date(med.fecha_medicion).toLocaleDateString('es-ES', { day: 'numeric', month: 'short', year: 'numeric' })}</p>
+                                                <p class="text-xs text-gray-500">Medición #${mediciones.length - index}</p>
+                                            </div>
+                                        </div>
+                                        ${index === 0 ? '<span class="px-2 py-1 bg-green-100 text-green-700 rounded-full text-xs font-bold">Reciente</span>' : ''}
+                                    </div>
+                                    
+                                    <!-- Datos Grid -->
+                                    <div class="grid grid-cols-3 gap-2">
+                                        <div class="bg-blue-50 rounded-lg p-2 text-center">
+                                            <p class="text-xs text-gray-600 mb-0.5"><i class="fas fa-weight"></i></p>
+                                            <p class="text-sm font-bold text-blue-700">${med.peso}</p>
+                                            <p class="text-xs text-gray-500">kg</p>
+                                        </div>
+                                        <div class="bg-green-50 rounded-lg p-2 text-center">
+                                            <p class="text-xs text-gray-600 mb-0.5"><i class="fas fa-arrows-alt-v"></i></p>
+                                            <p class="text-sm font-bold text-green-700">${med.talla}</p>
+                                            <p class="text-xs text-gray-500">cm</p>
+                                        </div>
+                                        <div class="bg-purple-50 rounded-lg p-2 text-center">
+                                            <p class="text-xs text-gray-600 mb-0.5"><i class="fas fa-calculator"></i></p>
+                                            <p class="text-sm font-bold text-purple-700">${med.imc || 'N/A'}</p>
+                                            <p class="text-xs text-gray-500">IMC</p>
+                                        </div>
+                                    </div>
+                                </div>
+                            `).join('')}
                         </div>
                     </div>
                 ` : ''}
@@ -2021,11 +2196,11 @@ function agregarNuevaMedicion(ninoId, nombre, apellido) {
             </div>
             
             <!-- Formulario -->
-            <form id="form-nueva-medicion" class="p-4 sm:p-6 space-y-4 sm:space-y-6 max-h-[65vh] overflow-y-auto">
+            <form id="form-nueva-medicion" class="p-4 sm:p-6 space-y-4 max-h-[65vh] overflow-y-auto">
                 <!-- Fecha de medición -->
-                <div class="bg-blue-50 border-l-4 border-blue-400 p-3 sm:p-4 rounded">
-                    <label class="block text-xs sm:text-sm font-semibold text-blue-900 mb-2">
-                        <i class="fas fa-calendar mr-2"></i>Fecha de Medición
+                <div class="bg-gradient-to-r from-blue-50 to-blue-100 border-l-4 border-blue-500 p-3 sm:p-4 rounded-lg shadow-sm">
+                    <label class="block text-xs sm:text-sm font-bold text-blue-900 mb-2">
+                        <i class="fas fa-calendar-alt mr-2"></i>Fecha de Medición
                     </label>
                     <input 
                         type="date" 
@@ -2033,15 +2208,21 @@ function agregarNuevaMedicion(ninoId, nombre, apellido) {
                         value="${new Date().toISOString().split('T')[0]}"
                         max="${new Date().toISOString().split('T')[0]}"
                         required 
-                        class="w-full px-3 sm:px-4 py-2 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm sm:text-base"
+                        class="w-full px-3 sm:px-4 py-2.5 sm:py-3 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent text-sm sm:text-base font-semibold"
                     >
                 </div>
                 
-                <!-- Mediciones principales -->
-                <div class="grid grid-cols-1 sm:grid-cols-2 gap-3 sm:gap-4">
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-weight mr-2 text-blue-600"></i>Peso (kg) *
+                <!-- Mediciones Principales (Cards en móvil, grid en desktop) -->
+                <div class="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
+                    <!-- Card Peso -->
+                    <div class="bg-gradient-to-br from-blue-50 to-blue-100 rounded-xl p-4 border-2 border-blue-200 shadow-md hover:shadow-lg transition-all">
+                        <label class="block text-sm font-bold text-blue-900 mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 bg-blue-500 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-weight text-white text-sm"></i>
+                                </div>
+                                <span>Peso (kg) *</span>
+                            </div>
                         </label>
                         <input 
                             type="number" 
@@ -2051,12 +2232,20 @@ function agregarNuevaMedicion(ninoId, nombre, apellido) {
                             max="200"
                             placeholder="Ej: 15.5" 
                             required 
-                            class="w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                            class="w-full px-4 py-3 border-2 border-blue-300 rounded-lg focus:ring-2 focus:ring-blue-600 focus:border-transparent text-base font-semibold"
                         >
+                        <p class="text-xs text-blue-700 mt-1"><i class="fas fa-info-circle mr-1"></i>Rango: 0.5 - 200 kg</p>
                     </div>
-                    <div>
-                        <label class="block text-sm font-semibold text-gray-700 mb-2">
-                            <i class="fas fa-arrows-alt-v mr-2 text-green-600"></i>Talla (cm) *
+                    
+                    <!-- Card Talla -->
+                    <div class="bg-gradient-to-br from-green-50 to-green-100 rounded-xl p-4 border-2 border-green-200 shadow-md hover:shadow-lg transition-all">
+                        <label class="block text-sm font-bold text-green-900 mb-2">
+                            <div class="flex items-center gap-2">
+                                <div class="w-8 h-8 bg-green-500 rounded-lg flex items-center justify-center">
+                                    <i class="fas fa-arrows-alt-v text-white text-sm"></i>
+                                </div>
+                                <span>Talla (cm) *</span>
+                            </div>
                         </label>
                         <input 
                             type="number" 
@@ -2066,18 +2255,23 @@ function agregarNuevaMedicion(ninoId, nombre, apellido) {
                             max="250"
                             placeholder="Ej: 85.5" 
                             required 
-                            class="w-full px-4 py-3 border-2 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent"
+                            class="w-full px-4 py-3 border-2 border-green-300 rounded-lg focus:ring-2 focus:ring-green-600 focus:border-transparent text-base font-semibold"
                         >
+                        <p class="text-xs text-green-700 mt-1"><i class="fas fa-info-circle mr-1"></i>Rango: 30 - 250 cm</p>
                     </div>
                 </div>
                 
-                <!-- Mediciones opcionales -->
-                <div class="border-t pt-4">
-                    <h4 class="text-sm font-semibold text-gray-500 mb-3 uppercase">Mediciones Adicionales (Opcional)</h4>
-                    <div class="grid md:grid-cols-2 gap-4">
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Perímetro Braquial (cm)
+                <!-- Mediciones Opcionales -->
+                <div class="border-t-2 border-gray-200 pt-4">
+                    <h4 class="text-sm font-bold text-gray-600 mb-3 flex items-center gap-2">
+                        <i class="fas fa-plus-circle text-purple-600"></i>
+                        <span>Mediciones Adicionales (Opcional)</span>
+                    </h4>
+                    <div class="space-y-3 sm:space-y-0 sm:grid sm:grid-cols-2 sm:gap-4">
+                        <!-- Card Perímetro Braquial -->
+                        <div class="bg-purple-50 rounded-lg p-3 border border-purple-200">
+                            <label class="block text-sm font-semibold text-purple-900 mb-2">
+                                <i class="fas fa-tape mr-1"></i>Perímetro Braquial (cm)
                             </label>
                             <input 
                                 type="number" 
@@ -2086,12 +2280,14 @@ function agregarNuevaMedicion(ninoId, nombre, apellido) {
                                 min="5" 
                                 max="50"
                                 placeholder="Ej: 13.5" 
-                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-600"
+                                class="w-full px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-600 text-sm"
                             >
                         </div>
-                        <div>
-                            <label class="block text-sm font-medium text-gray-700 mb-2">
-                                Peso al Nacer (gramos)
+                        
+                        <!-- Card Peso al Nacer -->
+                        <div class="bg-pink-50 rounded-lg p-3 border border-pink-200">
+                            <label class="block text-sm font-semibold text-pink-900 mb-2">
+                                <i class="fas fa-baby mr-1"></i>Peso al Nacer (gramos)
                             </label>
                             <input 
                                 type="number" 
@@ -2099,14 +2295,14 @@ function agregarNuevaMedicion(ninoId, nombre, apellido) {
                                 min="500" 
                                 max="10000"
                                 placeholder="Ej: 3200" 
-                                class="w-full px-4 py-2 border rounded-lg focus:ring-2 focus:ring-green-600"
+                                class="w-full px-3 py-2 border border-pink-300 rounded-lg focus:ring-2 focus:ring-pink-600 text-sm"
                             >
                         </div>
                     </div>
                 </div>
                 
                 <!-- Checkbox para generar evaluación automática -->
-                <div class="bg-gradient-to-r from-purple-50 to-pink-50 border-2 border-purple-300 rounded-lg p-4">
+                <div class="bg-gradient-to-r from-purple-100 to-pink-100 border-2 border-purple-400 rounded-xl p-4 shadow-md">
                     <label class="flex items-start cursor-pointer">
                         <input 
                             type="checkbox" 
@@ -2115,10 +2311,10 @@ function agregarNuevaMedicion(ninoId, nombre, apellido) {
                             class="mt-1 h-5 w-5 text-purple-600 rounded focus:ring-purple-500"
                         >
                         <div class="ml-3">
-                            <span class="text-sm font-semibold text-purple-900">
+                            <span class="text-sm font-bold text-purple-900">
                                 <i class="fas fa-stethoscope mr-2"></i>Generar evaluación nutricional automática
                             </span>
-                            <p class="text-xs text-purple-700 mt-1">
+                            <p class="text-xs text-purple-800 mt-1">
                                 Se ejecutará el diagnóstico automático después de guardar la medición
                             </p>
                         </div>
@@ -2126,19 +2322,19 @@ function agregarNuevaMedicion(ninoId, nombre, apellido) {
                 </div>
                 
                 <!-- Botones -->
-                <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t">
+                <div class="flex flex-col-reverse sm:flex-row justify-end gap-2 sm:gap-3 pt-3 sm:pt-4 border-t-2 border-gray-200">
                     <button 
                         type="button" 
                         onclick="this.closest('.fixed').remove()" 
-                        class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-semibold hover:bg-gray-50 transition-all text-sm sm:text-base"
+                        class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 border-2 border-gray-300 text-gray-700 rounded-lg font-bold hover:bg-gray-100 transition-all text-sm sm:text-base"
                     >
                         <i class="fas fa-times mr-2"></i>Cancelar
                     </button>
                     <button 
                         type="submit" 
-                        class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-semibold hover:shadow-lg transition-all text-sm sm:text-base"
+                        class="w-full sm:w-auto px-4 sm:px-6 py-2.5 sm:py-3 bg-gradient-to-r from-green-600 to-emerald-600 text-white rounded-lg font-bold hover:shadow-xl transition-all text-sm sm:text-base"
                     >
-                        <i class="fas fa-save mr-2"></i>Guardar
+                        <i class="fas fa-save mr-2"></i>Guardar Medición
                     </button>
                 </div>
             </form>
@@ -2381,7 +2577,7 @@ function setupBuscadorPacientes() {
                 // Mostrar resultados
                 resultadosDiv.innerHTML = `
                     <div class="space-y-3">
-                        <p class="text-sm font-semibold text-gray-700 mb-3">
+                        <p class="text-xs sm:text-sm font-semibold text-gray-700 mb-3">
                             <i class="fas fa-users mr-2"></i>${data.length} paciente${data.length > 1 ? 's' : ''} encontrado${data.length > 1 ? 's' : ''}
                         </p>
                         ${data.map(paciente => {
@@ -2397,37 +2593,65 @@ function setupBuscadorPacientes() {
                             const edadMeses = Math.floor((hoy - fechaNac) / (1000 * 60 * 60 * 24 * 30.44));
                             
                             return `
-                                <div class="bg-white border-2 border-gray-200 rounded-lg p-4 hover:border-emerald-500 hover:shadow-md transition-all cursor-pointer"
+                                <div class="bg-white border-2 border-gray-200 rounded-xl p-3 sm:p-4 hover:border-emerald-500 hover:shadow-lg transition-all cursor-pointer"
                                      onclick="seleccionarPacienteParaMedicion(${paciente.id}, '${paciente.nombre}', '${paciente.apellido}')">
-                                    <div class="flex items-center justify-between">
-                                        <div class="flex items-center space-x-4">
-                                            <div class="flex-shrink-0 h-12 w-12 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-lg">
-                                                ${paciente.nombre.charAt(0)}${paciente.apellido.charAt(0)}
+                                    
+                                    <!-- Header Card -->
+                                    <div class="flex items-start gap-3 mb-3">
+                                        <div class="flex-shrink-0 w-12 h-12 sm:w-14 sm:h-14 bg-gradient-to-br from-emerald-500 to-teal-500 rounded-full flex items-center justify-center text-white font-bold text-base sm:text-lg shadow-md">
+                                            ${paciente.nombre.charAt(0)}${paciente.apellido.charAt(0)}
+                                        </div>
+                                        <div class="flex-1 min-w-0">
+                                            <h3 class="text-base sm:text-lg font-bold text-gray-900 truncate">${paciente.nombre} ${paciente.apellido}</h3>
+                                            <div class="flex flex-wrap gap-2 mt-1">
+                                                <span class="inline-flex items-center text-xs sm:text-sm text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
+                                                    <i class="fas fa-birthday-cake mr-1"></i>${edadMeses}m
+                                                </span>
+                                                <span class="inline-flex items-center text-xs sm:text-sm text-gray-600 bg-gray-100 px-2 py-0.5 rounded">
+                                                    <i class="fas fa-${paciente.sexo === 'M' ? 'mars' : 'venus'} mr-1"></i>${paciente.sexo === 'M' ? 'M' : 'F'}
+                                                </span>
+                                                ${paciente.documento_identidad ? `
+                                                    <span class="inline-flex items-center text-xs sm:text-sm text-gray-600 bg-gray-100 px-2 py-0.5 rounded truncate max-w-[120px]">
+                                                        <i class="fas fa-id-card mr-1"></i>${paciente.documento_identidad}
+                                                    </span>
+                                                ` : ''}
                                             </div>
-                                            <div>
-                                                <h3 class="text-lg font-bold text-gray-900">${paciente.nombre} ${paciente.apellido}</h3>
-                                                <div class="flex items-center space-x-4 text-sm text-gray-600">
-                                                    <span><i class="fas fa-birthday-cake mr-1"></i>${edadMeses} meses</span>
-                                                    <span><i class="fas fa-${paciente.sexo === 'M' ? 'mars' : 'venus'} mr-1"></i>${paciente.sexo === 'M' ? 'Masculino' : 'Femenino'}</span>
-                                                    ${paciente.documento_identidad ? `<span><i class="fas fa-id-card mr-1"></i>${paciente.documento_identidad}</span>` : ''}
+                                        </div>
+                                    </div>
+                                    
+                                    <!-- Última Medición -->
+                                    ${ultimaMedicion ? `
+                                        <div class="bg-emerald-50 rounded-lg p-2 sm:p-3 mb-3 border border-emerald-200">
+                                            <p class="text-xs font-semibold text-emerald-900 mb-2">
+                                                <i class="fas fa-ruler-combined mr-1"></i>Última medición
+                                            </p>
+                                            <div class="grid grid-cols-3 gap-2">
+                                                <div class="text-center">
+                                                    <p class="text-xs text-gray-600">Fecha</p>
+                                                    <p class="text-xs sm:text-sm font-bold text-emerald-700">${new Date(ultimaMedicion.fecha_medicion).toLocaleDateString('es-ES', { day: '2-digit', month: 'short' })}</p>
+                                                </div>
+                                                <div class="text-center">
+                                                    <p class="text-xs text-gray-600">Peso</p>
+                                                    <p class="text-xs sm:text-sm font-bold text-blue-700">${ultimaMedicion.peso}kg</p>
+                                                </div>
+                                                <div class="text-center">
+                                                    <p class="text-xs text-gray-600">Talla</p>
+                                                    <p class="text-xs sm:text-sm font-bold text-green-700">${ultimaMedicion.talla}cm</p>
                                                 </div>
                                             </div>
                                         </div>
-                                        <div class="text-right">
-                                            ${ultimaMedicion ? `
-                                                <div class="text-sm text-gray-600 mb-1">Última medición:</div>
-                                                <div class="text-xs text-gray-500">${new Date(ultimaMedicion.fecha_medicion).toLocaleDateString('es-ES')}</div>
-                                                <div class="text-sm font-semibold text-emerald-600">${ultimaMedicion.peso}kg • ${ultimaMedicion.talla}cm</div>
-                                            ` : `
-                                                <div class="text-sm text-gray-500 italic">Sin mediciones</div>
-                                            `}
+                                    ` : `
+                                        <div class="bg-gray-50 rounded-lg p-2 sm:p-3 mb-3 text-center">
+                                            <p class="text-xs sm:text-sm text-gray-500 italic">
+                                                <i class="fas fa-info-circle mr-1"></i>Sin mediciones previas
+                                            </p>
                                         </div>
-                                    </div>
-                                    <div class="mt-3 flex justify-end">
-                                        <button class="px-4 py-2 bg-emerald-600 text-white rounded-lg text-sm font-semibold hover:bg-emerald-700 transition-colors">
-                                            <i class="fas fa-plus-circle mr-2"></i>Agregar Medición
-                                        </button>
-                                    </div>
+                                    `}
+                                    
+                                    <!-- Botón Acción -->
+                                    <button class="w-full px-3 sm:px-4 py-2 sm:py-2.5 bg-gradient-to-r from-emerald-600 to-teal-600 text-white rounded-lg text-xs sm:text-sm font-bold hover:from-emerald-700 hover:to-teal-700 transition-all shadow-md hover:shadow-lg">
+                                        <i class="fas fa-plus-circle mr-2"></i>Agregar Nueva Medición
+                                    </button>
                                 </div>
                             `;
                         }).join('')}
@@ -2992,9 +3216,13 @@ function generarGraficasAnalytics(datos) {
 // Generar Tabla de Estadísticas
 function generarTablaEstadisticas(datos) {
     const tbody = document.getElementById('tabla-stats-zona');
-    if (!tbody) return;
+    const cardsContainer = document.getElementById('cards-stats-zona');
+    if (!tbody && !cardsContainer) return;
 
     const zonas = ['urbana', 'rural'];
+    
+    // Generar filas tabla desktop
+    if (tbody) {
     const rows = zonas.map(zona => {
         const stats = datos.estadisticasZona[zona];
         
@@ -3028,8 +3256,62 @@ function generarTablaEstadisticas(datos) {
             </tr>
         `;
     }).join('');
-
     tbody.innerHTML = rows;
+    }
+    
+    // Generar cards móvil
+    if (cardsContainer) {
+    const cards = zonas.map(zona => {
+        const stats = datos.estadisticasZona[zona];
+        
+        const contadorMed = stats.contadorMediciones || 0;
+        const pesoProm = contadorMed > 0 ? (stats.peso / contadorMed).toFixed(1) : '0.0';
+        const tallaProm = contadorMed > 0 ? (stats.talla / contadorMed).toFixed(1) : '0.0';
+        const imcProm = contadorMed > 0 ? (stats.imc / contadorMed).toFixed(1) : '0.0';
+        const porcAltoRiesgo = stats.total > 0 ? ((stats.altoRiesgo / stats.total) * 100).toFixed(1) : '0.0';
+
+        return `
+            <div class="bg-white rounded-xl shadow-md border border-gray-100 p-4 hover:shadow-lg transition-all">
+                <!-- Header Zona -->
+                <div class="flex items-center justify-between mb-4 pb-3 border-b border-gray-100">
+                    <div class="flex items-center gap-2">
+                        <div class="w-10 h-10 ${zona === 'urbana' ? 'bg-blue-100' : 'bg-emerald-100'} rounded-lg flex items-center justify-center">
+                            <i class="fas fa-map-marker-alt ${zona === 'urbana' ? 'text-blue-600' : 'text-emerald-600'} text-lg"></i>
+                        </div>
+                        <div>
+                            <h3 class="text-lg font-bold text-gray-900 capitalize">${zona}</h3>
+                            <p class="text-xs text-gray-500">Total: <span class="font-bold text-gray-900">${stats.total}</span> pacientes</p>
+                        </div>
+                    </div>
+                    <span class="px-3 py-1 ${porcAltoRiesgo > 30 ? 'bg-red-100 text-red-700' : porcAltoRiesgo > 15 ? 'bg-yellow-100 text-yellow-700' : 'bg-green-100 text-green-700'} rounded-full text-sm font-bold">
+                        ${porcAltoRiesgo}%
+                    </span>
+                </div>
+                
+                <!-- Stats Grid -->
+                <div class="grid grid-cols-2 gap-3 mb-3">
+                    <div class="bg-blue-50 rounded-lg p-3">
+                        <p class="text-xs text-gray-600 mb-1"><i class="fas fa-weight mr-1"></i>Peso Prom.</p>
+                        <p class="text-base font-bold text-blue-700">${pesoProm} kg</p>
+                    </div>
+                    <div class="bg-green-50 rounded-lg p-3">
+                        <p class="text-xs text-gray-600 mb-1"><i class="fas fa-arrows-alt-v mr-1"></i>Talla Prom.</p>
+                        <p class="text-base font-bold text-green-700">${tallaProm} cm</p>
+                    </div>
+                    <div class="bg-purple-50 rounded-lg p-3">
+                        <p class="text-xs text-gray-600 mb-1"><i class="fas fa-calculator mr-1"></i>IMC Prom.</p>
+                        <p class="text-base font-bold text-purple-700">${imcProm}</p>
+                    </div>
+                    <div class="bg-red-50 rounded-lg p-3">
+                        <p class="text-xs text-gray-600 mb-1"><i class="fas fa-exclamation-triangle mr-1"></i>Alto Riesgo</p>
+                        <p class="text-base font-bold text-red-700">${stats.altoRiesgo} casos</p>
+                    </div>
+                </div>
+            </div>
+        `;
+    }).join('');
+    cardsContainer.innerHTML = cards;
+    }
 }
 
 // Event Listeners para Analytics

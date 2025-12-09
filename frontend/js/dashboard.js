@@ -2375,7 +2375,7 @@ function agregarNuevaMedicion(ninoId, nombre, apellido) {
                                 id="med-perimetro" 
                                 step="0.1" 
                                 min="5" 
-                                max="50"
+                                max="100"
                                 placeholder="Ej: 13.5" 
                                 class="w-full px-3 py-2 border border-purple-300 rounded-lg focus:ring-2 focus:ring-purple-600 text-sm"
                             >

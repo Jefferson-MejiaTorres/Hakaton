@@ -33,13 +33,13 @@ CREATE TABLE IF NOT EXISTS mediciones_antropometricas (
     fecha_medicion DATE NOT NULL,
     
     -- Mediciones básicas
-    peso NUMERIC(5, 2) NOT NULL CHECK (peso > 0 AND peso < 200),
-    talla NUMERIC(5, 2) NOT NULL CHECK (talla > 0 AND talla < 250),
-    perimetro_braquial NUMERIC(4, 2) CHECK (perimetro_braquial > 0 AND perimetro_braquial < 50),
-    peso_al_nacer NUMERIC(6, 2) CHECK (peso_al_nacer > 0 AND peso_al_nacer < 10000),
+    peso NUMERIC(6, 2) NOT NULL CHECK (peso > 0 AND peso < 200),
+    talla NUMERIC(6, 2) NOT NULL CHECK (talla > 0 AND talla < 250),
+    perimetro_braquial NUMERIC(5, 2) CHECK (perimetro_braquial > 0 AND perimetro_braquial < 100),
+    peso_al_nacer NUMERIC(7, 2) CHECK (peso_al_nacer > 0 AND peso_al_nacer < 10000),
     
     -- Indicadores calculados
-    imc NUMERIC(5, 2) CHECK (imc > 0 AND imc < 100),
+    imc NUMERIC(6, 2) CHECK (imc > 0 AND imc < 100),
     z_score_peso_edad NUMERIC(5, 2),
     z_score_talla_edad NUMERIC(5, 2),
     z_score_peso_talla NUMERIC(5, 2),

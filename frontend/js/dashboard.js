@@ -182,16 +182,22 @@ function loadCharts(stats) {
         chartsInstances.riesgo = new Chart(ctxRiesgo, {
             type: 'doughnut',
             data: {
-                labels: ['Riesgo Alto', 'Riesgo Medio', 'Riesgo Bajo'],
+                labels: ['🔴 Alto Riesgo', '🟠 Medio Riesgo', '🟢 Bajo Riesgo'],
                 datasets: [{
                     data: [stats.alto, stats.medio, stats.bajo],
                     backgroundColor: [
-                        'rgba(239, 68, 68, 0.8)',
-                        'rgba(234, 179, 8, 0.8)',
-                        'rgba(34, 197, 94, 0.8)'
+                        'rgba(239, 68, 68, 0.9)',   // Rojo más intenso
+                        'rgba(249, 115, 22, 0.9)',  // Naranja vibrante
+                        'rgba(34, 197, 94, 0.9)'    // Verde brillante
                     ],
-                    borderWidth: 2,
-                    borderColor: '#fff'
+                    borderColor: [
+                        'rgba(220, 38, 38, 1)',     // Borde rojo oscuro
+                        'rgba(234, 88, 12, 1)',     // Borde naranja oscuro
+                        'rgba(22, 163, 74, 1)'      // Borde verde oscuro
+                    ],
+                    borderWidth: 3,
+                    hoverOffset: 15,
+                    hoverBorderWidth: 4
                 }]
             },
             options: {
@@ -199,8 +205,43 @@ function loadCharts(stats) {
                 maintainAspectRatio: true,
                 plugins: {
                     legend: {
-                        position: 'bottom'
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 13,
+                                weight: '600'
+                            },
+                            usePointStyle: false,
+                            boxWidth: 15,
+                            boxHeight: 15
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        callbacks: {
+                            label: function(context) {
+                                const label = context.label || '';
+                                const value = context.parsed || 0;
+                                const total = context.dataset.data.reduce((a, b) => a + b, 0);
+                                const percentage = ((value / total) * 100).toFixed(1);
+                                return `${label}: ${value} pacientes (${percentage}%)`;
+                            }
+                        }
                     }
+                },
+                cutout: '65%',
+                animation: {
+                    animateScale: true,
+                    animateRotate: true
                 }
             }
         });
@@ -214,43 +255,131 @@ function loadCharts(stats) {
         chartsInstances.tendencia = new Chart(ctxTendencia, {
             type: 'line',
             data: {
-                labels: ['Ene', 'Feb', 'Mar', 'Abr', 'May', 'Jun'],
+                labels: ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio'],
                 datasets: [
                     {
-                        label: 'Riesgo Alto',
+                        label: '🔴 Riesgo Alto',
                         data: [12, 19, 15, 20, 18, 23],
                         borderColor: 'rgba(239, 68, 68, 1)',
                         backgroundColor: 'rgba(239, 68, 68, 0.1)',
-                        tension: 0.4
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: 'rgba(239, 68, 68, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(239, 68, 68, 1)',
+                        pointHoverBorderWidth: 3
                     },
                     {
-                        label: 'Riesgo Medio',
+                        label: '🟠 Riesgo Medio',
                         data: [45, 52, 60, 65, 72, 78],
-                        borderColor: 'rgba(234, 179, 8, 1)',
-                        backgroundColor: 'rgba(234, 179, 8, 0.1)',
-                        tension: 0.4
+                        borderColor: 'rgba(249, 115, 22, 1)',
+                        backgroundColor: 'rgba(249, 115, 22, 0.1)',
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: 'rgba(249, 115, 22, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(249, 115, 22, 1)',
+                        pointHoverBorderWidth: 3
                     },
                     {
-                        label: 'Riesgo Bajo',
+                        label: '🟢 Riesgo Bajo',
                         data: [88, 95, 110, 125, 138, 146],
                         borderColor: 'rgba(34, 197, 94, 1)',
                         backgroundColor: 'rgba(34, 197, 94, 0.1)',
-                        tension: 0.4
+                        borderWidth: 3,
+                        tension: 0.4,
+                        fill: true,
+                        pointRadius: 5,
+                        pointHoverRadius: 8,
+                        pointBackgroundColor: 'rgba(34, 197, 94, 1)',
+                        pointBorderColor: '#fff',
+                        pointBorderWidth: 2,
+                        pointHoverBackgroundColor: '#fff',
+                        pointHoverBorderColor: 'rgba(34, 197, 94, 1)',
+                        pointHoverBorderWidth: 3
                     }
                 ]
             },
             options: {
                 responsive: true,
                 maintainAspectRatio: true,
+                interaction: {
+                    mode: 'index',
+                    intersect: false
+                },
                 plugins: {
                     legend: {
-                        position: 'bottom'
+                        position: 'bottom',
+                        labels: {
+                            padding: 15,
+                            font: {
+                                size: 13,
+                                weight: '600'
+                            },
+                            usePointStyle: false,
+                            boxWidth: 15,
+                            boxHeight: 15
+                        }
+                    },
+                    tooltip: {
+                        backgroundColor: 'rgba(0, 0, 0, 0.8)',
+                        padding: 12,
+                        titleFont: {
+                            size: 14,
+                            weight: 'bold'
+                        },
+                        bodyFont: {
+                            size: 13
+                        },
+                        callbacks: {
+                            label: function(context) {
+                                return `${context.dataset.label}: ${context.parsed.y} pacientes`;
+                            }
+                        }
                     }
                 },
                 scales: {
                     y: {
-                        beginAtZero: true
+                        beginAtZero: true,
+                        grid: {
+                            color: 'rgba(0, 0, 0, 0.05)',
+                            drawBorder: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            },
+                            padding: 10
+                        }
+                    },
+                    x: {
+                        grid: {
+                            display: false,
+                            drawBorder: false
+                        },
+                        ticks: {
+                            font: {
+                                size: 12,
+                                weight: '500'
+                            },
+                            padding: 10
+                        }
                     }
+                },
+                animation: {
+                    duration: 1500,
+                    easing: 'easeInOutQuart'
                 }
             }
         });
